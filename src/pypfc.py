@@ -221,7 +221,7 @@ class setup_simulation(setup_io):
         OUTPUT
 
         Last revision:
-        H. Hallberg 2025-09-11
+        H. Hallberg 2025-09-15
         '''
 
         del self._tmp_d, self._C2_d, self._f_den_d, self._f_den2_d, self._f_den3_d
@@ -250,10 +250,10 @@ class setup_simulation(setup_io):
         # Write finishing time stamp to the setup file, if it is active
         # =============================================================
         if self._using_setup_file:
-            self.append_to_file(f' ', output_path=self._setup_file_path)
-            self.append_to_file(f'======================================================', output_path=self._setup_file_path)
-            self.append_to_file(f'{self.get_time_stamp()}', output_path=self._setup_file_path)
-            self.append_to_file(f'======================================================', output_path=self._setup_file_path)
+            self.append_to_info_file(f' ', output_path=self._setup_file_path)
+            self.append_to_info_file(f'======================================================', output_path=self._setup_file_path)
+            self.append_to_info_file(f'{self.get_time_stamp()}', output_path=self._setup_file_path)
+            self.append_to_info_file(f'======================================================', output_path=self._setup_file_path)
 
 # =====================================================================================
 
