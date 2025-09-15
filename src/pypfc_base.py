@@ -20,6 +20,7 @@ import numpy as np
 import datetime
 import torch
 import time
+import os
 from pypfc_grid import setup_grid
 
 class setup_base(setup_grid):
@@ -29,6 +30,8 @@ class setup_base(setup_grid):
         'dtype_gpu':                torch.float64,
         'device_type':              'gpu',
         'device_number':            0,
+        'torch_threads':            os.cpu_count(),
+        'torch_threads_interop':    os.cpu_count(),
         'verbose':                  False,
     }
 
@@ -51,11 +54,13 @@ class setup_base(setup_grid):
         super().__init__(ndiv, ddiv)
 
         # Set the data types
-        self._dtype_cpu     = cfg['dtype_cpu']
-        self._dtype_gpu     = cfg['dtype_gpu']
-        self._device_number = cfg['device_number']
-        self._device_type   = cfg['device_type']
-        self._verbose       = cfg['verbose']
+        self._dtype_cpu               = cfg['dtype_cpu']
+        self._dtype_gpu               = cfg['dtype_gpu']
+        self._device_number           = cfg['device_number']
+        self._device_type             = cfg['device_type']
+        self._set_num_threads         = cfg['torch_threads']
+        self._set_num_interop_threads = cfg['torch_threads_interop']
+        self._verbose                 = cfg['verbose']
 
         # Set complex GPU array precision based on dtype_gpu
         # ==================================================
@@ -89,6 +94,10 @@ class setup_base(setup_grid):
             raise ValueError(f'No GPU available, but GPU requested: device_number={self._device_number}')
         elif self._device_type.upper() == 'CPU':
             self._device = torch.device('cpu') 
+            torch.set_num_threads(self._set_num_threads)
+            torch.set_num_interop_threads(self._set_num_interop_threads)
+            if self._verbose:
+                print(f"Using {self._set_num_threads} CPU threads and {self._set_num_interop_threads} interop threads.")
         if self._verbose:
             print(f'Using device: {self._device}')
 
@@ -138,6 +147,14 @@ class setup_base(setup_grid):
     def get_k2_d(self):
         return self._k2_d
 
+    def get_torch_threads(self):
+        return torch.get_num_threads(), torch.get_num_interop_threads()
+    
+    def set_torch_threads(self, nthreads, nthreads_interop):
+        torch.set_num_threads(nthreads)
+        torch.set_num_interop_threads(nthreads_interop)
+        self._set_num_threads         = nthreads
+        self._set_num_interop_threads = nthreads_interop
 
 # =====================================================================================
 

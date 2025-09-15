@@ -57,6 +57,8 @@ class setup_simulation(setup_io):
         'density_threshold':        0.0,
         'density_merge_distance':   None,
         'pf_iso_level':             0.5
+        'torch_threads':            os.cpu_count(),
+        'torch_threads_interop':    os.cpu_count(),
     }
 
     def __init__(self, ndiv, ddiv, config=None):
@@ -78,7 +80,7 @@ class setup_simulation(setup_io):
         subset_cfg = {k: cfg[k] for k in ['struct', 'sigma', 'npeaks', 'device_number',
                                           'device_type', 'dtype_cpu', 'dtype_gpu', 'verbose',
                                           'density_interp_order', 'density_threshold', 'density_merge_distance',
-                                          'pf_iso_level'] if k in cfg}
+                                          'pf_iso_level', 'torch_threads', 'torch_threads_interop'] if k in cfg}
         super().__init__(ndiv, ddiv, config=subset_cfg)
 
         # Handle input arguments

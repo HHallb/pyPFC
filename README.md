@@ -7,7 +7,7 @@ The software is built on classes, contained in separate modules/files, with an i
 | No | File (*.py)     | Description             | Included Methods |
 | -- | --------------- | ------------------------| ---------------- |
 | 4  | **pypfc_main**  | Main class              | 
-| 3  | **pypfc_io**    | IO and plotting methods |
+| 3  | **pypfc_io**    | Data IO methods         |
 | 2  | **pypfc_aux**   | Auxiliary methods       |
 | 1  | **pypfc_base**  | Base methods            |
 | 0  | **pypfc_grid**  | Grid methods            |

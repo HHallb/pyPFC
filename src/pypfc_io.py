@@ -47,7 +47,9 @@ class setup_io(setup_aux):
         'density_interp_order':   1,
         'density_threshold':      0.0,
         'density_merge_distance': None,
-        'pf_iso_level':           0.5
+        'pf_iso_level':           0.5,
+        'torch_threads':          os.cpu_count(),
+        'torch_threads_interop':  os.cpu_count(),
     }
 
     def __init__(self, ndiv, ddiv, config=None):
@@ -68,7 +70,8 @@ class setup_io(setup_aux):
         # ============================
         subset_cfg = {k: cfg[k] for k in ['struct', 'sigma', 'npeaks', 'device_number', 'device_type',
                                           'dtype_cpu', 'dtype_gpu', 'verbose', 'density_interp_order',
-                                          'density_threshold', 'density_merge_distance', 'pf_iso_level'] if k in cfg}
+                                          'density_threshold', 'density_merge_distance', 'pf_iso_level',
+                                          'torch_threads', 'torch_threads_interop'] if k in cfg}
         super().__init__(ndiv, ddiv, config=subset_cfg)
 
         # Set the data types
@@ -80,195 +83,195 @@ class setup_io(setup_aux):
 
 # =====================================================================================
 
-    def plot_den_ene_pf(self, step, den, ene, pf, pf_verts=None, pf_faces=None, zpos=0, cmap='coolwarm', output_file=None, dpi=300):
+    # def plot_den_ene_pf(self, step, den, ene, pf, pf_verts=None, pf_faces=None, zpos=0, cmap='coolwarm', output_file=None, dpi=300):
 
-        # Define grid for plotting
-        x = np.linspace(0, self._dSize[0], self._ndiv[0])
-        y = np.linspace(0, self._dSize[1], self._ndiv[1])
-        z = np.linspace(0, self._dSize[2], self._ndiv[2])
-        xv, yv, _ = np.meshgrid(x, y, z, indexing='ij')
+    #     # Define grid for plotting
+    #     x = np.linspace(0, self._dSize[0], self._ndiv[0])
+    #     y = np.linspace(0, self._dSize[1], self._ndiv[1])
+    #     z = np.linspace(0, self._dSize[2], self._ndiv[2])
+    #     xv, yv, _ = np.meshgrid(x, y, z, indexing='ij')
 
-        fig = plt.figure(figsize=(19,5))
+    #     fig = plt.figure(figsize=(19,5))
 
-        fig.suptitle(f"Step {step}", fontsize=12)
+    #     fig.suptitle(f"Step {step}", fontsize=12)
 
-        plt.set_cmap(cmap)
+    #     plt.set_cmap(cmap)
 
-        ax1 = fig.add_subplot(1,3,1)
-        sc=ax1.contourf(xv[:,:,zpos], yv[:,:,zpos], den[:,:,zpos])
-        ax1.set_ylabel('y')
-        ax1.set_xlabel('x')
-        ax1.set_title('den')
-        ax1.axis('equal')
-        #ax1.set_xlim(x.min(), x.max())
-        #ax1.set_ylim(y.min(), y.max())
-        fig.colorbar(sc, ax=ax1, location='right', shrink=0.75)
+    #     ax1 = fig.add_subplot(1,3,1)
+    #     sc=ax1.contourf(xv[:,:,zpos], yv[:,:,zpos], den[:,:,zpos])
+    #     ax1.set_ylabel('y')
+    #     ax1.set_xlabel('x')
+    #     ax1.set_title('den')
+    #     ax1.axis('equal')
+    #     #ax1.set_xlim(x.min(), x.max())
+    #     #ax1.set_ylim(y.min(), y.max())
+    #     fig.colorbar(sc, ax=ax1, location='right', shrink=0.75)
 
-        ax2 = fig.add_subplot(1,3,2)
-        sc=ax2.contourf(xv[:,:,zpos], yv[:,:,zpos], ene[:,:,zpos])
-        ax2.set_xlabel('x')
-        ax2.set_ylabel('y')
-        ax2.set_title('ene')
-        ax2.axis('equal')
-        #ax2.set_xlim(x.min(), x.max())
-        #ax2.set_ylim(y.min(), y.max())
-        fig.colorbar(sc, ax=ax2, location='right', shrink=0.75)
+    #     ax2 = fig.add_subplot(1,3,2)
+    #     sc=ax2.contourf(xv[:,:,zpos], yv[:,:,zpos], ene[:,:,zpos])
+    #     ax2.set_xlabel('x')
+    #     ax2.set_ylabel('y')
+    #     ax2.set_title('ene')
+    #     ax2.axis('equal')
+    #     #ax2.set_xlim(x.min(), x.max())
+    #     #ax2.set_ylim(y.min(), y.max())
+    #     fig.colorbar(sc, ax=ax2, location='right', shrink=0.75)
 
-        ax3 = fig.add_subplot(1,3,3)
-        sc = ax3.contourf(xv[:,:,zpos], yv[:,:,zpos], pf[:,:,zpos], vmin=0.0, vmax=1.0)
-        ax3.set_xlabel('x')
-        ax3.set_ylabel('y')
-        ax3.set_title('pf')
-        ax3.axis('equal')
-        #ax3.set_xlim(x.min(), x.max())
-        #ax3.set_ylim(y.min(), y.max())
-        fig.colorbar(sc, ax=ax3, location='right', shrink=0.75)
+    #     ax3 = fig.add_subplot(1,3,3)
+    #     sc = ax3.contourf(xv[:,:,zpos], yv[:,:,zpos], pf[:,:,zpos], vmin=0.0, vmax=1.0)
+    #     ax3.set_xlabel('x')
+    #     ax3.set_ylabel('y')
+    #     ax3.set_title('pf')
+    #     ax3.axis('equal')
+    #     #ax3.set_xlim(x.min(), x.max())
+    #     #ax3.set_ylim(y.min(), y.max())
+    #     fig.colorbar(sc, ax=ax3, location='right', shrink=0.75)
 
-        if pf_verts is not None and pf_faces is not None:
-            triangles = [pf_verts[face][:, :2] for face in pf_faces]
-            poly      = PolyCollection(triangles, facecolor='none', edgecolor='k', alpha=1.0)
-            ax3.add_collection(poly)
+    #     if pf_verts is not None and pf_faces is not None:
+    #         triangles = [pf_verts[face][:, :2] for face in pf_faces]
+    #         poly      = PolyCollection(triangles, facecolor='none', edgecolor='k', alpha=1.0)
+    #         ax3.add_collection(poly)
 
-        plt.tight_layout()
-        if output_file is not None:
-            plt.savefig(output_file, bbox_inches='tight', pad_inches=0, dpi=dpi)
-            plt.close(fig)
-        else:
-            plt.show()
-
-# =====================================================================================
-
-    def plot_atoms(self, step, atom_coord, atom_data, atom_struct, atom_rot_diff_x, atom_rot_diff_y, atom_rot_diff_z, cmap='coolwarm', marker_size=1, output_file=None, dpi=300):
-
-        fig = plt.figure(figsize=(18,10))
-
-        fig.suptitle(f"Step {step}", fontsize=12)
-
-        # Create a custom discrete colormap
-        # =================================
-        # Find the number of unique structure types (assumes values start at 0)
-        n_struct_types = int(np.max(atom_struct)) + 1
-        # Select only the needed colors
-        discrete_colors = ['white', 'green', 'blue', 'red', 'orange', 'purple', 'brown', 'pink', 'gray']
-        selected_colors = discrete_colors[:n_struct_types]
-        discrete_cmap = ListedColormap(selected_colors)
-
-        ax1 = fig.add_subplot(2,3,1)
-        sc=ax1.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_data[:,0], marker='o', edgecolors='none', cmap=cmap)
-        ax1.set_ylabel('y')
-        ax1.set_xlabel('x')
-        ax1.set_title('den')
-        ax1.axis('equal')
-        #ax1.set_xlim(x.min(), x.max())
-        #ax1.set_ylim(y.min(), y.max())
-        fig.colorbar(sc, ax=ax1, location='right', shrink=0.75)
-
-        ax2 = fig.add_subplot(2,3,2)
-        sc=ax2.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_data[:,1], marker='o', edgecolors='none', cmap=cmap)
-        ax2.set_xlabel('x')
-        ax2.set_ylabel('y')
-        ax2.set_title('ene')
-        ax2.axis('equal')
-        fig.colorbar(sc, ax=ax2, location='right', shrink=0.75)
-
-        ax3 = fig.add_subplot(2,3,3)
-        sc = ax3.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_data[:,2], marker='o', edgecolors='none', cmap=cmap)
-        ax3.set_xlabel('x')
-        ax3.set_ylabel('y')
-        ax3.set_title('pf')
-        ax3.axis('equal')
-        fig.colorbar(sc, ax=ax3, location='right', shrink=0.75)
-
-        ax4 = fig.add_subplot(2,3,4)
-        sc = ax4.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_struct, marker='o', edgecolors='none', cmap=discrete_cmap)
-        ax4.set_xlabel('x')
-        ax4.set_ylabel('y')
-        ax4.set_title('struct')
-        ax4.axis('equal')
-        # Get the unique integer values in atom_struct
-        unique_structs = np.unique(atom_struct)
-        # Create the colorbar with ticks at the unique values
-        cbar = fig.colorbar(sc, ax=ax4, location='right', shrink=0.75, ticks=unique_structs)
-        # Optionally, set the tick labels to the integer values
-        cbar.ax.set_yticklabels([str(val) for val in unique_structs])
-
-        ax5 = fig.add_subplot(2,3,5)
-        sc = ax5.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_rot_diff_x, marker='o', edgecolors='none', cmap=cmap)
-        ax5.set_xlabel('x')
-        ax5.set_ylabel('y')
-        ax5.set_title('rot_diff_x')
-        ax5.axis('equal')
-        fig.colorbar(sc, ax=ax5, location='right', shrink=0.75)
-
-        ax6 = fig.add_subplot(2,3,6)
-        sc = ax6.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_rot_diff_y, marker='o', edgecolors='none', cmap=cmap)
-        ax6.set_xlabel('x')
-        ax6.set_ylabel('y')
-        ax6.set_title('rot_diff_y')
-        ax6.axis('equal')
-        fig.colorbar(sc, ax=ax6, location='right', shrink=0.75)
-
-        plt.tight_layout()
-        if output_file is not None:
-            plt.savefig(output_file, bbox_inches='tight', pad_inches=0, dpi=dpi)
-            plt.close(fig)
-        else:
-            plt.show()
+    #     plt.tight_layout()
+    #     if output_file is not None:
+    #         plt.savefig(output_file, bbox_inches='tight', pad_inches=0, dpi=dpi)
+    #         plt.close(fig)
+    #     else:
+    #         plt.show()
 
 # =====================================================================================
 
-    def plot_state_output(self, step, state_output, output_file=None, dpi=300, linewidth=1):
+    # def plot_atoms(self, step, atom_coord, atom_data, atom_struct, atom_rot_diff_x, atom_rot_diff_y, atom_rot_diff_z, cmap='coolwarm', marker_size=1, output_file=None, dpi=300):
 
-        fig = plt.figure(figsize=(18,10))
+    #     fig = plt.figure(figsize=(18,10))
 
-        fig.suptitle(f"Step {step}", fontsize=12)
+    #     fig.suptitle(f"Step {step}", fontsize=12)
 
-        ax1 = fig.add_subplot(2,3,1)
-        ax1.plot(state_output[1:,0], state_output[1:,1], 'r-', linewidth=linewidth, label='natoms')
-        ax1.set_ylabel('natoms')
-        ax1.set_xlabel('time')
+    #     # Create a custom discrete colormap
+    #     # =================================
+    #     # Find the number of unique structure types (assumes values start at 0)
+    #     n_struct_types = int(np.max(atom_struct)) + 1
+    #     # Select only the needed colors
+    #     discrete_colors = ['white', 'green', 'blue', 'red', 'orange', 'purple', 'brown', 'pink', 'gray']
+    #     selected_colors = discrete_colors[:n_struct_types]
+    #     discrete_cmap = ListedColormap(selected_colors)
 
-        ax2 = fig.add_subplot(2,3,2)
-        ax2.plot(state_output[1:,0], state_output[1:,2]/np.abs(state_output[1,2]), 'r-', linewidth=linewidth, label='mean_ene')
-        ax2.set_xlabel('time')
-        ax2.set_ylabel('mean_ene')
+    #     ax1 = fig.add_subplot(2,3,1)
+    #     sc=ax1.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_data[:,0], marker='o', edgecolors='none', cmap=cmap)
+    #     ax1.set_ylabel('y')
+    #     ax1.set_xlabel('x')
+    #     ax1.set_title('den')
+    #     ax1.axis('equal')
+    #     #ax1.set_xlim(x.min(), x.max())
+    #     #ax1.set_ylim(y.min(), y.max())
+    #     fig.colorbar(sc, ax=ax1, location='right', shrink=0.75)
 
-        ax3 = fig.add_subplot(2,3,3)
-        ax3.plot(state_output[1:,0], state_output[1:,3], 'r-', linewidth=linewidth, label='mean_den')
-        ax3.set_xlabel('time')
-        ax3.set_ylabel('mean_den')
+    #     ax2 = fig.add_subplot(2,3,2)
+    #     sc=ax2.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_data[:,1], marker='o', edgecolors='none', cmap=cmap)
+    #     ax2.set_xlabel('x')
+    #     ax2.set_ylabel('y')
+    #     ax2.set_title('ene')
+    #     ax2.axis('equal')
+    #     fig.colorbar(sc, ax=ax2, location='right', shrink=0.75)
 
-        ax4 = fig.add_subplot(2,3,4)
-        ax4.plot(state_output[1:,0], state_output[1:,4], 'r-', linewidth=linewidth, label='rot_diff_av_x')
-        ax4.plot(state_output[1:,0], state_output[1:,5], 'b-', linewidth=linewidth, label='rot_diff_av_y')
-        ax4.plot(state_output[1:,0], state_output[1:,6], 'g-', linewidth=linewidth, label='rot_diff_av_z')
-        ax4.legend()
-        ax4.set_xlabel('time')
-        ax4.set_ylabel('rotation [deg.]')
+    #     ax3 = fig.add_subplot(2,3,3)
+    #     sc = ax3.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_data[:,2], marker='o', edgecolors='none', cmap=cmap)
+    #     ax3.set_xlabel('x')
+    #     ax3.set_ylabel('y')
+    #     ax3.set_title('pf')
+    #     ax3.axis('equal')
+    #     fig.colorbar(sc, ax=ax3, location='right', shrink=0.75)
 
-        ax5 = fig.add_subplot(2,3,5)
-        ax5.plot(state_output[1:,0], state_output[1:,7], 'r-', linewidth=linewidth, label='volume')
-        ax5.set_xlabel('time')
-        ax5.set_ylabel('volume')
+    #     ax4 = fig.add_subplot(2,3,4)
+    #     sc = ax4.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_struct, marker='o', edgecolors='none', cmap=discrete_cmap)
+    #     ax4.set_xlabel('x')
+    #     ax4.set_ylabel('y')
+    #     ax4.set_title('struct')
+    #     ax4.axis('equal')
+    #     # Get the unique integer values in atom_struct
+    #     unique_structs = np.unique(atom_struct)
+    #     # Create the colorbar with ticks at the unique values
+    #     cbar = fig.colorbar(sc, ax=ax4, location='right', shrink=0.75, ticks=unique_structs)
+    #     # Optionally, set the tick labels to the integer values
+    #     cbar.ax.set_yticklabels([str(val) for val in unique_structs])
 
-        ax6 = fig.add_subplot(2,3,6)
-        ax6.plot(state_output[1:,0], state_output[1:,8],  'r-', linewidth=linewidth, label='ndisl_0')
-        ax6.plot(state_output[1:,0], state_output[1:,9],  'b-', linewidth=linewidth, label='ndisl_1')
-        ax6.plot(state_output[1:,0], state_output[1:,10], 'g-', linewidth=linewidth, label='ndisl_2')
-        ax6.plot(state_output[1:,0], state_output[1:,11], 'c-', linewidth=linewidth, label='ndisl_3')
-        ax6.plot(state_output[1:,0], state_output[1:,12], 'm-', linewidth=linewidth, label='ndisl_4')
-        ax6.plot(state_output[1:,0], state_output[1:,13], 'y-', linewidth=linewidth, label='ndisl_5')
-        ax6.plot(state_output[1:,0], state_output[1:,14], 'k-', linewidth=linewidth, label='ndisl_6')
-        ax6.legend()
-        ax6.set_xlabel('time')
-        ax6.set_ylabel('ndisl')
+    #     ax5 = fig.add_subplot(2,3,5)
+    #     sc = ax5.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_rot_diff_x, marker='o', edgecolors='none', cmap=cmap)
+    #     ax5.set_xlabel('x')
+    #     ax5.set_ylabel('y')
+    #     ax5.set_title('rot_diff_x')
+    #     ax5.axis('equal')
+    #     fig.colorbar(sc, ax=ax5, location='right', shrink=0.75)
 
-        plt.tight_layout()
-        if output_file is not None:
-            plt.savefig(output_file, bbox_inches='tight', pad_inches=0, dpi=dpi)
-            plt.close(fig)
-        else:
-            plt.show()
+    #     ax6 = fig.add_subplot(2,3,6)
+    #     sc = ax6.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_rot_diff_y, marker='o', edgecolors='none', cmap=cmap)
+    #     ax6.set_xlabel('x')
+    #     ax6.set_ylabel('y')
+    #     ax6.set_title('rot_diff_y')
+    #     ax6.axis('equal')
+    #     fig.colorbar(sc, ax=ax6, location='right', shrink=0.75)
+
+    #     plt.tight_layout()
+    #     if output_file is not None:
+    #         plt.savefig(output_file, bbox_inches='tight', pad_inches=0, dpi=dpi)
+    #         plt.close(fig)
+    #     else:
+    #         plt.show()
+
+# =====================================================================================
+
+    # def plot_state_output(self, step, state_output, output_file=None, dpi=300, linewidth=1):
+
+    #     fig = plt.figure(figsize=(18,10))
+
+    #     fig.suptitle(f"Step {step}", fontsize=12)
+
+    #     ax1 = fig.add_subplot(2,3,1)
+    #     ax1.plot(state_output[1:,0], state_output[1:,1], 'r-', linewidth=linewidth, label='natoms')
+    #     ax1.set_ylabel('natoms')
+    #     ax1.set_xlabel('time')
+
+    #     ax2 = fig.add_subplot(2,3,2)
+    #     ax2.plot(state_output[1:,0], state_output[1:,2]/np.abs(state_output[1,2]), 'r-', linewidth=linewidth, label='mean_ene')
+    #     ax2.set_xlabel('time')
+    #     ax2.set_ylabel('mean_ene')
+
+    #     ax3 = fig.add_subplot(2,3,3)
+    #     ax3.plot(state_output[1:,0], state_output[1:,3], 'r-', linewidth=linewidth, label='mean_den')
+    #     ax3.set_xlabel('time')
+    #     ax3.set_ylabel('mean_den')
+
+    #     ax4 = fig.add_subplot(2,3,4)
+    #     ax4.plot(state_output[1:,0], state_output[1:,4], 'r-', linewidth=linewidth, label='rot_diff_av_x')
+    #     ax4.plot(state_output[1:,0], state_output[1:,5], 'b-', linewidth=linewidth, label='rot_diff_av_y')
+    #     ax4.plot(state_output[1:,0], state_output[1:,6], 'g-', linewidth=linewidth, label='rot_diff_av_z')
+    #     ax4.legend()
+    #     ax4.set_xlabel('time')
+    #     ax4.set_ylabel('rotation [deg.]')
+
+    #     ax5 = fig.add_subplot(2,3,5)
+    #     ax5.plot(state_output[1:,0], state_output[1:,7], 'r-', linewidth=linewidth, label='volume')
+    #     ax5.set_xlabel('time')
+    #     ax5.set_ylabel('volume')
+
+    #     ax6 = fig.add_subplot(2,3,6)
+    #     ax6.plot(state_output[1:,0], state_output[1:,8],  'r-', linewidth=linewidth, label='ndisl_0')
+    #     ax6.plot(state_output[1:,0], state_output[1:,9],  'b-', linewidth=linewidth, label='ndisl_1')
+    #     ax6.plot(state_output[1:,0], state_output[1:,10], 'g-', linewidth=linewidth, label='ndisl_2')
+    #     ax6.plot(state_output[1:,0], state_output[1:,11], 'c-', linewidth=linewidth, label='ndisl_3')
+    #     ax6.plot(state_output[1:,0], state_output[1:,12], 'm-', linewidth=linewidth, label='ndisl_4')
+    #     ax6.plot(state_output[1:,0], state_output[1:,13], 'y-', linewidth=linewidth, label='ndisl_5')
+    #     ax6.plot(state_output[1:,0], state_output[1:,14], 'k-', linewidth=linewidth, label='ndisl_6')
+    #     ax6.legend()
+    #     ax6.set_xlabel('time')
+    #     ax6.set_ylabel('ndisl')
+
+    #     plt.tight_layout()
+    #     if output_file is not None:
+    #         plt.savefig(output_file, bbox_inches='tight', pad_inches=0, dpi=dpi)
+    #         plt.close(fig)
+    #     else:
+    #         plt.show()
 
 # =====================================================================================
 

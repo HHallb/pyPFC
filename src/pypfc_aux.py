@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import os
 import numpy as np
 from scipy.spatial import cKDTree
 from scipy import ndimage as ndi
@@ -39,6 +40,8 @@ class setup_aux(setup_base):
         'density_threshold':        0.0,
         'density_merge_distance':   None,
         'pf_iso_level':             0.5
+        'torch_threads':            os.cpu_count(),
+        'torch_threads_interop':    os.cpu_count(),
     }
 
     def __init__(self, ndiv, ddiv, config=None):
@@ -57,7 +60,7 @@ class setup_aux(setup_base):
 
         # Initiate the inherited class
         # ============================
-        subset_cfg = {k: cfg[k] for k in ['device_number', 'device_type', 'dtype_cpu', 'dtype_gpu', 'verbose'] if k in cfg}
+        subset_cfg = {k: cfg[k] for k in ['torch_threads', 'torch_threads_interop', 'device_number', 'device_type', 'dtype_cpu', 'dtype_gpu', 'verbose'] if k in cfg}
         super().__init__(ndiv, ddiv, config=subset_cfg)
 
         # Handle input arguments
