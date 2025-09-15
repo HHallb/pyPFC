@@ -1,0 +1,659 @@
+'''
+pyPFC: A Python Package for Phase Field Crystal Simulations
+Copyright (C) 2025 Håkan Hallberg
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+'''
+
+import numpy as np
+from pypfc_aux import setup_aux
+import pickle
+import gzip
+import vtk
+import re
+import os
+import time
+import torch
+import matplotlib as plt
+from vtk.util.numpy_support import numpy_to_vtk #, get_vtk_array_type
+import matplotlib.pyplot as plt
+from matplotlib.collections import PolyCollection
+from matplotlib.colors import ListedColormap
+#from matplotlib.patches import Circle
+#from mpl_toolkits.mplot3d import axes3d
+
+class setup_io(setup_aux):
+
+    DEFAULTS = {
+        'struct':                 'FCC',
+        'sigma':                  0.0,
+        'npeaks':                 2,
+        'dtype_cpu':              np.double,
+        'dtype_gpu':              torch.float64,
+        'device_type':            'gpu',
+        'device_number':          0,
+        'verbose':                False,
+        'density_interp_order':   1,
+        'density_threshold':      0.0,
+        'density_merge_distance': None,
+        'pf_iso_level':           0.5
+    }
+
+    def __init__(self, ndiv, ddiv, config=None):
+
+        # Merge user parameters with defaults, but only use keys present in DEFAULTS
+        # ==========================================================================
+        cfg = dict(self.DEFAULTS)
+        if config is not None:
+            # Only update with keys that are in DEFAULTS
+            filtered_config = {k: v for k, v in config.items() if k in self.DEFAULTS}
+            cfg.update(filtered_config)
+        # Warn about any keys in config that are not in DEFAULTS
+        ignored = set(config.keys()) - set(self.DEFAULTS.keys())
+        if ignored:
+            print(f"Ignored config keys: {ignored}")
+
+        # Initiate the inherited class
+        # ============================
+        subset_cfg = {k: cfg[k] for k in ['struct', 'sigma', 'npeaks', 'device_number', 'device_type',
+                                          'dtype_cpu', 'dtype_gpu', 'verbose', 'density_interp_order',
+                                          'density_threshold', 'density_merge_distance', 'pf_iso_level'] if k in cfg}
+        super().__init__(ndiv, ddiv, config=subset_cfg)
+
+        # Set the data types
+        self._dtype_cpu     = cfg['dtype_cpu']
+        self._dtype_gpu     = cfg['dtype_gpu']
+        self._device_number = cfg['device_number']
+        self._device_type   = cfg['device_type']
+        self._verbose       = cfg['verbose']
+
+# =====================================================================================
+
+    def plot_den_ene_pf(self, step, den, ene, pf, pf_verts=None, pf_faces=None, zpos=0, cmap='coolwarm', output_file=None, dpi=300):
+
+        # Define grid for plotting
+        x = np.linspace(0, self._dSize[0], self._ndiv[0])
+        y = np.linspace(0, self._dSize[1], self._ndiv[1])
+        z = np.linspace(0, self._dSize[2], self._ndiv[2])
+        xv, yv, _ = np.meshgrid(x, y, z, indexing='ij')
+
+        fig = plt.figure(figsize=(19,5))
+
+        fig.suptitle(f"Step {step}", fontsize=12)
+
+        plt.set_cmap(cmap)
+
+        ax1 = fig.add_subplot(1,3,1)
+        sc=ax1.contourf(xv[:,:,zpos], yv[:,:,zpos], den[:,:,zpos])
+        ax1.set_ylabel('y')
+        ax1.set_xlabel('x')
+        ax1.set_title('den')
+        ax1.axis('equal')
+        #ax1.set_xlim(x.min(), x.max())
+        #ax1.set_ylim(y.min(), y.max())
+        fig.colorbar(sc, ax=ax1, location='right', shrink=0.75)
+
+        ax2 = fig.add_subplot(1,3,2)
+        sc=ax2.contourf(xv[:,:,zpos], yv[:,:,zpos], ene[:,:,zpos])
+        ax2.set_xlabel('x')
+        ax2.set_ylabel('y')
+        ax2.set_title('ene')
+        ax2.axis('equal')
+        #ax2.set_xlim(x.min(), x.max())
+        #ax2.set_ylim(y.min(), y.max())
+        fig.colorbar(sc, ax=ax2, location='right', shrink=0.75)
+
+        ax3 = fig.add_subplot(1,3,3)
+        sc = ax3.contourf(xv[:,:,zpos], yv[:,:,zpos], pf[:,:,zpos], vmin=0.0, vmax=1.0)
+        ax3.set_xlabel('x')
+        ax3.set_ylabel('y')
+        ax3.set_title('pf')
+        ax3.axis('equal')
+        #ax3.set_xlim(x.min(), x.max())
+        #ax3.set_ylim(y.min(), y.max())
+        fig.colorbar(sc, ax=ax3, location='right', shrink=0.75)
+
+        if pf_verts is not None and pf_faces is not None:
+            triangles = [pf_verts[face][:, :2] for face in pf_faces]
+            poly      = PolyCollection(triangles, facecolor='none', edgecolor='k', alpha=1.0)
+            ax3.add_collection(poly)
+
+        plt.tight_layout()
+        if output_file is not None:
+            plt.savefig(output_file, bbox_inches='tight', pad_inches=0, dpi=dpi)
+            plt.close(fig)
+        else:
+            plt.show()
+
+# =====================================================================================
+
+    def plot_atoms(self, step, atom_coord, atom_data, atom_struct, atom_rot_diff_x, atom_rot_diff_y, atom_rot_diff_z, cmap='coolwarm', marker_size=1, output_file=None, dpi=300):
+
+        fig = plt.figure(figsize=(18,10))
+
+        fig.suptitle(f"Step {step}", fontsize=12)
+
+        # Create a custom discrete colormap
+        # =================================
+        # Find the number of unique structure types (assumes values start at 0)
+        n_struct_types = int(np.max(atom_struct)) + 1
+        # Select only the needed colors
+        discrete_colors = ['white', 'green', 'blue', 'red', 'orange', 'purple', 'brown', 'pink', 'gray']
+        selected_colors = discrete_colors[:n_struct_types]
+        discrete_cmap = ListedColormap(selected_colors)
+
+        ax1 = fig.add_subplot(2,3,1)
+        sc=ax1.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_data[:,0], marker='o', edgecolors='none', cmap=cmap)
+        ax1.set_ylabel('y')
+        ax1.set_xlabel('x')
+        ax1.set_title('den')
+        ax1.axis('equal')
+        #ax1.set_xlim(x.min(), x.max())
+        #ax1.set_ylim(y.min(), y.max())
+        fig.colorbar(sc, ax=ax1, location='right', shrink=0.75)
+
+        ax2 = fig.add_subplot(2,3,2)
+        sc=ax2.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_data[:,1], marker='o', edgecolors='none', cmap=cmap)
+        ax2.set_xlabel('x')
+        ax2.set_ylabel('y')
+        ax2.set_title('ene')
+        ax2.axis('equal')
+        fig.colorbar(sc, ax=ax2, location='right', shrink=0.75)
+
+        ax3 = fig.add_subplot(2,3,3)
+        sc = ax3.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_data[:,2], marker='o', edgecolors='none', cmap=cmap)
+        ax3.set_xlabel('x')
+        ax3.set_ylabel('y')
+        ax3.set_title('pf')
+        ax3.axis('equal')
+        fig.colorbar(sc, ax=ax3, location='right', shrink=0.75)
+
+        ax4 = fig.add_subplot(2,3,4)
+        sc = ax4.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_struct, marker='o', edgecolors='none', cmap=discrete_cmap)
+        ax4.set_xlabel('x')
+        ax4.set_ylabel('y')
+        ax4.set_title('struct')
+        ax4.axis('equal')
+        # Get the unique integer values in atom_struct
+        unique_structs = np.unique(atom_struct)
+        # Create the colorbar with ticks at the unique values
+        cbar = fig.colorbar(sc, ax=ax4, location='right', shrink=0.75, ticks=unique_structs)
+        # Optionally, set the tick labels to the integer values
+        cbar.ax.set_yticklabels([str(val) for val in unique_structs])
+
+        ax5 = fig.add_subplot(2,3,5)
+        sc = ax5.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_rot_diff_x, marker='o', edgecolors='none', cmap=cmap)
+        ax5.set_xlabel('x')
+        ax5.set_ylabel('y')
+        ax5.set_title('rot_diff_x')
+        ax5.axis('equal')
+        fig.colorbar(sc, ax=ax5, location='right', shrink=0.75)
+
+        ax6 = fig.add_subplot(2,3,6)
+        sc = ax6.scatter(atom_coord[:,0], atom_coord[:,1], s=marker_size, c=atom_rot_diff_y, marker='o', edgecolors='none', cmap=cmap)
+        ax6.set_xlabel('x')
+        ax6.set_ylabel('y')
+        ax6.set_title('rot_diff_y')
+        ax6.axis('equal')
+        fig.colorbar(sc, ax=ax6, location='right', shrink=0.75)
+
+        plt.tight_layout()
+        if output_file is not None:
+            plt.savefig(output_file, bbox_inches='tight', pad_inches=0, dpi=dpi)
+            plt.close(fig)
+        else:
+            plt.show()
+
+# =====================================================================================
+
+    def plot_state_output(self, step, state_output, output_file=None, dpi=300, linewidth=1):
+
+        fig = plt.figure(figsize=(18,10))
+
+        fig.suptitle(f"Step {step}", fontsize=12)
+
+        ax1 = fig.add_subplot(2,3,1)
+        ax1.plot(state_output[1:,0], state_output[1:,1], 'r-', linewidth=linewidth, label='natoms')
+        ax1.set_ylabel('natoms')
+        ax1.set_xlabel('time')
+
+        ax2 = fig.add_subplot(2,3,2)
+        ax2.plot(state_output[1:,0], state_output[1:,2]/np.abs(state_output[1,2]), 'r-', linewidth=linewidth, label='mean_ene')
+        ax2.set_xlabel('time')
+        ax2.set_ylabel('mean_ene')
+
+        ax3 = fig.add_subplot(2,3,3)
+        ax3.plot(state_output[1:,0], state_output[1:,3], 'r-', linewidth=linewidth, label='mean_den')
+        ax3.set_xlabel('time')
+        ax3.set_ylabel('mean_den')
+
+        ax4 = fig.add_subplot(2,3,4)
+        ax4.plot(state_output[1:,0], state_output[1:,4], 'r-', linewidth=linewidth, label='rot_diff_av_x')
+        ax4.plot(state_output[1:,0], state_output[1:,5], 'b-', linewidth=linewidth, label='rot_diff_av_y')
+        ax4.plot(state_output[1:,0], state_output[1:,6], 'g-', linewidth=linewidth, label='rot_diff_av_z')
+        ax4.legend()
+        ax4.set_xlabel('time')
+        ax4.set_ylabel('rotation [deg.]')
+
+        ax5 = fig.add_subplot(2,3,5)
+        ax5.plot(state_output[1:,0], state_output[1:,7], 'r-', linewidth=linewidth, label='volume')
+        ax5.set_xlabel('time')
+        ax5.set_ylabel('volume')
+
+        ax6 = fig.add_subplot(2,3,6)
+        ax6.plot(state_output[1:,0], state_output[1:,8],  'r-', linewidth=linewidth, label='ndisl_0')
+        ax6.plot(state_output[1:,0], state_output[1:,9],  'b-', linewidth=linewidth, label='ndisl_1')
+        ax6.plot(state_output[1:,0], state_output[1:,10], 'g-', linewidth=linewidth, label='ndisl_2')
+        ax6.plot(state_output[1:,0], state_output[1:,11], 'c-', linewidth=linewidth, label='ndisl_3')
+        ax6.plot(state_output[1:,0], state_output[1:,12], 'm-', linewidth=linewidth, label='ndisl_4')
+        ax6.plot(state_output[1:,0], state_output[1:,13], 'y-', linewidth=linewidth, label='ndisl_5')
+        ax6.plot(state_output[1:,0], state_output[1:,14], 'k-', linewidth=linewidth, label='ndisl_6')
+        ax6.legend()
+        ax6.set_xlabel('time')
+        ax6.set_ylabel('ndisl')
+
+        plt.tight_layout()
+        if output_file is not None:
+            plt.savefig(output_file, bbox_inches='tight', pad_inches=0, dpi=dpi)
+            plt.close(fig)
+        else:
+            plt.show()
+
+# =====================================================================================
+
+    def write_extended_xyz(self, filename, coord, atom_data, atom_data_labels, simulation_time=0.0, gz=True):
+        """
+        PURPOSE
+            Save PFC data in extended XYZ format.
+
+        INPUT
+            filename            Name of the output XYZ file
+            coord               Array of shape (natoms, 3) containing atom coordinates
+            atom_data           List of arrays, each of shape [natoms], containing per-atom data
+            atom_data_labels    List of strings, labels for each atom data array
+            simulation_time     Simulation time
+            gz                  If True, save the file as a gzip-compressed file
+
+        OUTPUT
+            Data is written to the file 'filename.xyz' or 'filename.xyz.gz' (if gzip=True)
+
+        Last revision:
+        H. Hallberg 2025-09-02
+        """
+
+        if self._verbose:
+            tstart = time.time()
+
+        # Checks
+        # ======
+        natoms = coord.shape[0]
+        if not isinstance(atom_data, list) or not isinstance(atom_data_labels, list):
+            raise ValueError("atom_data and atom_data_labels must be lists")
+        if len(atom_data) != len(atom_data_labels):
+            raise ValueError("Number of atom_data arrays and labels must match")
+        for arr in atom_data:
+            if arr.shape[0] != natoms:
+                raise ValueError("All atom_data arrays must have the same length as coord (natoms)")
+
+        # Open the file for writing (gzip or plain text)
+        # ==============================================
+        if gz:
+            open_func = gzip.open
+            file_ext  = '.xyz.gz'
+            mode      = 'wt'
+        else:
+            open_func = open
+            file_ext  = '.xyz'
+            mode      = 'w'
+
+        # Build Properties string
+        # =======================
+        prop_str = 'pos:R:3:' + ':'.join([f'{lbl}:R:1' for lbl in atom_data_labels])
+        header = (
+            f"{natoms}\n"
+            f'Lattice="{self._dSize[0]:.6f} 0.0 0.0 0.0 {self._dSize[1]:.6f} 0.0 0.0 0.0 {self._dSize[2]:.6f}" '
+            f'Properties={prop_str} Time={simulation_time:.6f}\n'
+        )
+
+        # Stack all data for fast formatting
+        # ==================================
+        all_data = np.column_stack([coord] + atom_data)
+        # Format all lines at once using numpy
+        lines = [
+            " ".join(f"{val:13.6f}" for val in row)
+            for row in all_data
+        ]
+
+        with open_func(filename + file_ext, mode) as file:
+            file.write(header)
+            file.write("\n".join(lines))
+            file.write("\n")
+
+        if self._verbose:
+            tend = time.time()
+            print(f'Time to write extended XYZ file {filename + file_ext}: {tend - tstart:.2f} s')
+
+# =====================================================================================
+
+    def read_extended_xyz(self, filename, nfields=0):
+        """
+        PURPOSE
+            Read PFC data on extended XYZ format from file.
+        
+        INPUT
+            filename    Name of the input XYZ file (with or without .xyz/.xyz.gz extension)
+            nfields     Number of data fields per atom (beyond its coordinates [x,y,z])
+
+        OUTPUT
+            coord       Array of shape (natoms, 3) containing atom coordinates
+            dSize       Domain size: [Lx, Ly, Lz]
+            time        Simulation time
+            partDen     Particle PFC density, [natoms]
+            partEne     Particle PFC energy, [natoms]
+            partPf      Particle PFC phase field values, [natoms]
+        
+        Last revision:
+        H. Hallberg 2025-09-02
+        """
+        
+        if self._verbose:
+            tstart = time.time()
+
+        # Determine if file is gzipped and construct full filename
+        if filename.endswith('.xyz.gz'):
+            full_filename = filename
+            is_gzipped = True
+        elif filename.endswith('.xyz'):
+            full_filename = filename
+            is_gzipped = False
+        else:
+            # Try to find the file with appropriate extension
+            import os
+            if os.path.exists(filename + '.xyz.gz'):
+                full_filename = filename + '.xyz.gz'
+                is_gzipped = True
+            elif os.path.exists(filename + '.xyz'):
+                full_filename = filename + '.xyz'
+                is_gzipped = False
+            else:
+                raise FileNotFoundError(f"Could not find file: {filename}.xyz or {filename}.xyz.gz")
+        
+        # Open the file (gzip or plain text)
+        if is_gzipped:
+            open_func = gzip.open
+            mode = 'rt'  # Read text mode for gzip
+        else:
+            open_func = open
+            mode = 'r'
+        
+        with open_func(full_filename, mode) as file:
+            lines = file.readlines()
+        
+        # Parse header
+        nAtoms = int(lines[0].strip())
+        header_line = lines[1].strip()
+        
+        # Parse lattice parameters from header
+        lattice_match = re.search(r'Lattice="([^"]*)"', header_line)
+        if lattice_match:
+            lattice_values = lattice_match.group(1).split()
+            dSize = [float(lattice_values[0]), float(lattice_values[4]), float(lattice_values[8])]
+        else:
+            raise ValueError("Could not parse Lattice information from header")
+        
+        # Parse time from header
+        time_match = re.search(r'Time=([0-9.-]+)', header_line)
+        if time_match:
+            time = float(time_match.group(1))
+        else:
+            raise ValueError("Could not parse Time information from header")
+        
+        # Initialize arrays
+        coord = np.zeros((nAtoms, 3))
+        atom_data = [np.zeros(nAtoms) for _ in range(nfields)]
+
+        # Parse particle/atom data
+        for i in range(nAtoms):
+            line_data = lines[i + 2].strip().split()
+            if len(line_data) != 3 + nfields:
+                raise ValueError(f"Line {i+3} does not contain expected {3 + nfields} values: {lines[i + 2].strip()}")
+
+            coord[i, 0] = float(line_data[0])
+            coord[i, 1] = float(line_data[1])
+            coord[i, 2] = float(line_data[2])
+            for j in range(nfields):
+                atom_data[j][i] = float(line_data[3 + j])
+
+        if self._verbose:
+            tend = time.time()
+            print(f'Time to read extended XYZ file {filename}: {tend - tstart:.2f} s')
+
+        return coord, dSize, time, atom_data
+    
+# =====================================================================================
+
+    def write_vtk_points(self, filename, coord, scalarData, scalarDataName, vectorData=None, vectorDataName=None, tensorData=None, tensorDataName=None):
+        """
+        PURPOSE
+            Save 3D point data into a VTK file.
+            The data is saved in binary XML format.
+
+        INPUT        
+            filename        Output file name
+            coord               Array of shape (natoms, 3) containing atom coordinates
+            scalarData      List of 3D numpy arrays with scala point data
+            scalarDataName  List of labels/names for the data arrays in 'scalarData'
+            vectorData      List of 3D numpy arrays, of size [3], with vector point data
+            vectorDataName  List of labels/names for the data arrays in 'vectorData'
+            tensorData      List of 3D numpy arrays, of size [3x3], with tensor point data
+                            3x3 tensors are reshaped according to: (3, 3, nPoints) -> (nPoints, 9) with
+
+                            T = [[T11, T12, T13],
+                                [T21, T22, T23],
+                                [T31, T32, T33]]
+
+                            becoming
+
+                            T = [T11, T12, T13, T21, T22, T23, T31, T32, T33]
+
+            tensorDataName  List of labels/names for the data arrays in 'tensorData'
+
+        OUTPUT
+            Data is written to the file 'filename.vts'
+
+        Last revision:
+        H. Hallberg 2025-02-04
+        """
+
+        if self._verbose:
+            tstart = time.time()
+
+        # Ensure that the input points array is 2D with shape (N, 3)
+        assert coord.ndim == 2 and coord.shape[1] == 3, 'Points array must be of shape (N, 3)'
+
+        # Create a vtkPoints object and set the data
+        vtk_points = vtk.vtkPoints()
+        vtk_points.SetData(numpy_to_vtk(coord, deep=True, array_type=vtk.VTK_FLOAT))
+
+        # Create a vtkPolyData object and set the points
+        poly_data = vtk.vtkPolyData()
+        poly_data.SetPoints(vtk_points)
+
+        # Convert the scalar numpy array data to VTK arrays and add them to the polydata
+        for sd in range(len(scalarData)):
+            vtk_array = numpy_to_vtk(scalarData[sd], deep=True, array_type=vtk.VTK_FLOAT)
+            vtk_array.SetName(scalarDataName[sd])
+            poly_data.GetPointData().AddArray(vtk_array)
+
+        # Convert the vector numpy array data to VTK arrays and add them to the polydata
+        if vectorData is not None and vectorDataName is not None:
+            for vd in range(len(vectorData)):
+                vtk_vector_array = numpy_to_vtk(vectorData[vd], deep=True, array_type=vtk.VTK_FLOAT)
+                vtk_vector_array.SetNumberOfComponents(3)  # Ensure the array has 3 components per tuple
+                vtk_vector_array.SetName(vectorDataName[vd])
+                poly_data.GetPointData().AddArray(vtk_vector_array)
+
+        # Convert the tensor numpy array data to VTK arrays and add them to the polydata
+        if tensorData is not None and tensorDataName is not None:
+            for td in range(len(tensorData)):
+                # Reshape each tensor from (3, 3, nPoints) to (nPoints, 9)
+                reshaped_tensor = tensorData[td].reshape(3, 3, -1).transpose(2, 0, 1).reshape(-1, 9)
+                vtk_tensor_array = numpy_to_vtk(reshaped_tensor, deep=True, array_type=vtk.VTK_FLOAT)
+                vtk_tensor_array.SetNumberOfComponents(9)  # Ensure the array has 9 components per tuple
+                vtk_tensor_array.SetName(tensorDataName[td])
+                poly_data.GetPointData().AddArray(vtk_tensor_array)
+
+        # Write the vtkPolyData to a file
+        writer = vtk.vtkXMLPolyDataWriter()
+        writer.SetFileName(filename+'.vtp')
+        writer.SetInputData(poly_data)
+        writer.SetDataModeToBinary()  # Ensure binary format
+        writer.Write()
+
+        if self._verbose:
+            tend = time.time()
+            print(f'Time to write VTK point file {filename}: {tend - tstart:.2f} s')
+
+# =====================================================================================
+
+    def write_vtk_structured_grid(self, filename, arrayData, arrayName):
+        """
+        PURPOSE
+            Save 3D numpy arrays into a single VTK file.
+            The structured-grid data is saved in binary XML format.
+
+        INPUT        
+            filename    Output file name
+            ndiv        No of grid points along each dimension, [3]
+            ddiv        Grid spacing along each axis, [3]
+            arrayData   List of 3D numpy data arrays
+            arrayName   List oflabels/names for the data arrays in 'arrayData'
+
+        OUTPUT
+            Data is written to the file 'filename.vts'
+
+        Last revision:
+        H. Hallberg 2025-09-02
+        """
+
+        if self._verbose:
+            tstart = time.time()
+
+        # Grid
+        nx,ny,nz = self._ndiv
+        dx,dy,dz = self._ddiv
+
+        # Create a vtkStructuredGrid object
+        structured_grid = vtk.vtkStructuredGrid()
+        structured_grid.SetDimensions(nx, ny, nz)
+
+        # Create points for the structured grid
+        x = np.linspace(0, (nx-1)*dx, nx)
+        y = np.linspace(0, (ny-1)*dy, ny)
+        z = np.linspace(0, (nz-1)*dz, nz)
+        xv, yv, zv = np.meshgrid(x, y, z, indexing='ij')
+        points = np.column_stack([xv.ravel(order='F'), yv.ravel(order='F'), zv.ravel(order='F')])
+
+        vtk_points = vtk.vtkPoints()
+        vtk_points.SetData(numpy_to_vtk(points, deep=True, array_type=vtk.VTK_FLOAT))
+        structured_grid.SetPoints(vtk_points)
+
+        # Convert the numpy arrays to VTK arrays and set the scalar fields in the vtkStructuredGrid
+        for ad in range(len(arrayData)):
+            vtk_array = numpy_to_vtk(arrayData[ad].ravel(order='F'), deep=True, array_type=vtk.VTK_FLOAT)
+            vtk_array.SetName(arrayName[ad])
+            structured_grid.GetPointData().AddArray(vtk_array)
+
+        # Write the vtkStructuredGrid to a file
+        writer = vtk.vtkXMLStructuredGridWriter()
+        writer.SetFileName(filename+'.vts')
+        writer.SetInputData(structured_grid)
+        writer.SetDataModeToBinary()  # Ensure binary format
+        writer.Write()
+
+        if self._verbose:
+            tend = time.time()
+            print(f'Time to write VTK structured grid file {filename}: {tend - tstart:.2f} s')
+
+# =====================================================================================
+
+    def save_pickle(self, filename, data):
+        """
+        PURPOSE
+            Save a list of data objects to a binary pickle file
+
+        INPUT
+            filename        Path to the binary file (without extension)
+            data            List of data objects to save
+
+        OUTPUT
+            Saves data to a file 'filename.pickle'
+
+        Last revision:
+        H. Hallberg 2025-09-02
+        """
+
+        if self._verbose:
+            tstart = time.time()
+
+        try:
+            with open(filename + '.pickle', 'wb') as output_file:
+                # Save data
+                for data_object in data:
+                    pickle.dump(data_object, output_file)
+        except IOError as e:
+            raise IOError(f"An error occurred while writing to the file {filename}.pickle: {e}")
+
+        if self._verbose:
+            tend = time.time()
+            print(f'Time to write pickle file {filename}: {tend - tstart:.2f} s')
+
+
+# =====================================================================================
+
+    def load_pickle(self, filename, ndata):
+        """
+        PURPOSE
+            Load data objetcs from a binary pickle file.
+
+        INPUT
+            filename        Path to the binary file (without extension)
+            ndata           Number of data objects to read
+
+        OUTPUT
+            data            List of data objects read from the file 'filename.pickle'
+
+        Last revision:
+        H. Hallberg 2025-09-02
+        """
+
+        if self._verbose:
+            tstart = time.time()
+
+        # Check if file exists
+        if not os.path.exists(filename + '.pickle'):
+            raise FileNotFoundError(f"The file {filename}.pickle does not exist.")
+
+        # Open file
+        with open(filename + '.pickle', 'rb') as input_file:
+            # Load data
+            data = [pickle.load(input_file) for _ in range(ndata)]
+
+        if self._verbose:
+            tend = time.time()
+            print(f'Time to read pickle file {filename}: {tend - tstart:.2f} s')
+
+        return data
+
+# =====================================================================================

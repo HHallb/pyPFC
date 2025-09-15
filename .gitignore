@@ -1,0 +1,8 @@
+**/__pycache__/
+*.pyc
+.venv/
+*.swp
+*.swo
+*.log
+.DS_Store
+examples/ex*_output*/
