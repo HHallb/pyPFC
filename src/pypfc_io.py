@@ -25,13 +25,7 @@ import re
 import os
 import time
 import torch
-import matplotlib as plt
 from vtk.util.numpy_support import numpy_to_vtk #, get_vtk_array_type
-import matplotlib.pyplot as plt
-from matplotlib.collections import PolyCollection
-from matplotlib.colors import ListedColormap
-#from matplotlib.patches import Circle
-#from mpl_toolkits.mplot3d import axes3d
 
 class setup_io(setup_aux):
 
