@@ -39,7 +39,7 @@ class setup_aux(setup_base):
         'density_interp_order':     1,
         'density_threshold':        0.0,
         'density_merge_distance':   None,
-        'pf_iso_level':             0.5
+        'pf_iso_level':             0.5,
         'torch_threads':            os.cpu_count(),
         'torch_threads_interop':    os.cpu_count(),
     }

@@ -56,7 +56,7 @@ class setup_simulation(setup_io):
         'density_interp_order':     1,
         'density_threshold':        0.0,
         'density_merge_distance':   None,
-        'pf_iso_level':             0.5
+        'pf_iso_level':             0.5,
         'torch_threads':            os.cpu_count(),
         'torch_threads_interop':    os.cpu_count(),
     }
@@ -257,116 +257,119 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def write_setup_to_file(self, output_path=None):
-        '''
-        PURPOSE
-            Write the simulation setup to a file.
+#     def write_setup_to_file(self, output_path=None):
+#         '''
+#         PURPOSE
+#             Write the simulation setup to a file.
 
-        INPUT
-            output_path   Path to the output file
+#         INPUT
+#             output_path   Path to the output file
 
-        OUTPUT
+#         OUTPUT
 
-        Last revision:
-        H. Hallberg 2025-08-27
-        '''
+#         Last revision:
+#         H. Hallberg 2025-08-27
+#         '''
 
-        if output_path is None:
-            output_path = os.path.join(os.getcwd(), 'pypfc_setup.txt')
+#         if output_path is None:
+#             output_path = os.path.join(os.getcwd(), 'pypfc_setup.txt')
             
-        try:
-            # Ensure the directory exists
-            dir_path = os.path.dirname(output_path)
-            if dir_path and not os.path.exists(dir_path):
-                os.makedirs(dir_path)
-        except Exception as e:
-            print(f"Error creating directory for output: {e}")
-            return
+#         try:
+#             # Ensure the directory exists
+#             dir_path = os.path.dirname(output_path)
+#             if dir_path and not os.path.exists(dir_path):
+#                 os.makedirs(dir_path)
+#         except Exception as e:
+#             print(f"Error creating directory for output: {e}")
+#             return
 
-        try:
-            with open(output_path, 'w') as f:
+#         try:
+#             with open(output_path, 'w') as f:
 
-                f.write(f'======================================================\n')
-                f.write(f'{self.get_time_stamp()}\n')
-                f.write(f'======================================================\n')
-                f.write(f"Number of grid divisions: {self._ndiv}\n")
-                f.write(f"   nx:                    {self._nx}\n")
-                f.write(f"   ny:                    {self._ny}\n")
-                f.write(f"   nz:                    {self._nz}\n")
-                f.write(f"Division grid spacings:   {self._ddiv}\n")
-                f.write(f"   dx:                    {self._dx}\n")
-                f.write(f"   dy:                    {self._dy}\n")
-                f.write(f"   dz:                    {self._dz}\n")
-                f.write(f"Total grid size:          {self._dSize}\n")
-                f.write(f"   Lx:                    {self._Lx}\n")
-                f.write(f"   Ly:                    {self._Ly}\n")
-                f.write(f"   Lz:                    {self._Lz}\n")
-                f.write(f"Time increment:           {self._dtime}\n")
-                f.write(f"Crystal structure:        {self._struct}\n")
-                f.write(f"Lattice parameter:        {self._alat}\n")
-                f.write(f"Effective temperature:    {self._sigma}\n")
-                f.write(f"Number of C2 peaks:       {self._npeaks}\n")
-                f.write(f"Widths of the peaks:      {self._alpha}\n")
-                f.write(f"Density amplitudes:       {self._ampl}\n")
-                f.write(f"Liquid/Solid densities:   {self._nlns}\n")
-                f.write(f"Phase field Gauss. var.:  {self._pf_gauss_var}\n")
-                f.write(f"Normalize phase field:    {self._normalize_pf}\n")
-                f.write(f"Update scheme:            {self._update_scheme}\n")
-                f.write(f"Update scheme parameters: {self._update_scheme_params}\n")
-                f.write(f"Data type, CPU:           {self._dtype_cpu}\n")
-                f.write(f"Data type, GPU:           {self._dtype_gpu}\n")
-                f.write(f"Verbose output:           {self._verbose}\n")
-                f.write(f"Device type:              {self._device_type}\n")
-                if self._device_type.upper() == 'GPU':
-                    f.write(f'Device name:              {torch.cuda.get_device_name(self._device_number)}\n')
-                    f.write(f"Device number:            {self._device_number}\n")
-                    f.write(f"Compute capability:       {torch.cuda.get_device_properties(self._device_number).major}.{torch.cuda.get_device_properties(self._device_number).minor}\n")
-                    f.write(f"Total memory:             {round(torch.cuda.get_device_properties(self._device_number).total_memory/1024**3,2)} GB\n")
-                    f.write(f"Allocated memory:         {round(torch.cuda.memory_allocated()/1024**3, 2)} GB\n")
-                    f.write(f"Cached memory:            {round(torch.cuda.memory_reserved()/1024**3, 2)} GB\n")
-                    f.write(f"Reserved memory:          {round(torch.cuda.memory_reserved()/1024**3, 2)} GB\n")
-                    f.write(f"Multi processor count:    {torch.cuda.get_device_properties(self._device_number).multi_processor_count}\n")
-                f.write(f'======================================================\n')
-                f.write(f'\n')
+#                 f.write(f'======================================================\n')
+#                 f.write(f'{self.get_time_stamp()}\n')
+#                 f.write(f'======================================================\n')
+#                 f.write(f"Number of grid divisions:  {self._ndiv}\n")
+#                 f.write(f"   nx:                     {self._nx}\n")
+#                 f.write(f"   ny:                     {self._ny}\n")
+#                 f.write(f"   nz:                     {self._nz}\n")
+#                 f.write(f"Grid spacings:             {self._ddiv}\n")
+#                 f.write(f"   dx:                     {self._dx}\n")
+#                 f.write(f"   dy:                     {self._dy}\n")
+#                 f.write(f"   dz:                     {self._dz}\n")
+#                 f.write(f"Total grid size:           {self._dSize}\n")
+#                 f.write(f"   Lx:                     {self._Lx}\n")
+#                 f.write(f"   Ly:                     {self._Ly}\n")
+#                 f.write(f"   Lz:                     {self._Lz}\n")
+#                 f.write(f"Time increment:            {self._dtime}\n")
+#                 f.write(f"Crystal structure:         {self._struct}\n")
+#                 f.write(f"Lattice parameter:         {self._alat}\n")
+#                 f.write(f"Effective temperature:     {self._sigma}\n")
+#                 f.write(f"Number of C2 peaks:        {self._npeaks}\n")
+#                 f.write(f"Widths of the peaks:       {self._alpha}\n")
+#                 f.write(f"Density amplitudes:        {self._ampl}\n")
+#                 f.write(f"Liquid/Solid densities:    {self._nlns}\n")
+#                 f.write(f"Phase field Gauss. var.:   {self._pf_gauss_var}\n")
+#                 f.write(f"Normalize phase field:     {self._normalize_pf}\n")
+#                 f.write(f"Update scheme:             {self._update_scheme}\n")
+#                 f.write(f"Update scheme parameters:  {self._update_scheme_params}\n")
+#                 f.write(f"Data type, CPU:            {self._dtype_cpu}\n")
+#                 f.write(f"Data type, GPU:            {self._dtype_gpu}\n")
+#                 f.write(f"Verbose output:            {self._verbose}\n")
+#                 f.write(f"Device type:               {self._device_type}\n")
+#                 if self._device_type.upper() == 'GPU':
+#                     f.write(f'Device name:               {torch.cuda.get_device_name(self._device_number)}\n')
+#                     f.write(f"Device number:             {self._device_number}\n")
+#                     f.write(f"Compute capability:        {torch.cuda.get_device_properties(self._device_number).major}.{torch.cuda.get_device_properties(self._device_number).minor}\n")
+#                     f.write(f"Total memory:              {round(torch.cuda.get_device_properties(self._device_number).total_memory/1024**3,2)} GB\n")
+#                     f.write(f"Allocated memory:          {round(torch.cuda.memory_allocated()/1024**3, 2)} GB\n")
+#                     f.write(f"Cached memory:             {round(torch.cuda.memory_reserved()/1024**3, 2)} GB\n")
+#                     f.write(f"Reserved memory:           {round(torch.cuda.memory_reserved()/1024**3, 2)} GB\n")
+#                     f.write(f"Multi processor count:     {torch.cuda.get_device_properties(self._device_number).multi_processor_count}\n")
+#                 if self._device_type.upper() == 'CPU':
+#                     f.write(f"Number of CPU threads:     {self._set_num_threads}\n")
+#                     f.write(f"Number of interop threads: {self._set_num_interop_threads}\n") 
+#                 f.write(f'======================================================\n')
+#                 f.write(f'\n')
 
-            # Activate further output to the setup file
-            # =========================================
-            self._using_setup_file = True
-            self._setup_file_path  = output_path
+#             # Activate further output to the setup file
+#             # =========================================
+#             self._using_setup_file = True
+#             self._setup_file_path  = output_path
 
-        except Exception as e:
-            print(f"Error writing setup to file: {e}")
+#         except Exception as e:
+#             print(f"Error writing setup to file: {e}")
 
-# =====================================================================================
+# # =====================================================================================
 
-    def append_to_file(self, info, output_path=None):
-        '''
-        PURPOSE
-            Append information to the simulation setup file.
+#     def append_to_file(self, info, output_path=None):
+#         '''
+#         PURPOSE
+#             Append information to the simulation setup file.
 
-        INPUT
-            info         String or list of strings to append
-            output_path  Path to the output file
+#         INPUT
+#             info         String or list of strings to append
+#             output_path  Path to the output file
 
-        OUTPUT
-            Appends info to the file
+#         OUTPUT
+#             Appends info to the file
 
-        Last revision:
-        H. Hallberg 2025-08-27
-        '''
-        if output_path is None:
-            output_path = os.path.join(os.getcwd(), 'pypfc_setup.txt')
-        try:
-            with open(output_path, 'a') as f:
-                if isinstance(info, list):
-                    for line in info:
-                        f.write(f"{line}\n")
-                else:
-                    f.write(f"{info}\n")
-        except Exception as e:
-            print(f"Error appending to setup file: {e}")
+#         Last revision:
+#         H. Hallberg 2025-08-27
+#         '''
+#         if output_path is None:
+#             output_path = os.path.join(os.getcwd(), 'pypfc_setup.txt')
+#         try:
+#             with open(output_path, 'a') as f:
+#                 if isinstance(info, list):
+#                     for line in info:
+#                         f.write(f"{line}\n")
+#                 else:
+#                     f.write(f"{info}\n")
+#         except Exception as e:
+#             print(f"Error appending to setup file: {e}")
 
-# =====================================================================================
+# # =====================================================================================
 
     def evaluate_C2_d(self):
         """

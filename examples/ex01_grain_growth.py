@@ -29,7 +29,9 @@ params = {
     'density_threshold':      0.0,                    # Threshold for density maxima detection
     'density_merge_distance': 0.1,                    # Distance for merging density maxima
     'density_interp_order':   1,                      # Interpolation order for density maxima localization
-    'pf_iso_level':           0.5                     # Iso-level for phase field contouring
+    'pf_iso_level':           0.5,                    # Iso-level for phase field contouring
+    'torch_threads':          8,                      # Number of CPU threads to use if device_type is 'cpu'
+    'torch_threads_interop':  8,                      # Number of interop threads to use if device_type is 'cpu'
 }
 
 # Simulation-specific parameters
@@ -65,7 +67,7 @@ pypfc = pypfc.setup_simulation(ndiv, ddiv, config=params)
 
 # Save setup information to file
 # ==============================
-pypfc.write_setup_to_file(output_path+output_file)
+pypfc.write_info_file(output_path+output_file)
 
 # Create a preprocessor object and generate the initial density field:
 # A centered spherical nucleus in an otherwise liquid domain
@@ -149,7 +151,7 @@ for step in range(start_step,nstep):
 
         # Save state data to file
         # =======================
-        pypfc.append_to_file(state_string, output_path+output_file)
+        pypfc.append_to_info_file(state_string, output_path+output_file)
 
         # Save step data
         # ===============
