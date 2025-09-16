@@ -10,35 +10,35 @@ import torch
 # Set pyPFC parameters, these are handled as a dictionary
 # =======================================================
 params = {
-    'dtime':                  1.0e-3,                 # Time increment
-    'struct':                 'FCC',                  # Set crystal structure
-    'alat':                   1.0,                    # Lattice parameter
-    'sigma':                  0.0,                    # Temperature parameter
-    'npeaks':                 2,                      # Number of peaks in C2
-    'alpha':                  [1, 1],                 # C2 Gaussian peak widths
-    'pf_gauss_var':           0.1,                    # Variance (sigma) of the Gaussian smoothing kernel used in phase field evaluations
-    'normalize_pf':           True,                   # Normalize the phase fields to [0,1], or not
-    'update_scheme':          '1st_order',            # Time integration scheme
-    'update_scheme_params':   None,                   # Parameters in the 2nd order time integration scheme: alpha, beta, gamma
-    'device_type':            'gpu',                  # PyTorch device (CPU/GPU)
-    'device_number':          0,                      # GPU device number (if multiple GPUs are available)
-    'dtype_cpu':              np.double,              # Set precision of numpy arrays
-    'dtype_gpu':              torch.float64,          # Set precision of PyTorch tensors
-    'verbose':                True,                   # Verbose output (or not)
-    'evaluate_phase_field':   True,                   # Evaluate phase field (or not)
-    'density_threshold':      0.0,                    # Threshold for density maxima detection
-    'density_merge_distance': 0.1,                    # Distance for merging density maxima
-    'density_interp_order':   1,                      # Interpolation order for density maxima localization
-    'pf_iso_level':           0.5,                    # Iso-level for phase field contouring
-    'torch_threads':          8,                      # Number of CPU threads to use if device_type is 'cpu'
-    'torch_threads_interop':  8,                      # Number of interop threads to use if device_type is 'cpu'
+    'dtime':                  1.0e-3,                               # Non-dimensional time increment
+    'struct':                 'FCC',                                # Crystal structure
+    'alat':                   1.0,                                  # Lattice parameter (non-dimensional)
+    'sigma':                  0.0,                                  # Temperature parameter (non-dimensional)
+    'npeaks':                 2,                                    # Number of Gaussian peaks to use in the two-point pair correlation function C2
+    'alpha':                  [1, 1],                               # C2 Gaussian peak widths
+    'pf_gauss_var':           0.1,                                  # Variance (sigma) of the Gaussian smoothing kernel used in phase field evaluations
+    'normalize_pf':           True,                                 # Normalize the phase fields to [0,1], or not
+    'update_scheme':          '1st_order',                          # Time integration scheme
+    'update_scheme_params':   [1.0, 1.0, 1.0, None, None, None],    # Parameters in the time integration scheme: g1, g2, g3, alpha, beta, gamma
+    'device_type':            'gpu',                                # PyTorch device (CPU or GPU)
+    'device_number':          0,                                    # GPU device number (if multiple GPUs are available, defaults to 0)
+    'dtype_cpu':              np.double,                            # Set precision of numpy arrays
+    'dtype_gpu':              torch.float64,                        # Set precision of PyTorch tensors
+    'verbose':                True,                                 # Verbose output (or not)
+    'evaluate_phase_field':   True,                                 # Evaluate phase field (or not)
+    'density_threshold':      0.0,                                  # Threshold for density maxima detection
+    'density_merge_distance': 0.1,                                  # Distance for merging density maxima
+    'density_interp_order':   1,                                    # Interpolation order for density maxima localization
+    'pf_iso_level':           0.5,                                  # Iso-level for phase field contouring
+    'torch_threads':          8,                                    # Number of CPU threads to use if device_type is CPU
+    'torch_threads_interop':  8,                                    # Number of interop threads to use if device_type is CPU
 }
 
 # Simulation-specific parameters
 # ==============================
-nstep            = 6000                               # Number of simulation steps
+nstep            = 14000                              # Number of simulation steps
 nout             = 500                                # Evaluate step data in every nout:h step
-n_save_step_data = 1000                               # Save step data in every n_save_step_data:th step
+n_save_step_data = 2000                               # Save step data in every n_save_step_data:th step
 nfill            = 7                                  # Number of figures to use in filenames (pre-pad with zeroes if needed)
 output_path      = '/home/hlhh/Insync/OneDriveLTH/python/pyPFC/examples/ex01_output_gpu_96x96x96/' # Output path
 output_file      = 'pypfc_setup.txt'                                                  # Output file name

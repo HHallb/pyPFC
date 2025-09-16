@@ -1,11 +1,11 @@
-# pyPFC: A Python Package for Running Phase Field Crystal Simulations
+# pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
 A Python software package for setting up, running and processing Phase Field Crystal (PFC) simulations. The code uses PyTorch to allow execution on both CPUs and GPUs, depending on the available hardware.
 
 ## Description of Source Files
 The software is built on classes, contained in separate modules/files, with an inheritance chain (from bottom to top) comprising:
 
-| No | File (*.py)     | Description             | Included Methods |
-| -- | --------------- | ------------------------| ---------------- |
+| No | File (*.py)     | Description             |
+| -- | --------------- | ------------------------|
 | 4  | **pypfc_main**  | Main class              | 
 | 3  | **pypfc_io**    | Data IO methods         |
 | 2  | **pypfc_aux**   | Auxiliary methods       |
@@ -33,11 +33,7 @@ The following Python packages are required:
 * vtk
 
 ## Installation and Usage
-Import with 'import pypfc_main' and 'import pypfc_ovito'.
+Import with `import pypfc_main` and (optionally) `import pypfc_ovito`.
 
 ## Licencing and Acknowledgment
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
-
-If you publish or present results obtained with pyPFC, please add the following reference to your publication or presentation:
-
-**H. Hallberg**, *Title*, Journal, vol(no):pp-pp, year

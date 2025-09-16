@@ -1,5 +1,5 @@
 '''
-pyPFC: A Python Package for Phase Field Crystal Simulations
+pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
 Copyright (C) 2025 Håkan Hallberg
 
 This program is free software: you can redistribute it and/or modify
@@ -21,19 +21,6 @@ import torch
 import time
 import os
 from pypfc_io import setup_io
-
-#from memory_profiler import profile
-
-# =====================================================================================
-
-# def maybe_compile(fn):
-#     # Permit function compilation if on Linux
-#     if sys.platform.startswith('linux'):
-#         return torch.compile(fn)
-#     return fn
-
-# =====================================================================================
-
 class setup_simulation(setup_io):
 
     DEFAULTS = {
@@ -46,7 +33,7 @@ class setup_simulation(setup_io):
         'pf_gauss_var':             1.0,
         'normalize_pf':             True,
         'update_scheme':            '1st_order',
-        'update_scheme_params':     None,
+        'update_scheme_params':     [1.0, 1.0, 1.0, None, None, None],
         'device_type':              'gpu',
         'device_number':            0,
         'dtype_cpu':                np.double,
@@ -180,6 +167,13 @@ class setup_simulation(setup_io):
 
     def get_update_scheme(self):
         return self._update_scheme
+    
+    def set_update_scheme_params(self, params):
+        self._update_scheme_params = params
+        self.update_density = self.get_update_scheme()  
+
+    def get_update_scheme_params(self):
+        return self._update_scheme_params
 
     def get_energy(self):
         ene, mean_ene = self.evaluate_energy()
@@ -367,9 +361,9 @@ class setup_simulation(setup_io):
             case 'DC': # Diamond Cubic (3D)
                 # {111}, {220}, {311}         (...the next would be {400}, {331}, {422}, {511})
                 nvals = 3
-                kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(3), np.sqrt(8), np.sqrt(11)], dtype=float)        # k_i
-                pl    = np.array([8, 12, 24], dtype=int)                                                     # beta_i, d
-                denpl = (1/self._alat**2) * np.array([4/np.sqrt(3), 4/np.sqrt(2), 1.385641467389298], dtype=float) # lambda_i
+                kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(3), np.sqrt(8), np.sqrt(11)], dtype=float)
+                pl    = np.array([8, 12, 24], dtype=int)                                                   
+                denpl = (1/self._alat**2) * np.array([4/np.sqrt(3), 4/np.sqrt(2), 1.385641467389298], dtype=float)
             case _:
                 raise ValueError(f'Unsupported crystal structure: struct={self._struct.upper()}')
 
@@ -386,61 +380,48 @@ class setup_simulation(setup_io):
 # =====================================================================================
 
     def get_update_scheme(self):
-        # # Input checks
-        # if self._update_scheme == '2nd_order':
-        #     if self._update_scheme_params is None or len(self._update_scheme_params) != 3:
-        #         raise ValueError("param must be provided as an array of three values for '2nd_order' update_scheme.")
-        #     if self._f_denOld_d is None:
-        #         raise ValueError("f_denOld_d must be provided for '2nd_order' update_scheme.")
-        # if self._update_scheme == 'exponential' and self._f_tmp_d is None:
-        #     raise ValueError("f_tmp_d must be provided for 'exponential' update_scheme.")
 
-        # if self._update_scheme == '1st_order':
-        #     f_Lterm_d = -self._k2_d.mul(1 - self._C2_d)
-        #     f_Lterm_d = f_Lterm_d.contiguous()
-        #     update_step = lambda: self.update_density_1(f_Lterm_d)
-        # elif self._update_scheme == '2nd_order':
-        #     f_Lterm0_d = 4 * self._update_scheme_params[2]
-        #     f_Lterm1_d = self._update_scheme_params[1] * self._dtime - 2 * self._update_scheme_params[2]
-        #     f_Lterm2_d = 2 * (self._dtime ** 2) * self._update_scheme_params[0] ** 2 * self._k2_d
-        #     f_Lterm3_d = 2 * self._update_scheme_params[2] + self._update_scheme_params[1] * self._dtime + 2 * (self._dtime ** 2) * (self._update_scheme_params[0] ** 2) * self._k2_d.mul(1 - self._C2_d)
-        #     f_Lterm2_d = f_Lterm2_d.contiguous()
-        #     f_Lterm3_d = f_Lterm3_d.contiguous()
-        #     update_step = lambda: self.update_density_2(f_Lterm0_d, f_Lterm1_d, f_Lterm2_d, f_Lterm3_d)
-        # elif self._update_scheme == 'exponential':
-        #     f_Lterm0_d = 1 - self._C2_d
-        #     f_Lterm0_d = torch.where(f_Lterm0_d == 0, torch.tensor(1e-12, device=self._device, dtype=self._dtype_torch), f_Lterm0_d) # Handle zeros to avoid subsequent division by zero
-        #     f_Lterm1_d = torch.exp(-self._k2_d.mul(f_Lterm0_d) * self._dtime)
-        #     f_Lterm0_d = f_Lterm0_d.contiguous()
-        #     f_Lterm1_d = f_Lterm1_d.contiguous()
-        #     update_step = lambda: self.update_density_exp(f_Lterm0_d, f_Lterm1_d)
-        # else:
-        #     raise ValueError(f"Unknown update_scheme: {self._update_scheme}")
+        '''
+        PURPOSE
+            Establish the PFC time integration scheme.
 
-        # return update_step
-        # Precompute constant terms for each scheme
+        INPUT
+
+        OUTPUT
+            update_density     Function handle to the selected time integration scheme
+
+        Last revision:
+        H. Hallberg 2025-09-16
+        '''
+
+        # Scheme parameters
+        # =================
+        g1, _, _, alpha, beta, gamma = self._update_scheme_params
+        dt = self._dtime
+
+        # Pre-compute contants and define the update function
+        # ===================================================
         if self._update_scheme == '1st_order':
-            self._f_Lterm_d = -self._k2_d.mul(1 - self._C2_d).contiguous()
+            self._f_Lterm_d = -self._k2_d.mul(g1 - self._C2_d).contiguous()
             self.update_density = self.update_density_1
         elif self._update_scheme == '2nd_order':
-            if self._update_scheme_params is None or len(self._update_scheme_params) != 3:
-                raise ValueError("param must be provided as an array of three values for '2nd_order' update_scheme.")
+            if self._update_scheme_params[3:].any() is None or len(self._update_scheme_params) != 6:
+                raise ValueError("alpha, beta, gamma parameters must be provided for the '2nd_order' update_scheme.")
             if self._f_denOld_d is None:
                 raise ValueError("f_denOld_d must be provided for '2nd_order' update_scheme.")
-            self._f_Lterm0_d = 4 * self._update_scheme_params[2]
-            self._f_Lterm1_d = self._update_scheme_params[1] * self._dtime - 2 * self._update_scheme_params[2]
-            self._f_Lterm2_d = 2 * (self._dtime ** 2) * self._update_scheme_params[0] ** 2 * self._k2_d.contiguous()
-            self._f_Lterm3_d = (2 * self._update_scheme_params[2] +
-                                self._update_scheme_params[1] * self._dtime +
-                                2 * (self._dtime ** 2) * (self._update_scheme_params[0] ** 2) *
-                                self._k2_d.mul(1 - self._C2_d).contiguous())
+            self._f_Lterm0_d = 4 * gamma
+            self._f_Lterm1_d = beta * dt - 2 * gamma
+            self._f_Lterm2_d = 2 * (dt ** 2) * alpha ** 2 * self._k2_d.contiguous()
+            self._f_Lterm3_d = (2 * gamma + beta * self._dtime +
+                                2 * (dt ** 2) * (alpha ** 2) *
+                                self._k2_d.mul(g1 - self._C2_d).contiguous())
             self.update_density = self.update_density_2
         elif self._update_scheme == 'exponential':
-            self._f_Lterm0_d = 1 - self._C2_d
+            self._f_Lterm0_d = g1 - self._C2_d
             self._f_Lterm0_d = torch.where(self._f_Lterm0_d == 0,
                                         torch.tensor(1e-12, device=self._device, dtype=self._dtype_torch),
                                         self._f_Lterm0_d).contiguous()
-            self._f_Lterm1_d = torch.exp(-self._k2_d.mul(self._f_Lterm0_d) * self._dtime).contiguous()
+            self._f_Lterm1_d = torch.exp(-self._k2_d.mul(self._f_Lterm0_d) * dt).contiguous()
             self.update_density = self.update_density_exp
         else:
             raise ValueError(f"Unknown update_scheme: {self._update_scheme}")
@@ -461,7 +442,7 @@ class setup_simulation(setup_io):
             f_den_d     Updated density field in the frequency domain
 
         Last revision:
-        H. Hallberg 2025-08-27
+        H. Hallberg 2025-09-16
         '''
 
         # Call the selected update method with precomputed constants
@@ -473,9 +454,6 @@ class setup_simulation(setup_io):
             self._f_den_d = self.update_density(self._f_Lterm0_d, self._f_Lterm1_d)
         else:
             raise ValueError(f"Unknown update_scheme: {self._update_scheme}")
-
-        # Update the density field in Fourier space
-        #self._f_den_d = self.update_density()
 
         # Reverse FFT of the updated density field
         torch.fft.irfftn(self._f_den_d, s=self._den_d.shape, out=self._den_d)
@@ -500,15 +478,18 @@ class setup_simulation(setup_io):
             f_den_d     Updated density field in the frequency domain
 
         Last revision:
-        H. Hallberg 2025-03-06
+        H. Hallberg 2025-09-16
         '''
+
+        # Parameters
+        _, g2, g3, *_ = self._update_scheme_params
 
         # Forward FFT of the nonlinear density terms (in-place)
         torch.fft.rfftn(self._den_d.pow(2), out=self._f_den2_d)
         torch.fft.rfftn(self._den_d.pow(3), out=self._f_den3_d)
 
         # Update the density field in-place
-        self._f_den_d.sub_(self._dtime * self._k2_d * (-self._f_den2_d / 2 + self._f_den3_d / 3))
+        self._f_den_d.sub_(self._dtime * self._k2_d * (-self._f_den2_d * g2 / 2 + self._f_den3_d * g3 / 3))
         self._f_den_d.div_(1 - self._dtime * f_Lterm_d)
 
         return self._f_den_d
@@ -537,8 +518,10 @@ class setup_simulation(setup_io):
             f_den_d     Updated density field in step n+1 in the frequency domain
 
         Last revision:
-        H. Hallberg 2025-08-27
+        H. Hallberg 2025-09-16
         '''
+        # Parameters
+        _, g2, g3, *_ = self._update_scheme_params
 
         # Maintain a copy of the old density field in Fourier space
         self._f_denOld_d.copy_(self._f_den_d)
@@ -548,7 +531,7 @@ class setup_simulation(setup_io):
         torch.fft.rfftn(self._den_d.pow(3), out=self._f_den3_d)
 
         # Compute nonlinear term in-place: self._f_tmp_d = f_Lterm2_d * (self._f_den2_d/2 - self._f_den3_d/3)
-        self._f_tmp_d.copy_(self._f_den2_d.div(2).sub(self._f_den3_d.div(3)).mul(f_Lterm2_d))
+        self._f_tmp_d.copy_(self._f_den2_d.div(2/g2).sub(self._f_den3_d.div(3/g3)).mul(f_Lterm2_d))
 
         # Update the density field in-place
         self._f_den_d.mul_(f_Lterm0_d)
@@ -573,19 +556,20 @@ class setup_simulation(setup_io):
             Updates self._f_den_d in-place
 
         Last revision:
-        H. Hallberg 2025-08-28
+        H. Hallberg 2025-09-16
         '''
+
+        # Parameters
+        _, g2, g3, *_ = self._update_scheme_params
 
         # Forward FFT of the nonlinear density terms
         torch.fft.rfftn(self._den_d.pow(2), out=self._f_den2_d)
         torch.fft.rfftn(self._den_d.pow(3), out=self._f_den3_d)
 
         # Compute nonlinear term out-of-place
-        #self._f_tmp_d = -self._f_den2_d/2 + self._f_den3_d/3
-        self._f_tmp_d.copy_((-self._f_den2_d / 2) + (self._f_den3_d / 3))
+        self._f_tmp_d.copy_((-self._f_den2_d * g2 / 2) + (self._f_den3_d * g3 / 3))
 
         # Update self._f_den_d in-place:
-        #self._f_den_d = self._f_den_d * f_Lterm1_d + self._f_tmp_d * (f_Lterm1_d - 1) / f_Lterm0_d
         self._f_den_d.mul_(f_Lterm1_d)
         self._f_tmp_d.mul_(f_Lterm1_d - 1)
         self._f_tmp_d.div_(f_Lterm0_d)

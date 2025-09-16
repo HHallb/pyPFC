@@ -1,5 +1,5 @@
 '''
-pyPFC: A Python Package for Phase Field Crystal Simulations
+pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
 Copyright (C) 2025 Håkan Hallberg
 
 This program is free software: you can redistribute it and/or modify

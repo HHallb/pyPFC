@@ -1,5 +1,5 @@
 '''
-pyPFC - A Python implementation of the Phase Field Crystal method.
+pyPFC - An Open-Source Python implementation of the Phase Field Crystal method.
 Copyright (C) 2025 Håkan Hallberg
 
 This program is free software: you can redistribute it and/or modify

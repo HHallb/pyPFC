@@ -1,5 +1,5 @@
 '''
-pyPFC: A Python Package for Phase Field Crystal Simulations
+pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
 Copyright (C) 2025 Håkan Hallberg
 
 This program is free software: you can redistribute it and/or modify
@@ -512,7 +512,7 @@ class setup_aux(setup_base):
             denpos = np.array(merged_denpos)
             enepos = np.array(merged_enepos)
 
-        # Handle the list or single phase field
+        # Handle phase field(s), either as a list of fields or as a single field
         if pf is not None:
             # If pf is a single array, wrap it in a list
             if isinstance(pf, np.ndarray) and pf.ndim == 3:
