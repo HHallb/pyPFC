@@ -42,17 +42,17 @@ params = {
 
 # Simulation-specific parameters
 # ==============================
-nstep            = 1000                               # Number of simulation steps
-nout             = 1000                               # Evaluate step data in every nout:h step
-n_save_step_data = 1000                               # Save step data in every n_save_step_data:th step
-nfill            = 7                                  # Number of figures to use in filenames (pre-pad with zeroes if needed)
+nstep            = 40000                             # Number of simulation steps
+nout             = 1000                              # Evaluate step data in every nout:h step
+n_save_step_data = 1000                              # Save step data in every n_save_step_data:th step
+nfill            = 7                                 # Number of figures to use in filenames (pre-pad with zeroes if needed)
 output_path      = '/home/hlhh/Insync/OneDriveLTH/python/pyPFC/examples/ex03_output/' # Output path
 output_file      = 'pypfc_setup.txt'                                                  # Output file name
 
 # Define the computational grid
 # =============================
-dSize = params['alat'] * np.array([128, 64, 2], dtype=float)   # Domain size along the x, y and z axes
-ndiv  = 8 * np.array([128, 64, 2], dtype=int)                  # Number of grid divisions along the x, y and z axes       
+dSize = params['alat'] * np.array([256, 64, 1], dtype=float)   # Domain size along the x, y and z axes
+ndiv  = 16 * np.array([256, 64, 1], dtype=int)                 # Number of grid divisions along the x, y and z axes       
 ddiv  = dSize / ndiv                                           # Grid spacing along the x, y and z axes
 print(f'ndiv:    {ndiv}')
 print(f'ddiv:    {ddiv} [a]')
@@ -69,13 +69,14 @@ pypfc.write_info_file(output_path+output_file)  # Write setup information to a t
 
 # Generate the initial density field
 # ==================================
-n_xtal         = 5
+n_xtal         = 6
 xtalRot        = np.zeros((3,3,n_xtal), dtype=float)                    # Rotation matrices of the two crystals
 xtalRot[:,:,0] = np.eye(3,dtype=float)                                  # Rotation of crystal #1
-xtalRot[:,:,1] = Rotation.from_euler('z', np.deg2rad(15)).as_matrix()   # Rotation of crystal #2
+xtalRot[:,:,1] = Rotation.from_euler('z', np.deg2rad(27)).as_matrix()   # Rotation of crystal #2
 xtalRot[:,:,2] = Rotation.from_euler('z', np.deg2rad(-38)).as_matrix()  # Rotation of crystal #3
 xtalRot[:,:,3] = Rotation.from_euler('z', np.deg2rad(-49)).as_matrix()  # Rotation of crystal #4
 xtalRot[:,:,4] = Rotation.from_euler('z', np.deg2rad(127)).as_matrix()  # Rotation of crystal #5
+xtalRot[:,:,5] = Rotation.from_euler('z', np.deg2rad(-80)).as_matrix()  # Rotation of crystal #6
 liq_width      = 2*params['alat']                                       # Width of the liquid layers between the crystals
 den            = pypfc.do_polycrystal(xtalRot, liq_width=liq_width)     # Generate a polycrystal
 pypfc.set_density(den)                                                  # Sets the new density field in the pyPFC simulation object
@@ -93,12 +94,11 @@ pf = pypfc.get_phase_field() # Evaluate the phase field
 atom_coord, atom_data = pypfc.interpolate_density_maxima(den, ene, pf)  # Interpolate density maxima positions and associated data (density, energy, phase field)
 natoms = atom_coord.shape[0]                                            # Retrieve the number of atoms (= density peaks)
 
-# Save data to VTK files
-# ======================
+# Save data to file
+# =================
 plotnr   = str(0).zfill(nfill)
 filename = output_path + 'pfc_data_' + plotnr
-pypfc.write_vtk_structured_grid(filename, [den], ['den'])                                                               # Save the continuous density field to structured grid VTK file
-pypfc.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'])    # Save the discrete density maxima (atoms) to VTK point file
+pypfc.write_extended_xyz(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'], simulation_time=0.0)   # Save atom data to an extended XYZ file, gzip compressed by default
 
 # Prepare storage of state data and save the intial state
 # =======================================================
@@ -151,22 +151,16 @@ for step in range(nstep):
         # ===============
         if np.mod(step+1,n_save_step_data)==0:
 
-            # Integrate fields along x
-            # ========================
-            den_av = pypfc.get_field_average_along_axis(den, 'x')
-            pf_av  = pypfc.get_field_average_along_axis(pf, 'x')
-        
             # Save data to a binary pickle file
             # =================================
             filename = output_path + 'step_' + str(step+1).zfill(nfill)
-            pypfc.save_pickle(filename, [ step, total_time, ndiv, ddiv, dSize, den, state_output[:state_output_idx+1,:], den_av, pf_av])
+            pypfc.save_pickle(filename, [ step, total_time, ndiv, ddiv, dSize, den, state_output[:state_output_idx+1,:] ])
 
-            # Save data to VTK files
-            # ======================
+            # Save data to file
+            # =================
             plotnr   = str(step+1).zfill(nfill)
             filename = output_path + 'pfc_data_' + plotnr     
-            pypfc.write_vtk_structured_grid(filename, [den], ['den'])
-            pypfc.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'])
+            pypfc.write_extended_xyz(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'], simulation_time=total_time)   # Save atom data to an extended XYZ file, gzip compressed by default
 
 tend = time.time()
 print(f'Time spent in time step loop: {tend-tstart:.3f} s')

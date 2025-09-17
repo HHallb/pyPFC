@@ -19,7 +19,7 @@ The following Python packages are required:
 
 * datetime
 * gzip
-* matplotlib (only used in the Jupyter notebook examples)
+* matplotlib (only used in the examples)
 * numpy
 * os
 * ovito (if pypfc_ovito is to be used)

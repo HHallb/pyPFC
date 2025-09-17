@@ -252,6 +252,61 @@ class setup_aux(setup_base):
 
 # =====================================================================================
 
+    def do_polycrystal(self, xtalRot, params=None, liq_width=0.0, model=0):
+        '''
+        PURPOSE
+            Define a polycrystal in a periodic 3D domain.
+    
+        INPUT
+            xtalRot       Crystal orientations (rotation matrices): [3 x 3 x n_xtal]
+            params        List containing parameters for the polycrystal model
+            liq_width     Width of the liquid band along the GB
+            model         Density field layout:
+                            0 = A row of cylindrical seeds along y, with the cylinders extending through z
+    
+        OUTPUT
+            density       Density field, real rank-3 array of size [nx x ny x nz]
+
+        Last revision:
+        H. Hallberg 2025-09-17
+        '''
+
+        # Grid
+        nx,ny,nz = self._ndiv
+        dx,dy,dz = self._ddiv
+        Lx,Ly,Lz = self._ndiv*self._ddiv
+
+        # Allocate output array
+        density = np.full((nx, ny, nz), self._nlns[1], dtype=self._dtype_cpu)
+        
+        # Number of crystals
+        n_xtal = xtalRot.shape[2]
+
+        # Generate grid coordinates
+        xc = np.linspace(0, (nx-1)*dx, nx)
+        yc = np.linspace(0, (ny-1)*dy, ny)
+        zc = np.linspace(0, (nz-1)*dz, nz)
+        Xc, Yc, Zc = np.meshgrid(xc, yc, zc, indexing='ij')
+
+        # Generate polycrystal        
+        if model==0:
+            xtalRadius = (Ly - n_xtal*liq_width) / n_xtal / 2
+            xcrd       = Lx / 2
+            for i in range(n_xtal+1):
+                ycrd      = i*liq_width + i*2*xtalRadius
+                condition = (np.sqrt((Xc-xcrd)**2 + (Yc-ycrd)**2) <= xtalRadius)
+                crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
+                if i<n_xtal:
+                    density[condition] = self.generate_density_field(crd, xtalRot[:,:,i].T)
+                else:
+                    density[condition] = self.generate_density_field(crd, xtalRot[:,:,0].T)
+        else:
+            raise ValueError(f'Unsupported seed layout: model={model}')
+
+        return density
+
+# =====================================================================================
+
     def generate_density_field(self, crd, g):
         '''
         PURPOSE
