@@ -38,7 +38,7 @@ class setup_io(setup_aux):
         'device_type':            'gpu',
         'device_number':          0,
         'verbose':                False,
-        'density_interp_order':   1,
+        'density_interp_order':   2,
         'density_threshold':      0.0,
         'density_merge_distance': None,
         'pf_iso_level':           0.5,

@@ -7,6 +7,8 @@ import numpy as np
 import time
 import torch
 
+from scipy.spatial.transform import Rotation # Added import to define crystal rotations
+
 # Set pyPFC parameters, these are handled as a dictionary
 # The parameters are initialized to default values
 # internally, but can be changed as needed
@@ -20,7 +22,7 @@ params = {
     'alpha':                  [1, 1],                               # C2 Gaussian peak widths, excluding the zero-mode peak
     'C20_amplitude':          0.0,                                  # Amplitude of the zero-mode Gaussian peak in C2
     'C20_alpha':              1.0,                                  # Width of the zero-mode Gaussian peak in C2
-    'pf_gauss_var':           0.1,                                  # Variance (sigma) of the Gaussian smoothing kernel used in phase field evaluations
+    'pf_gauss_var':           1.0,                                  # Variance (sigma) of the Gaussian smoothing kernel used in phase field evaluations
     'normalize_pf':           True,                                 # Normalize the phase fields to [0,1], or not
     'update_scheme':          '1st_order',                          # Time integration scheme
     'update_scheme_params':   [1.0, 1.0, 1.0, None, None, None],    # Parameters in the time integration scheme: g1, g2, g3, alpha, beta, gamma
@@ -40,18 +42,18 @@ params = {
 
 # Simulation-specific parameters
 # ==============================
-nstep            = 8000                               # Number of simulation steps
-nout             = 500                                # Evaluate step data in every nout:h step
+nstep            = 1000                               # Number of simulation steps
+nout             = 1000                               # Evaluate step data in every nout:h step
 n_save_step_data = 1000                               # Save step data in every n_save_step_data:th step
 nfill            = 7                                  # Number of figures to use in filenames (pre-pad with zeroes if needed)
-output_path      = '/home/hlhh/Insync/OneDriveLTH/python/pyPFC/examples/ex01_output/' # Output path
+output_path      = '/home/hlhh/Insync/OneDriveLTH/python/pyPFC/examples/ex03_output/' # Output path
 output_file      = 'pypfc_setup.txt'                                                  # Output file name
 
 # Define the computational grid
 # =============================
-dSize          = params['alat'] * np.array([64, 64, 64], dtype=float)   # Domain size along the x, y and z axes
-ndiv           = 8 * np.array([64, 64, 64], dtype=int)                  # Number of grid divisions along the x, y and z axes       
-ddiv           = dSize / ndiv                                           # Grid spacing along the x, y and z axes
+dSize = params['alat'] * np.array([128, 64, 2], dtype=float)   # Domain size along the x, y and z axes
+ndiv  = 8 * np.array([128, 64, 2], dtype=int)                  # Number of grid divisions along the x, y and z axes       
+ddiv  = dSize / ndiv                                           # Grid spacing along the x, y and z axes
 print(f'ndiv:    {ndiv}')
 print(f'ddiv:    {ddiv} [a]')
 print(f'dSize:   {dSize} [a]')
@@ -65,13 +67,18 @@ pypfc = pypfc.setup_simulation(ndiv, ddiv, config=params)
 # ==============================
 pypfc.write_info_file(output_path+output_file)  # Write setup information to a text file
 
-# Generate the initial density field:
-# A centered spherical nucleus in an otherwise liquid domain
-# ====================================================================
-xtalRot    = np.eye(3, dtype=float)                         # No rotation of the seed crystal
-xtalRadius = 0.1 * min(dSize)                               # Radius of the spherical seed crystal
-den        = pypfc.do_single_crystal(xtalRot, [xtalRadius]) # Generates a single crystal in the center of the domain
-pypfc.set_density(den)                                      # Sets the new density field in the pyPFC simulation object
+# Generate the initial density field
+# ==================================
+n_xtal         = 5
+xtalRot        = np.zeros((3,3,n_xtal), dtype=float)                    # Rotation matrices of the two crystals
+xtalRot[:,:,0] = np.eye(3,dtype=float)                                  # Rotation of crystal #1
+xtalRot[:,:,1] = Rotation.from_euler('z', np.deg2rad(15)).as_matrix()   # Rotation of crystal #2
+xtalRot[:,:,2] = Rotation.from_euler('z', np.deg2rad(-38)).as_matrix()  # Rotation of crystal #3
+xtalRot[:,:,3] = Rotation.from_euler('z', np.deg2rad(-49)).as_matrix()  # Rotation of crystal #4
+xtalRot[:,:,4] = Rotation.from_euler('z', np.deg2rad(127)).as_matrix()  # Rotation of crystal #5
+liq_width      = 2*params['alat']                                       # Width of the liquid layers between the crystals
+den            = pypfc.do_polycrystal(xtalRot, liq_width=liq_width)     # Generate a polycrystal
+pypfc.set_density(den)                                                  # Sets the new density field in the pyPFC simulation object
 
 # Evaluate energy
 # ===============
@@ -79,8 +86,7 @@ ene, mean_ene = pypfc.get_energy()  # Evaluate the PFC free energy and its mean 
 
 # Evaluate phase field
 # ====================
-pf = pypfc.get_phase_field()                                    # Evaluate the phase field
-pf_verts, pf_faces, volume = pypfc.get_phase_field_contour(pf)  # Evaluate the phase field contour and the volume contained within it
+pf = pypfc.get_phase_field() # Evaluate the phase field
 
 # Interpolate density field maxima
 # ================================
@@ -96,12 +102,12 @@ pypfc.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], at
 
 # Prepare storage of state data and save the intial state
 # =======================================================
-total_time         = 0.0                                            # Initialize total simulation time
-state_output_idx   = 0                                              # Initialize state output index
-state_output       = np.zeros((nstep+1, 6), dtype=float)            # Allocate array for state data: time, natoms, mean_ene, mean_den, volume, cpu_time
-_ , mean_den       = pypfc.get_density()                            # Evaluate the mean density
-state_output[0,:]  = [0.0, natoms, mean_ene, mean_den, volume, 0.0] # Save initial state data
-state_output_idx  += 1                                              # Step up state output index
+total_time         = 0.0                                    # Initialize total simulation time
+state_output_idx   = 0                                      # Initialize state output index
+state_output       = np.zeros((nstep+1, 5), dtype=float)    # Allocate array for state data: time, natoms, mean_ene, mean_den, volume, cpu_time
+_ , mean_den       = pypfc.get_density()                    # Evaluate the mean density
+state_output[0,:]  = [0.0, natoms, mean_ene, mean_den, 0.0] # Save initial state data
+state_output_idx  += 1                                      # Step up state output index
 
 # Evolve density field
 # ====================
@@ -121,21 +127,20 @@ for step in range(nstep):
 
         # Evaluate data in the current step
         # =================================
-        den, mean_den              = pypfc.get_density()                            # Evaluate the density field and its mean value
-        ene, mean_ene              = pypfc.get_energy()                             # Evaluate the PFC free energy and its mean value
-        pf                         = pypfc.get_phase_field()                        # Evaluate the phase field
-        pf_verts, pf_faces, volume = pypfc.get_phase_field_contour(pf)              # Evaluate the phase field contour and the volume contained within it
-        atom_coord, atom_data      = pypfc.interpolate_density_maxima(den, ene, pf) # Interpolate density maxima positions and associated data (density, energy, phase field)
-        natoms                     = atom_coord.shape[0]                            # Retrieve the number of atoms (= number of interpolated density peaks)
+        den, mean_den         = pypfc.get_density()                            # Evaluate the density field and its mean value
+        ene, mean_ene         = pypfc.get_energy()                             # Evaluate the PFC free energy and its mean value
+        pf                    = pypfc.get_phase_field()                        # Evaluate the phase field
+        atom_coord, atom_data = pypfc.interpolate_density_maxima(den, ene, pf) # Interpolate density maxima positions and associated data (density, energy, phase field)
+        natoms                = atom_coord.shape[0]                            # Retrieve the number of atoms (= number of interpolated density peaks)
 
         # Save state data
         # ===============
-        state_output[state_output_idx,:] = [total_time, natoms, mean_ene, mean_den, volume, time.time()-tstart] # Save state data
-        state_output_idx += 1                                                                                   # Step up state output index
+        state_output[state_output_idx,:] = [total_time, natoms, mean_ene, mean_den, time.time()-tstart] # Save state data
+        state_output_idx += 1                                                                           # Step up state output index
 
         # Print state to identify the simulation progress
         # ===============================================
-        state_string = f"Step {step+1:>10,}: natoms = {natoms:>10,}, den = {mean_den:.5e}, ene = {mean_ene:.5e}, vol = {volume:.5e}, sim_time = {time.time()-tstart:.5e} s"
+        state_string = f"Step {step+1:>10,}: natoms = {natoms:>10,}, den = {mean_den:.5e}, ene = {mean_ene:.5e}, sim_time = {time.time()-tstart:.5e} s"
         print(state_string) # Print the current state to the console
 
         # Save state data to file
@@ -146,10 +151,15 @@ for step in range(nstep):
         # ===============
         if np.mod(step+1,n_save_step_data)==0:
 
+            # Integrate fields along x
+            # ========================
+            den_av = pypfc.get_field_average_along_axis(den, 'x')
+            pf_av  = pypfc.get_field_average_along_axis(pf, 'x')
+        
             # Save data to a binary pickle file
             # =================================
             filename = output_path + 'step_' + str(step+1).zfill(nfill)
-            pypfc.save_pickle(filename, [ step, total_time, ndiv, ddiv, dSize, den, state_output[:state_output_idx+1,:]])
+            pypfc.save_pickle(filename, [ step, total_time, ndiv, ddiv, dSize, den, state_output[:state_output_idx+1,:], den_av, pf_av])
 
             # Save data to VTK files
             # ======================
@@ -164,3 +174,4 @@ print(f'Time spent in time step loop: {tend-tstart:.3f} s')
 # Do cleanup
 # ==========
 pypfc.cleanup()
+

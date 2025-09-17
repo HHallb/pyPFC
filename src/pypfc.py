@@ -29,7 +29,9 @@ class setup_simulation(setup_io):
         'alat':                     1.0,
         'sigma':                    0.0,
         'npeaks':                   2,
-        'alpha':                    [1, 1],
+        'alpha':                    [1, 1, 1],
+        'C20_amplitude':            0.0,
+        'C20_alpha':                1.0,
         'pf_gauss_var':             1.0,
         'normalize_pf':             True,
         'update_scheme':            '1st_order',
@@ -40,7 +42,7 @@ class setup_simulation(setup_io):
         'dtype_gpu':                torch.float64,
         'verbose':                  False,
         'evaluate_phase_field':     False,
-        'density_interp_order':     1,
+        'density_interp_order':     2,
         'density_threshold':        0.0,
         'density_merge_distance':   None,
         'pf_iso_level':             0.5,
@@ -80,11 +82,14 @@ class setup_simulation(setup_io):
         self._pf_gauss_var         = cfg['pf_gauss_var']
         self._normalize_pf         = cfg['normalize_pf']
         self._evaluate_phase_field = cfg['evaluate_phase_field']
+        self._C20_amplitude        = cfg['C20_amplitude']
+        self._C20_alpha            = cfg['C20_alpha']
 
         # Initiate additional class variables
         # ===================================
         self._using_setup_file = False
         self._setup_file_path  = None
+        self._use_H2           = False
 
         # Allocate torch tensors and ensure that they are contiguous in memory
         # ====================================================================
@@ -161,6 +166,12 @@ class setup_simulation(setup_io):
     def get_C2_d(self):
         return self._C2_d
 
+    def set_H2(self, H0, Rot):
+        self._f_H_d  = self.evaluate_directional_correlation_kernel(H0, Rot)
+        self._f_H_d  = self._f_H_d.contiguous()
+        self._use_H2 = True
+        self.update_density = self.get_update_scheme()  # Recompute the update scheme to include H2
+
     def set_update_scheme(self, update_scheme):
         self._update_scheme = update_scheme
         self.update_density = self.get_update_scheme()
@@ -189,7 +200,7 @@ class setup_simulation(setup_io):
         self._f_den_d = torch.fft.rfftn(self._den_d).to(self._f_den_d.dtype)  # Forward FFT of the density field
 
     def set_phase_field_kernel(self, H0=1.0, Rot=None):
-        if Rot==None or Rot.any()==None:
+        if Rot is None:
             self._f_pf_kernel_d = self._C2_d
             self._f_pf_kernel_d = self._f_pf_kernel_d.contiguous()
         else:
@@ -215,7 +226,7 @@ class setup_simulation(setup_io):
         OUTPUT
 
         Last revision:
-        H. Hallberg 2025-09-15
+        H. Hallberg 2025-09-17
         '''
 
         del self._tmp_d, self._C2_d, self._f_den_d, self._f_den2_d, self._f_den3_d
@@ -239,6 +250,9 @@ class setup_simulation(setup_io):
         if self._evaluate_phase_field:
             del self._f_pf_kernel_d, self._f_pf_smoothing_kernel_d
 
+        if self._use_H2:
+            del self._f_H_d
+
         torch.cuda.empty_cache()  # Frees up unused GPU memory
 
         # Write finishing time stamp to the setup file, if it is active
@@ -257,18 +271,12 @@ class setup_simulation(setup_io):
             Establish the two-point correlation function for a particular crystal structure.
 
         INPUT
-            k2_d          Sum of squared wave vectors, [nx, ny, nz] (on the device)
-            sig           Effective temperature in the Debye-Waller factor
-            npeaks        Number of peaks to evaluate
-            alat          Lattice parameters
-            struct        Crystal structure: SC, BCC, FCC, DC
-            alpha         Width of the Gaussian peaks, [npeaks]
 
         OUTPUT
             C2_d          Two-point pair correlation function [nx, ny, nz/2+1] (on the device)
 
         Last revision:
-        H. Hallberg 2025-08-26
+        H. Hallberg 2025-09-16
         """
 
         # Get reciprocal planes
@@ -280,24 +288,43 @@ class setup_simulation(setup_io):
         alpha_d = torch.tensor(self._alpha, dtype=self._k2_d.dtype, device=self._k2_d.device)
         npl_d   = torch.tensor(npl,   dtype=self._k2_d.dtype, device=self._k2_d.device)
 
-        # Evaluate the Debye-Waller factor
+        # Evaluate the exponential pre-factor (Debye-Waller-like)
         DWF_d = torch.exp(-(self._sigma**2) * (kpl_d**2) / (2 * denpl_d * npl_d))
 
-        # Precompute denominators
-        denom_d = 2 * alpha_d**2
-
-        # Evaluate the two-point correlation function
+        # Precompute quantities
+        denom_d   = 2 * alpha_d**2
         k2_sqrt_d = torch.sqrt(self._k2_d)
 
-        # Reshape kpl, DWF, and alpha for broadcasting
-        kpl_d   = kpl_d.view(1, 1, 1, self._npeaks)
-        DWF_d   = DWF_d.view(1, 1, 1, self._npeaks)
-        denom_d = denom_d.view(1, 1, 1, self._npeaks)
+        # # Reshape kpl, DWF, and alpha for broadcasting
+        # kpl_d   = kpl_d.view(1, 1, 1, self._npeaks)
+        # DWF_d   = DWF_d.view(1, 1, 1, self._npeaks)
+        # denom_d = denom_d.view(1, 1, 1, self._npeaks)
 
-        # Compute the correlation function
-        C2testval_d = DWF_d * torch.exp(-(k2_sqrt_d.unsqueeze(-1) - kpl_d) ** 2 / denom_d)
-        C2_d = torch.max(C2testval_d, dim=-1).values
-        C2_d = C2_d.contiguous()
+        # # Compute the correlation function
+        # C2testval_d = DWF_d * torch.exp(-(k2_sqrt_d.unsqueeze(-1) - kpl_d) ** 2 / denom_d)
+        # C2_d = torch.max(C2testval_d, dim=-1).values
+        # C2_d = C2_d.contiguous()
+
+        # Zero-mode peak
+        if self._C20_amplitude != 0.0:
+            if self._C20_alpha < 0.0:
+                raise ValueError("C20_alpha must be positive when C20_amplitude is non-zero.")
+            zero_peak = self._C20_amplitude * torch.exp(-k2_sqrt_d ** 2 / self._C20_alpha)
+        else:
+            zero_peak = torch.zeros_like(k2_sqrt_d)
+
+        # Use f_tmp_d as workspace (complex type)
+        self._f_tmp_d.zero_()
+        # Take real part for max operation
+        self._f_tmp_d.real.copy_(zero_peak)
+
+        # Compute the correlation function for all peaks
+        for ipeak in range(self._npeaks):
+            peak_val = DWF_d[ipeak] * torch.exp( -(k2_sqrt_d - kpl_d[ipeak]) ** 2 / denom_d[ipeak] )
+            self._f_tmp_d.real = torch.maximum(self._f_tmp_d.real, peak_val)
+
+        # Return the real part as the result
+        C2_d = self._f_tmp_d.real.contiguous()
 
         return C2_d
 
@@ -309,10 +336,6 @@ class setup_simulation(setup_io):
             Establish reciprocal vectors/planes for a particular crystal structure.
 
         INPUT
-            npeaks        Number of peaks to evaluate
-            alat          Lattice parameters
-            struct        Crystal structure: SC, BCC, FCC, DC
-            dtype         Data type for output arrays (e.g., torch.float32, torch.float64)
 
         OUTPUT
             kPlane        Reciprocal lattice plane spacing (a.k.a. "d-spacing"). For cubic systems, the formulae
@@ -399,10 +422,16 @@ class setup_simulation(setup_io):
         g1, _, _, alpha, beta, gamma = self._update_scheme_params
         dt = self._dtime
 
+        if self._use_H2 and self._verbose:
+            print("Using an orientation-dependent kernel H2 in the time integration scheme.")
+
         # Pre-compute contants and define the update function
         # ===================================================
         if self._update_scheme == '1st_order':
-            self._f_Lterm_d = -self._k2_d.mul(g1 - self._C2_d).contiguous()
+            if self._use_H2:
+                self._f_Lterm_d = -self._k2_d.mul(g1 - self._C2_d - self._f_H_d).contiguous()
+            else:
+                self._f_Lterm_d = -self._k2_d.mul(g1 - self._C2_d).contiguous()
             self.update_density = self.update_density_1
         elif self._update_scheme == '2nd_order':
             if self._update_scheme_params[3:].any() is None or len(self._update_scheme_params) != 6:
@@ -412,12 +441,20 @@ class setup_simulation(setup_io):
             self._f_Lterm0_d = 4 * gamma
             self._f_Lterm1_d = beta * dt - 2 * gamma
             self._f_Lterm2_d = 2 * (dt ** 2) * alpha ** 2 * self._k2_d.contiguous()
-            self._f_Lterm3_d = (2 * gamma + beta * self._dtime +
-                                2 * (dt ** 2) * (alpha ** 2) *
-                                self._k2_d.mul(g1 - self._C2_d).contiguous())
+            if self._use_H2:
+                self._f_Lterm3_d = (2 * gamma + beta * self._dtime +
+                                    2 * (dt ** 2) * (alpha ** 2) *
+                                    self._k2_d.mul(g1 - self._C2_d - self._f_H_d).contiguous())
+            else:
+                self._f_Lterm3_d = (2 * gamma + beta * self._dtime +
+                                    2 * (dt ** 2) * (alpha ** 2) *
+                                    self._k2_d.mul(g1 - self._C2_d).contiguous())
             self.update_density = self.update_density_2
         elif self._update_scheme == 'exponential':
-            self._f_Lterm0_d = g1 - self._C2_d
+            if self._use_H2:
+                self._f_Lterm0_d = g1 - self._C2_d - self._f_H_d
+            else:
+                self._f_Lterm0_d = g1 - self._C2_d
             self._f_Lterm0_d = torch.where(self._f_Lterm0_d == 0,
                                         torch.tensor(1e-12, device=self._device, dtype=self._dtype_torch),
                                         self._f_Lterm0_d).contiguous()

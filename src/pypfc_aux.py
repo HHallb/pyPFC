@@ -36,7 +36,7 @@ class setup_aux(setup_base):
         'device_type':              'gpu',
         'device_number':            0,
         'verbose':                  False,
-        'density_interp_order':     1,
+        'density_interp_order':     2,
         'density_threshold':        0.0,
         'density_merge_distance':   None,
         'pf_iso_level':             0.5,
@@ -137,6 +137,7 @@ class setup_aux(setup_base):
             params        List containing parameters for the single crystal model
             model         Density field layout:
                             0 = Spherical crystal
+                            1 = A crystal extending throughout y and z, while only covering an interval in x
     
         OUTPUT
             density       Density field, real rank-3 array of size [nx x ny x nz]
@@ -167,6 +168,11 @@ class setup_aux(setup_base):
             xtalRadius = params[0]
             condition  = (np.sqrt((Xc-Lx/2)**2 + (Yc-Ly/2)**2 + (Zc-Lz/2)**2) <= xtalRadius)
 
+        elif model==1:
+            start_x   = params[0]
+            end_x     = params[1]
+            condition = (Xc >= start_x) & (Xc <= end_x)
+
         else:
             raise ValueError(f'Unsupported seed layout: model={model}')
 
@@ -184,18 +190,19 @@ class setup_aux(setup_base):
             a periodic 3D domain.
     
         INPUT
-            xtalRot       Crystal orientation (rotation matrix): [3 x 3 x 2]
+            xtalRot       Crystal orientations (rotation matrices): [3 x 3 x 2]
             params        List containing parameters for the bicrystal model
             liq_width     Width of the liquid band along the GB
             model         Density field layout:
                             0 = Cylindrical crystal, extending through z
                             1 = Spherical crystal
+                            2 = Bicrystal with two planar grain boundaries, normal to x
     
         OUTPUT
             density       Density field, real rank-3 array of size [nx x ny x nz]
 
         Last revision:
-        H. Hallberg 2025-09-11
+        H. Hallberg 2025-09-17
         '''
 
         # Grid
@@ -226,6 +233,12 @@ class setup_aux(setup_base):
             xtalRadius = params[0]
             condition0 = (np.sqrt((Xc-Lx/2)**2 + (Yc-Ly/2)**2 + (Zc-Lz/2)**2) >  (xtalRadius+liq_width/2))
             condition1 = (np.sqrt((Xc-Lx/2)**2 + (Yc-Ly/2)**2 + (Zc-Lz/2)**2) <= (xtalRadius-liq_width/2))
+
+        elif model==2:
+            gb_x1      = params[0]
+            gb_x2      = params[1]
+            condition0 = (Xc <=  (gb_x1-liq_width/2)) | (Xc >= (gb_x2+liq_width/2))
+            condition1 = (Xc >= (gb_x1+liq_width/2)) & (Xc <= (gb_x2-liq_width/2))
 
         else:
             raise ValueError(f'Unsupported seed layout: model={model}')
@@ -298,22 +311,21 @@ class setup_aux(setup_base):
 
 # =====================================================================================
 
-    def get_integrated_field(self, field, limits):
+    def get_integrated_field_in_volume(self, field, limits):
         '''
         PURPOSE
-            Integrate a field variable, defined on a fixed Cartesian 3D grid.
+            Integrate a field variable within a certain volume, defined on a fixed Cartesian 3D grid.
 
         INPUT
             field       Field to be integrated, [nx x ny x nz]
-            limits      Spatial integration limits, [2 x 3]:
-                            limits = [xmin ymin zmin
-                                    xmax ymax zmax]
+            limits      Spatial integration limits, [6]:
+                            limits = [xmin xmax ymin ymax zmin zmax]
 
         OUTPUT
             result      Result of the integration
 
         Last revision:
-        H. Hallberg 2024-07-12
+        H. Hallberg 2024-09-16
         '''
 
         # Grid
@@ -321,8 +333,7 @@ class setup_aux(setup_base):
         dx,dy,dz = self._ddiv
 
         # Integration limits
-        xmin,ymin,zmin = limits[0,:]
-        xmax,ymax,zmax = limits[1,:]
+        xmin,xmax,ymin,ymax,zmin,zmax = limits
 
         # Create a grid of coordinates
         x = np.linspace(0, (nx-1) * dx, nx)
@@ -338,14 +349,77 @@ class setup_aux(setup_base):
                 (Z >= zmin) & (Z <= zmax))
 
         # Perform integration using the mask
-        result = np.sum(field[mask])
+        result = np.sum(field[mask]) * dx * dy * dz
 
-        # Divide sum by the number of included values to get the average
-        nvals = np.sum(mask)
-        if nvals > 0:
-            result = result / nvals
+        return result
+      
+# =====================================================================================
+
+    def get_field_average_along_axis(self, field, axis):
+        '''
+        PURPOSE
+            Evaluate the mean value of a field variable along a certain axis,
+            defined on a fixed Cartesian 3D grid.
+
+        INPUT
+            field       Field to be integrated, [nx x ny x nz]
+            axis        Axis to integrate along: 'x', 'y' or 'z'
+
+        OUTPUT
+            result      Result of the integration
+
+        Last revision:
+        H. Hallberg 2024-09-17
+        '''
+
+        # Evaluate the mean field value along the specified axis
+        # ======================================================
+        if axis.upper() == 'X':
+            result = np.mean(field, axis=(1,2))
+        elif axis.upper() == 'Y':
+            result = np.mean(field, axis=(0,2))
+        elif axis.upper() == 'Z':
+            result = np.mean(field, axis=(0,1))
         else:
-            result = 0.0
+            raise ValueError("Axis must be 'x', 'y', or 'z'.")
+
+        return result
+      
+# =====================================================================================
+
+    def get_integrated_field_along_axis(self, field, axis):
+        '''
+        PURPOSE
+            Integrate a field variable along a certain axis, defined on a fixed Cartesian 3D grid.
+
+        INPUT
+            field       Field to be integrated, [nx x ny x nz]
+            axis        Axis to integrate along: 'x', 'y' or 'z'
+
+        OUTPUT
+            result      Result of the integration
+
+        Last revision:
+        H. Hallberg 2024-09-16
+        '''
+
+        # Grid
+        # ====
+        dx,dy,dz = self._ddiv
+
+        # Integrate along the specified axis
+        # ==================================
+        if axis.upper() == 'X':
+            # Integrate over y and z for each x
+            result = np.sum(field, axis=(1,2)) * dy * dz
+        elif axis.upper() == 'Y':
+            # Integrate over x and z for each y
+            result = np.sum(field, axis=(0,2)) * dx * dz
+        elif axis.upper() == 'Z':
+            # Integrate over x and y for each z
+            result = np.sum(field, axis=(0,1)) * dx * dy
+        else:
+            raise ValueError("Axis must be 'x', 'y', or 'z'.")
 
         return result
       
