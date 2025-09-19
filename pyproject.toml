@@ -16,8 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-license = "GNU GPLv3. "
-license-files = ["LICEN[CS]E*"]
+license = "GPL-3.0-or-later"
 
 # Add your dependencies here
 dependencies = [
