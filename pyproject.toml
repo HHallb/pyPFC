@@ -9,7 +9,7 @@ authors = [
   { name="Håkan Hallberg", email="hakan.hallb@protonmail.com" },
 ]
 keywords = ["phase field crystal", "simulation", "atomistic simulation"]
-description = "Python-based Phase Field Crystal (PFC) simulation tools"
+description = "A Python Package for Phase Field Crystal (PFC) Simulations"
 readme = "README.md"
 requires-python = ">=3.12"
 classifiers = [
