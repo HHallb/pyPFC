@@ -138,7 +138,7 @@ class setup_simulation(setup_io):
         self.update_density = self.get_update_scheme()
         if self._verbose:
             tend = time.time()
-            print(f'Time to construct time integration scheme ({self._update_scheme}): {tend-tstart:.3f} s')
+            print(f'Time to construct the time integration scheme ({self._update_scheme}): {tend-tstart:.3f} s')
 
 # =====================================================================================
 
