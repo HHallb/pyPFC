@@ -51,11 +51,11 @@ class setup_grid:
     def get_ddiv(self):
         return self.__ddiv
 
-    def set_dSize(self, dSize):
-        self._dSize = dSize
-        self._Lx = dSize[0]
-        self._Ly = dSize[1]
-        self._Lz = dSize[2]
+    # def set_dSize(self, dSize):
+    #     self._dSize = dSize
+    #     self._Lx = dSize[0]
+    #     self._Ly = dSize[1]
+    #     self._Lz = dSize[2]
 
     def get_dSize(self):
         return self._dSize

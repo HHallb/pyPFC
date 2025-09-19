@@ -66,7 +66,7 @@ class setup_simulation(setup_io):
 
         # Initiate the inherited class
         # ============================
-        subset_cfg = {k: cfg[k] for k in ['struct', 'sigma', 'npeaks', 'device_number',
+        subset_cfg = {k: cfg[k] for k in ['struct', 'alat', 'sigma', 'npeaks', 'device_number',
                                           'device_type', 'dtype_cpu', 'dtype_gpu', 'verbose',
                                           'density_interp_order', 'density_threshold', 'density_merge_distance',
                                           'pf_iso_level', 'torch_threads', 'torch_threads_interop'] if k in cfg}
@@ -176,8 +176,8 @@ class setup_simulation(setup_io):
         self._update_scheme = update_scheme
         self.update_density = self.get_update_scheme()
 
-    def get_update_scheme(self):
-        return self._update_scheme
+    # def get_update_scheme(self):
+    #     return self._update_scheme
     
     def set_update_scheme_params(self, params):
         self._update_scheme_params = params
@@ -265,142 +265,142 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def evaluate_C2_d(self):
-        """
-        PURPOSE
-            Establish the two-point correlation function for a particular crystal structure.
+#     def evaluate_C2_d(self):
+#         """
+#         PURPOSE
+#             Establish the two-point correlation function for a particular crystal structure.
 
-        INPUT
+#         INPUT
 
-        OUTPUT
-            C2_d          Two-point pair correlation function [nx, ny, nz/2+1] (on the device)
+#         OUTPUT
+#             C2_d          Two-point pair correlation function [nx, ny, nz/2+1] (on the device)
 
-        Last revision:
-        H. Hallberg 2025-09-16
-        """
+#         Last revision:
+#         H. Hallberg 2025-09-16
+#         """
 
-        # Get reciprocal planes
-        kpl, npl, denpl = self.evaluate_reciprocal_planes()
+#         # Get reciprocal planes
+#         kpl, npl, denpl = self.evaluate_reciprocal_planes()
 
-        # Convert to PyTorch tensors and move to device
-        kpl_d   = torch.tensor(kpl,   dtype=self._k2_d.dtype, device=self._k2_d.device)
-        denpl_d = torch.tensor(denpl, dtype=self._k2_d.dtype, device=self._k2_d.device)
-        alpha_d = torch.tensor(self._alpha, dtype=self._k2_d.dtype, device=self._k2_d.device)
-        npl_d   = torch.tensor(npl,   dtype=self._k2_d.dtype, device=self._k2_d.device)
+#         # Convert to PyTorch tensors and move to device
+#         kpl_d   = torch.tensor(kpl,   dtype=self._k2_d.dtype, device=self._k2_d.device)
+#         denpl_d = torch.tensor(denpl, dtype=self._k2_d.dtype, device=self._k2_d.device)
+#         alpha_d = torch.tensor(self._alpha, dtype=self._k2_d.dtype, device=self._k2_d.device)
+#         npl_d   = torch.tensor(npl,   dtype=self._k2_d.dtype, device=self._k2_d.device)
 
-        # Evaluate the exponential pre-factor (Debye-Waller-like)
-        DWF_d = torch.exp(-(self._sigma**2) * (kpl_d**2) / (2 * denpl_d * npl_d))
+#         # Evaluate the exponential pre-factor (Debye-Waller-like)
+#         DWF_d = torch.exp(-(self._sigma**2) * (kpl_d**2) / (2 * denpl_d * npl_d))
 
-        # Precompute quantities
-        denom_d   = 2 * alpha_d**2
-        k2_sqrt_d = torch.sqrt(self._k2_d)
+#         # Precompute quantities
+#         denom_d   = 2 * alpha_d**2
+#         k2_sqrt_d = torch.sqrt(self._k2_d)
 
-        # # Reshape kpl, DWF, and alpha for broadcasting
-        # kpl_d   = kpl_d.view(1, 1, 1, self._npeaks)
-        # DWF_d   = DWF_d.view(1, 1, 1, self._npeaks)
-        # denom_d = denom_d.view(1, 1, 1, self._npeaks)
+#         # # Reshape kpl, DWF, and alpha for broadcasting
+#         # kpl_d   = kpl_d.view(1, 1, 1, self._npeaks)
+#         # DWF_d   = DWF_d.view(1, 1, 1, self._npeaks)
+#         # denom_d = denom_d.view(1, 1, 1, self._npeaks)
 
-        # # Compute the correlation function
-        # C2testval_d = DWF_d * torch.exp(-(k2_sqrt_d.unsqueeze(-1) - kpl_d) ** 2 / denom_d)
-        # C2_d = torch.max(C2testval_d, dim=-1).values
-        # C2_d = C2_d.contiguous()
+#         # # Compute the correlation function
+#         # C2testval_d = DWF_d * torch.exp(-(k2_sqrt_d.unsqueeze(-1) - kpl_d) ** 2 / denom_d)
+#         # C2_d = torch.max(C2testval_d, dim=-1).values
+#         # C2_d = C2_d.contiguous()
 
-        # Zero-mode peak
-        if self._C20_amplitude != 0.0:
-            if self._C20_alpha < 0.0:
-                raise ValueError("C20_alpha must be positive when C20_amplitude is non-zero.")
-            zero_peak = self._C20_amplitude * torch.exp(-k2_sqrt_d ** 2 / self._C20_alpha)
-        else:
-            zero_peak = torch.zeros_like(k2_sqrt_d)
+#         # Zero-mode peak
+#         if self._C20_amplitude != 0.0:
+#             if self._C20_alpha < 0.0:
+#                 raise ValueError("C20_alpha must be positive when C20_amplitude is non-zero.")
+#             zero_peak = self._C20_amplitude * torch.exp(-k2_sqrt_d ** 2 / self._C20_alpha)
+#         else:
+#             zero_peak = torch.zeros_like(k2_sqrt_d)
 
-        # Use f_tmp_d as workspace (complex type)
-        self._f_tmp_d.zero_()
-        # Take real part for max operation
-        self._f_tmp_d.real.copy_(zero_peak)
+#         # Use f_tmp_d as workspace (complex type)
+#         self._f_tmp_d.zero_()
+#         # Take real part for max operation
+#         self._f_tmp_d.real.copy_(zero_peak)
 
-        # Compute the correlation function for all peaks
-        for ipeak in range(self._npeaks):
-            peak_val = DWF_d[ipeak] * torch.exp( -(k2_sqrt_d - kpl_d[ipeak]) ** 2 / denom_d[ipeak] )
-            self._f_tmp_d.real = torch.maximum(self._f_tmp_d.real, peak_val)
+#         # Compute the correlation function for all peaks
+#         for ipeak in range(self._npeaks):
+#             peak_val = DWF_d[ipeak] * torch.exp( -(k2_sqrt_d - kpl_d[ipeak]) ** 2 / denom_d[ipeak] )
+#             self._f_tmp_d.real = torch.maximum(self._f_tmp_d.real, peak_val)
 
-        # Return the real part as the result
-        C2_d = self._f_tmp_d.real.contiguous()
+#         # Return the real part as the result
+#         C2_d = self._f_tmp_d.real.contiguous()
 
-        return C2_d
+#         return C2_d
 
-# =====================================================================================
+# # =====================================================================================
 
-    def evaluate_reciprocal_planes(self):
-        '''
-        PURPOSE
-            Establish reciprocal vectors/planes for a particular crystal structure.
+#     def evaluate_reciprocal_planes(self):
+#         '''
+#         PURPOSE
+#             Establish reciprocal vectors/planes for a particular crystal structure.
 
-        INPUT
+#         INPUT
 
-        OUTPUT
-            kPlane        Reciprocal lattice plane spacing (a.k.a. "d-spacing"). For cubic systems, the formulae
-                            is:
-                                    d = a / sqrt(h^2 + k^2 + l^2)
+#         OUTPUT
+#             kPlane        Reciprocal lattice plane spacing (a.k.a. "d-spacing"). For cubic systems, the formulae
+#                             is:
+#                                     d = a / sqrt(h^2 + k^2 + l^2)
 
-                            where a is the lattice parameter. The reciprocal spacing is
+#                             where a is the lattice parameter. The reciprocal spacing is
 
-                                    kPlane = 2pi/d
+#                                     kPlane = 2pi/d
 
-                            Theorem: For any family of lattice planes separated by distance d, there are 
-                                    reciprocal lattice vectors perpendicular to the planes, the shortest
-                                    being 2pi/d.
+#                             Theorem: For any family of lattice planes separated by distance d, there are 
+#                                     reciprocal lattice vectors perpendicular to the planes, the shortest
+#                                     being 2pi/d.
 
-            nPlane        Number of symmetrical planes of each family
-            denPlane      Atomic density within a plane (i.e. "planar density")
+#             nPlane        Number of symmetrical planes of each family
+#             denPlane      Atomic density within a plane (i.e. "planar density")
 
-        Last revision:
-        H. Hallberg 2025-08-26
-        '''
+#         Last revision:
+#         H. Hallberg 2025-08-26
+#         '''
 
-        kPlane   = np.zeros(self._npeaks, dtype=float)
-        denPlane = np.zeros(self._npeaks, dtype=float)
-        nPlane   = np.zeros(self._npeaks, dtype=int)
+#         kPlane   = np.zeros(self._npeaks, dtype=float)
+#         denPlane = np.zeros(self._npeaks, dtype=float)
+#         nPlane   = np.zeros(self._npeaks, dtype=int)
 
-        # Define reciprocal vectors
-        match self._struct.upper():
-            case 'SC': #= SC in reciprocal space
-                # {100}, {110}, {111}
-                nvals = 3
-                kpl   = (2*np.pi/self._alat) * np.array([1, np.sqrt(2), np.sqrt(3)], dtype=float)
-                pl    = np.array([6, 12, 8], dtype=int)
-                denpl = (1/self._alat**2) * np.array([1, 1/np.sqrt(2), 1/np.sqrt(3)], dtype=float)
-            case 'BCC': # = FCC in reciprocal space
-                # {110}, {200}       (...the next would be {211}, {220}, {310}, {222})
-                nvals = 2
-                kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(2), 2], dtype=float)
-                pl    = np.array([12, 6, 24], dtype=int)
-                denpl = (1/self._alat**2) * np.array([2/np.sqrt(2), 1], dtype=float)
-            case 'FCC': # = BCC in reciprocal space
-                # {111}, {200}, {220}        (...the next would be {311}, {222})
-                nvals = 3
-                kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(3), 2, np.sqrt(8)], dtype=float)
-                pl    = np.array([8, 6, 12], dtype=int)
-                denpl = (1/self._alat**2) * np.array([4/np.sqrt(3), 2, 4/np.sqrt(2)], dtype=float)
-            case 'DC': # Diamond Cubic (3D)
-                # {111}, {220}, {311}         (...the next would be {400}, {331}, {422}, {511})
-                nvals = 3
-                kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(3), np.sqrt(8), np.sqrt(11)], dtype=float)
-                pl    = np.array([8, 12, 24], dtype=int)                                                   
-                denpl = (1/self._alat**2) * np.array([4/np.sqrt(3), 4/np.sqrt(2), 1.385641467389298], dtype=float)
-            case _:
-                raise ValueError(f'Unsupported crystal structure: struct={self._struct.upper()}')
+#         # Define reciprocal vectors
+#         match self._struct.upper():
+#             case 'SC': #= SC in reciprocal space
+#                 # {100}, {110}, {111}
+#                 nvals = 3
+#                 kpl   = (2*np.pi/self._alat) * np.array([1, np.sqrt(2), np.sqrt(3)], dtype=float)
+#                 pl    = np.array([6, 12, 8], dtype=int)
+#                 denpl = (1/self._alat**2) * np.array([1, 1/np.sqrt(2), 1/np.sqrt(3)], dtype=float)
+#             case 'BCC': # = FCC in reciprocal space
+#                 # {110}, {200}       (...the next would be {211}, {220}, {310}, {222})
+#                 nvals = 2
+#                 kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(2), 2], dtype=float)
+#                 pl    = np.array([12, 6, 24], dtype=int)
+#                 denpl = (1/self._alat**2) * np.array([2/np.sqrt(2), 1], dtype=float)
+#             case 'FCC': # = BCC in reciprocal space
+#                 # {111}, {200}, {220}        (...the next would be {311}, {222})
+#                 nvals = 3
+#                 kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(3), 2, np.sqrt(8)], dtype=float)
+#                 pl    = np.array([8, 6, 12], dtype=int)
+#                 denpl = (1/self._alat**2) * np.array([4/np.sqrt(3), 2, 4/np.sqrt(2)], dtype=float)
+#             case 'DC': # Diamond Cubic (3D)
+#                 # {111}, {220}, {311}         (...the next would be {400}, {331}, {422}, {511})
+#                 nvals = 3
+#                 kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(3), np.sqrt(8), np.sqrt(11)], dtype=float)
+#                 pl    = np.array([8, 12, 24], dtype=int)                                                   
+#                 denpl = (1/self._alat**2) * np.array([4/np.sqrt(3), 4/np.sqrt(2), 1.385641467389298], dtype=float)
+#             case _:
+#                 raise ValueError(f'Unsupported crystal structure: struct={self._struct.upper()}')
 
-        # Retrieve output data
-        if nvals>=self._npeaks:
-            kPlane   = kpl[0:self._npeaks]
-            nPlane   = pl[0:self._npeaks]
-            denPlane = denpl[0:self._npeaks]
-        else:
-            raise ValueError(f'Not enough peaks defined, npeaks={self._npeaks}')
+#         # Retrieve output data
+#         if nvals>=self._npeaks:
+#             kPlane   = kpl[0:self._npeaks]
+#             nPlane   = pl[0:self._npeaks]
+#             denPlane = denpl[0:self._npeaks]
+#         else:
+#             raise ValueError(f'Not enough peaks defined, npeaks={self._npeaks}')
 
-        return kPlane, nPlane, denPlane
+#         return kPlane, nPlane, denPlane
 
-# =====================================================================================
+# # =====================================================================================
 
     def get_update_scheme(self):
 
@@ -663,7 +663,7 @@ class setup_simulation(setup_io):
     def get_phase_field(self):
         """
         PURPOSE
-            Evaluate the phase field (orientation field) using a wavelet transform.
+            Evaluate the phase field using a wavelet filtering.
             The phase field is calculated as
                 pf = (density_field*wavelet)*smoothing_kernel
             where * denotes a convolution.
@@ -748,119 +748,119 @@ class setup_simulation(setup_io):
         
 # =====================================================================================
 
-    def evaluate_directional_correlation_kernel(self, H0, Rot):
-        '''
-        PURPOSE
-            Establish the directional correlation kernel for a particular crystal structure.
+#     def evaluate_directional_correlation_kernel(self, H0, Rot):
+#         '''
+#         PURPOSE
+#             Establish the directional correlation kernel for a particular crystal structure.
 
-        INPUT
-            kx              Wave vector along the x-axis, [nx]
-            ky              Wave vector along the y-axis, [ny]
-            kz              Wave vector along the z-axis, [nz]
-            latticePar      Lattice parameter
-            struct          Crystal structure: SC, BCC, FCC, DC
-            H0              Constant modulation of the peak height
-            Rot             Lattice rotation matrix, [3, 3]
+#         INPUT
+#             kx              Wave vector along the x-axis, [nx]
+#             ky              Wave vector along the y-axis, [ny]
+#             kz              Wave vector along the z-axis, [nz]
+#             latticePar      Lattice parameter
+#             struct          Crystal structure: SC, BCC, FCC, DC
+#             H0              Constant modulation of the peak height
+#             Rot             Lattice rotation matrix, [3, 3]
     
-        OUTPUT
-            f_H             Directional correlation kernel, [nx, ny, nz/2+1]
+#         OUTPUT
+#             f_H             Directional correlation kernel, [nx, ny, nz/2+1]
 
-        Last revision:
-        H. Hallberg 2024-10-21
-        '''
+#         Last revision:
+#         H. Hallberg 2024-10-21
+#         '''
 
-        if self._verbose: tstart = time.time()
+#         if self._verbose: tstart = time.time()
 
-        # Allocate output array
-        f_H = np.zeros((self._nx, self._ny, self._nz_half), dtype=self._dtype_cpu)
+#         # Allocate output array
+#         f_H = np.zeros((self._nx, self._ny, self._nz_half), dtype=self._dtype_cpu)
 
-        # Define reciprocal lattice vectors (RLV)
-        rlv  = self.get_rlv(self._struct, self._alat)  # Shape: [nrlv, 3]
-        nrlv = rlv.shape[0]
+#         # Define reciprocal lattice vectors (RLV)
+#         rlv  = self.get_rlv(self._struct, self._alat)  # Shape: [nrlv, 3]
+#         nrlv = rlv.shape[0]
         
-        # Gauss peak width parameters
-        gamma = np.ones(nrlv, dtype=np.double)
-        denom = 2 * gamma**2
+#         # Gauss peak width parameters
+#         gamma = np.ones(nrlv, dtype=np.double)
+#         denom = 2 * gamma**2
 
-        # Rotate the reciprocal lattice vectors
-        rlv_rotated = np.dot(rlv, Rot.T)  # Shape: [nrlv, 3]
+#         # Rotate the reciprocal lattice vectors
+#         rlv_rotated = np.dot(rlv, Rot.T)  # Shape: [nrlv, 3]
 
-        # Create 3D grids for kx, ky, kz
-        kx = self.get_k(self._nx, self._dx)
-        ky = self.get_k(self._ny, self._dy)
-        kz = self.get_k(self._nz, self._dz)
-        KX, KY, KZ = np.meshgrid(kx, ky, kz[:self._nz_half], indexing='ij')
+#         # Create 3D grids for kx, ky, kz
+#         kx = self.get_k(self._nx, self._dx)
+#         ky = self.get_k(self._ny, self._dy)
+#         kz = self.get_k(self._nz, self._dz)
+#         KX, KY, KZ = np.meshgrid(kx, ky, kz[:self._nz_half], indexing='ij')
 
-        # Loop over reciprocal lattice vectors (small dimension)
-        for p in range(nrlv):
-            # Compute squared differences for each reciprocal lattice vector
-            diff_kx = (KX - rlv_rotated[p, 0])**2
-            diff_ky = (KY - rlv_rotated[p, 1])**2
-            diff_kz = (KZ - rlv_rotated[p, 2])**2
+#         # Loop over reciprocal lattice vectors (small dimension)
+#         for p in range(nrlv):
+#             # Compute squared differences for each reciprocal lattice vector
+#             diff_kx = (KX - rlv_rotated[p, 0])**2
+#             diff_ky = (KY - rlv_rotated[p, 1])**2
+#             diff_kz = (KZ - rlv_rotated[p, 2])**2
 
-            # Compute the Gaussian contribution for this lattice vector
-            Htestval = H0 * np.exp(-(diff_kx + diff_ky + diff_kz) / denom[p])
+#             # Compute the Gaussian contribution for this lattice vector
+#             Htestval = H0 * np.exp(-(diff_kx + diff_ky + diff_kz) / denom[p])
 
-            # Update the directional correlation kernel by taking the maximum
-            f_H = np.maximum(f_H, Htestval)
+#             # Update the directional correlation kernel by taking the maximum
+#             f_H = np.maximum(f_H, Htestval)
 
-        f_H_d = torch.from_numpy(f_H).to(self._device) # Copy to GPU device
-        f_H_d = f_H_d.contiguous()                     # Ensure that the tensor is contiguous in memory
+#         f_H_d = torch.from_numpy(f_H).to(self._device) # Copy to GPU device
+#         f_H_d = f_H_d.contiguous()                     # Ensure that the tensor is contiguous in memory
 
-        if self._verbose:
-            tend = time.time()
-            print(f'Time to evaluate directional convolution kernel: {tend-tstart:.3f} s')
+#         if self._verbose:
+#             tend = time.time()
+#             print(f'Time to evaluate directional convolution kernel: {tend-tstart:.3f} s')
 
-        return f_H_d
+#         return f_H_d
 
-# =====================================================================================
+# # =====================================================================================
 
-    def get_rlv(self, struct, alat):
-        '''
-        PURPOSE
-            Get the reciprocal lattice vectors for a particular crystal structure.
+#     def get_rlv(self, struct, alat):
+#         '''
+#         PURPOSE
+#             Get the reciprocal lattice vectors for a particular crystal structure.
 
-        INPUT
-            struct      Crystal structure: SC, BCC, FCC, DC
-            latticePar  Lattice parameter
+#         INPUT
+#             struct      Crystal structure: SC, BCC, FCC, DC
+#             latticePar  Lattice parameter
     
-        OUTPUT
-            RLV         Reciprocal lattice vectors, [nRLV x 3]
+#         OUTPUT
+#             RLV         Reciprocal lattice vectors, [nRLV x 3]
 
-        Last revision:
-        H. Hallberg 2025-08-27
-        '''
+#         Last revision:
+#         H. Hallberg 2025-08-27
+#         '''
 
-        # Define reciprocal lattice vectors
-        structures = {
-                'SC': [
-                    [ 1,  0,  0], [ 0,  1,  0], [ 0,  0,  1],
-                    [-1,  0,  0], [ 0, -1,  0], [ 0,  0, -1]
-                ],
-                'BCC': [
-                    [ 0,  1,  1], [ 0, -1,  1], [ 0,  1, -1], [ 0, -1, -1],
-                    [ 1,  0,  1], [-1,  0,  1], [ 1,  0, -1], [-1,  0, -1],
-                    [ 1,  1,  0], [-1,  1,  0], [ 1, -1,  0], [-1, -1,  0]
-                ],
-                'FCC': [
-                    [ 1,  1,  1], [-1,  1,  1], [ 1, -1,  1], [ 1,  1, -1],
-                    [-1, -1,  1], [ 1, -1, -1], [-1,  1, -1], [-1, -1, -1]
-                ],
-                'DC': [
-                    [ 1,  1,  1], [-1,  1,  1], [ 1, -1,  1], [ 1,  1, -1],
-                    [-1, -1,  1], [ 1, -1, -1], [-1,  1, -1], [-1, -1, -1],
-                    [ 1,  1,  0], [-1,  1,  0], [ 1, -1,  0], [-1, -1,  0],
-                    [ 1,  0,  1], [-1,  0,  1], [ 1,  0, -1], [-1,  0, -1],
-                    [ 0,  1,  1], [ 0, -1,  1], [ 0,  1, -1], [ 0, -1, -1]
-                ],
-            }
+#         # Define reciprocal lattice vectors
+#         structures = {
+#                 'SC': [
+#                     [ 1,  0,  0], [ 0,  1,  0], [ 0,  0,  1],
+#                     [-1,  0,  0], [ 0, -1,  0], [ 0,  0, -1]
+#                 ],
+#                 'BCC': [
+#                     [ 0,  1,  1], [ 0, -1,  1], [ 0,  1, -1], [ 0, -1, -1],
+#                     [ 1,  0,  1], [-1,  0,  1], [ 1,  0, -1], [-1,  0, -1],
+#                     [ 1,  1,  0], [-1,  1,  0], [ 1, -1,  0], [-1, -1,  0]
+#                 ],
+#                 'FCC': [
+#                     [ 1,  1,  1], [-1,  1,  1], [ 1, -1,  1], [ 1,  1, -1],
+#                     [-1, -1,  1], [ 1, -1, -1], [-1,  1, -1], [-1, -1, -1]
+#                 ],
+#                 'DC': [
+#                     [ 1,  1,  1], [-1,  1,  1], [ 1, -1,  1], [ 1,  1, -1],
+#                     [-1, -1,  1], [ 1, -1, -1], [-1,  1, -1], [-1, -1, -1],
+#                     [ 1,  1,  0], [-1,  1,  0], [ 1, -1,  0], [-1, -1,  0],
+#                     [ 1,  0,  1], [-1,  0,  1], [ 1,  0, -1], [-1,  0, -1],
+#                     [ 0,  1,  1], [ 0, -1,  1], [ 0,  1, -1], [ 0, -1, -1]
+#                 ],
+#             }
 
-        if struct.upper() not in structures:
-            raise ValueError(f'Unsupported crystal structure ({struct.upper()}) in get_rlv')
+#         if struct.upper() not in structures:
+#             raise ValueError(f'Unsupported crystal structure ({struct.upper()}) in get_rlv')
         
-        rlv = np.array(structures[struct], dtype=float)
-        rlv = rlv * (2*np.pi/alat)
+#         rlv = np.array(structures[struct], dtype=float)
+#         rlv = rlv * (2*np.pi/alat)
 
-        return rlv
+#         return rlv
 
-# =====================================================================================
+# # =====================================================================================

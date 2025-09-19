@@ -45,12 +45,12 @@ nout             = 500                                # Evaluate step data in ev
 n_save_step_data = 500                                # Save step data in every n_save_step_data:th step
 nfill            = 7                                  # Number of figures to use in filenames (pre-pad with zeroes if needed)
 output_path      = '/home/hlhh/Insync/OneDriveLTH/python/pyPFC/examples/ex00_output/' # Output path
-output_file      = 'pypfc_setup.txt'                                                      # Output file name
+output_file      = 'pypfc_setup.txt'                                                  # Output file name
 
 # Define the computational grid
 # =============================
 dSize          = params['alat'] * np.array([32, 1, 1], dtype=float)   # Domain size along the x, y and z axes
-ndiv           = 2*16 * np.array([32, 1, 1], dtype=int)                  # Number of grid divisions along the x, y and z axes       
+ndiv           = 16 * np.array([32, 1, 1], dtype=int)                 # Number of grid divisions along the x, y and z axes       
 ddiv           = dSize / ndiv                                         # Grid spacing along the x, y and z axes
 print(f'ndiv:    {ndiv}')
 print(f'ddiv:    {ddiv} [a]')

@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
 import numpy as np
-from pypfc_aux import setup_aux
+from pypfc_pre import setup_pre
 import pickle
 import gzip
 import vtk
@@ -25,12 +25,13 @@ import re
 import os
 import time
 import torch
-from vtk.util.numpy_support import numpy_to_vtk #, get_vtk_array_type
+from vtk.util.numpy_support import numpy_to_vtk
 
-class setup_io(setup_aux):
+class setup_io(setup_pre):
 
     DEFAULTS = {
         'struct':                 'FCC',
+        'alat':                   1.0,
         'sigma':                  0.0,
         'npeaks':                 2,
         'dtype_cpu':              np.double,
@@ -62,7 +63,7 @@ class setup_io(setup_aux):
 
         # Initiate the inherited class
         # ============================
-        subset_cfg = {k: cfg[k] for k in ['struct', 'sigma', 'npeaks', 'device_number', 'device_type',
+        subset_cfg = {k: cfg[k] for k in ['struct', 'alat', 'sigma', 'npeaks', 'device_number', 'device_type',
                                           'dtype_cpu', 'dtype_gpu', 'verbose', 'density_interp_order',
                                           'density_threshold', 'density_merge_distance', 'pf_iso_level',
                                           'torch_threads', 'torch_threads_interop'] if k in cfg}
@@ -154,7 +155,7 @@ class setup_io(setup_aux):
     def read_extended_xyz(self, filename, nfields=0):
         """
         PURPOSE
-            Read PFC data on extended XYZ format from file.
+            Read PFC data in extended XYZ format from file.
         
         INPUT
             filename    Name of the input XYZ file (with or without .xyz/.xyz.gz extension)
@@ -335,7 +336,7 @@ class setup_io(setup_aux):
     def write_vtk_structured_grid(self, filename, arrayData, arrayName):
         """
         PURPOSE
-            Save 3D numpy arrays into a single VTK file.
+            Save 3D field data to a VTK file.
             The structured-grid data is saved in binary XML format.
 
         INPUT        
@@ -466,7 +467,7 @@ class setup_io(setup_aux):
     def write_info_file(self, filename='pypfc_simulation.txt', output_path=None):
         '''
         PURPOSE
-            Write the simulation setup information to a file.
+            Write simulation setup information to a file.
 
         INPUT
             filename      Name of the output file
@@ -551,7 +552,7 @@ class setup_io(setup_aux):
     def append_to_info_file(self, info, filename='pypfc_simulation.txt', output_path=None):
         '''
         PURPOSE
-            Append information to the simulation setup file.
+            Append lines to a text file.
 
         INPUT
             info         String or list of strings to append

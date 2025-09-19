@@ -18,17 +18,15 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
 import numpy as np
-from scipy.spatial import cKDTree
-from scipy import ndimage as ndi
 import time
 import torch
 from pypfc_base import setup_base
-from scipy.ndimage import zoom
-from skimage import measure
-class setup_aux(setup_base):
+
+class setup_pre(setup_base):
 
     DEFAULTS = {
         'struct':                   'FCC',
+        'alat':                     1.0,
         'sigma':                    0.0,
         'npeaks':                   2,
         'dtype_cpu':                np.double,
@@ -60,7 +58,10 @@ class setup_aux(setup_base):
 
         # Initiate the inherited class
         # ============================
-        subset_cfg = {k: cfg[k] for k in ['torch_threads', 'torch_threads_interop', 'device_number', 'device_type', 'dtype_cpu', 'dtype_gpu', 'verbose'] if k in cfg}
+        subset_cfg = {k: cfg[k] for k in ['struct', 'alat', 'sigma', 'npeaks', 'torch_threads', 'torch_threads_interop', 'device_number',
+                                          'device_type', 'dtype_cpu', 'dtype_gpu', 'verbose',
+                                          'density_interp_order', 'density_threshold',
+                                          'density_merge_distance', 'pf_iso_level'] if k in cfg}
         super().__init__(ndiv, ddiv, config=subset_cfg)
 
         # Handle input arguments
@@ -70,12 +71,9 @@ class setup_aux(setup_base):
         self._den                    = np.zeros((nx, ny, nz), dtype=cfg['dtype_cpu'])
         self._ene                    = np.zeros((nx, ny, nz), dtype=cfg['dtype_cpu'])
         self._struct                 = cfg['struct']
+        self._alat                   = cfg['alat']
         self._sigma                  = cfg['sigma']
         self._npeaks                 = cfg['npeaks']
-        self._density_interp_order   = cfg['density_interp_order']
-        self._density_threshold      = cfg['density_threshold']
-        self._density_merge_distance = cfg['density_merge_distance']
-        self._pf_iso_level           = cfg['pf_iso_level']
 
         # Get density field amplitudes and densitites
         # ===========================================
@@ -328,7 +326,7 @@ class setup_aux(setup_base):
 
         q    = 2*np.pi
         nAmp = len(self._ampl) # Number of density field modes/amplitudes
-        n0   = self._nlns[1]  # Reference density (liquid)
+        n0   = self._nlns[1]   # Reference density (liquid)
 
         crdRot   = np.dot(g,crd)
         xc,yc,zc = crdRot
@@ -366,308 +364,309 @@ class setup_aux(setup_base):
 
 # =====================================================================================
 
-    def get_integrated_field_in_volume(self, field, limits):
-        '''
-        PURPOSE
-            Integrate a field variable within a certain volume, defined on a fixed Cartesian 3D grid.
+#     def get_integrated_field_in_volume(self, field, limits):
+#         '''
+#         PURPOSE
+#             Integrate a field variable within a certain volume, defined on a fixed Cartesian 3D grid.
 
-        INPUT
-            field       Field to be integrated, [nx x ny x nz]
-            limits      Spatial integration limits, [6]:
-                            limits = [xmin xmax ymin ymax zmin zmax]
+#         INPUT
+#             field       Field to be integrated, [nx x ny x nz]
+#             limits      Spatial integration limits, [6]:
+#                             limits = [xmin xmax ymin ymax zmin zmax]
 
-        OUTPUT
-            result      Result of the integration
+#         OUTPUT
+#             result      Result of the integration
 
-        Last revision:
-        H. Hallberg 2024-09-16
-        '''
+#         Last revision:
+#         H. Hallberg 2024-09-16
+#         '''
 
-        # Grid
-        nx,ny,nz = self._ndiv
-        dx,dy,dz = self._ddiv
+#         # Grid
+#         nx,ny,nz = self._ndiv
+#         dx,dy,dz = self._ddiv
 
-        # Integration limits
-        xmin,xmax,ymin,ymax,zmin,zmax = limits
+#         # Integration limits
+#         xmin,xmax,ymin,ymax,zmin,zmax = limits
 
-        # Create a grid of coordinates
-        x = np.linspace(0, (nx-1) * dx, nx)
-        y = np.linspace(0, (ny-1) * dy, ny)
-        z = np.linspace(0, (nz-1) * dz, nz)
+#         # Create a grid of coordinates
+#         x = np.linspace(0, (nx-1) * dx, nx)
+#         y = np.linspace(0, (ny-1) * dy, ny)
+#         z = np.linspace(0, (nz-1) * dz, nz)
         
-        # Create a meshgrid of coordinates
-        X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
+#         # Create a meshgrid of coordinates
+#         X, Y, Z = np.meshgrid(x, y, z, indexing='ij')
 
-        # Create a boolean mask for the integration limits
-        mask = ((X >= xmin) & (X <= xmax) &
-                (Y >= ymin) & (Y <= ymax) &
-                (Z >= zmin) & (Z <= zmax))
+#         # Create a boolean mask for the integration limits
+#         mask = ((X >= xmin) & (X <= xmax) &
+#                 (Y >= ymin) & (Y <= ymax) &
+#                 (Z >= zmin) & (Z <= zmax))
 
-        # Perform integration using the mask
-        result = np.sum(field[mask]) * dx * dy * dz
+#         # Perform integration using the mask
+#         result = np.sum(field[mask]) * dx * dy * dz
 
-        return result
+#         return result
       
-# =====================================================================================
+# # =====================================================================================
 
-    def get_field_average_along_axis(self, field, axis):
-        '''
-        PURPOSE
-            Evaluate the mean value of a field variable along a certain axis,
-            defined on a fixed Cartesian 3D grid.
+#     def get_field_average_along_axis(self, field, axis):
+#         '''
+#         PURPOSE
+#             Evaluate the mean value of a field variable along a certain axis,
+#             defined on a fixed Cartesian 3D grid.
 
-        INPUT
-            field       Field to be integrated, [nx x ny x nz]
-            axis        Axis to integrate along: 'x', 'y' or 'z'
+#         INPUT
+#             field       Field to be integrated, [nx x ny x nz]
+#             axis        Axis to integrate along: 'x', 'y' or 'z'
 
-        OUTPUT
-            result      Result of the integration
+#         OUTPUT
+#             result      Result of the integration
 
-        Last revision:
-        H. Hallberg 2024-09-17
-        '''
+#         Last revision:
+#         H. Hallberg 2024-09-17
+#         '''
 
-        # Evaluate the mean field value along the specified axis
-        # ======================================================
-        if axis.upper() == 'X':
-            result = np.mean(field, axis=(1,2))
-        elif axis.upper() == 'Y':
-            result = np.mean(field, axis=(0,2))
-        elif axis.upper() == 'Z':
-            result = np.mean(field, axis=(0,1))
-        else:
-            raise ValueError("Axis must be 'x', 'y', or 'z'.")
+#         # Evaluate the mean field value along the specified axis
+#         # ======================================================
+#         if axis.upper() == 'X':
+#             result = np.mean(field, axis=(1,2))
+#         elif axis.upper() == 'Y':
+#             result = np.mean(field, axis=(0,2))
+#         elif axis.upper() == 'Z':
+#             result = np.mean(field, axis=(0,1))
+#         else:
+#             raise ValueError("Axis must be 'x', 'y', or 'z'.")
 
-        return result
+#         return result
       
-# =====================================================================================
+# # =====================================================================================
 
-    def get_integrated_field_along_axis(self, field, axis):
-        '''
-        PURPOSE
-            Integrate a field variable along a certain axis, defined on a fixed Cartesian 3D grid.
+#     def get_integrated_field_along_axis(self, field, axis):
+#         '''
+#         PURPOSE
+#             Integrate a field variable along a certain axis, defined on a fixed Cartesian 3D grid.
 
-        INPUT
-            field       Field to be integrated, [nx x ny x nz]
-            axis        Axis to integrate along: 'x', 'y' or 'z'
+#         INPUT
+#             field       Field to be integrated, [nx x ny x nz]
+#             axis        Axis to integrate along: 'x', 'y' or 'z'
 
-        OUTPUT
-            result      Result of the integration
+#         OUTPUT
+#             result      Result of the integration
 
-        Last revision:
-        H. Hallberg 2024-09-16
-        '''
+#         Last revision:
+#         H. Hallberg 2024-09-16
+#         '''
 
-        # Grid
-        # ====
-        dx,dy,dz = self._ddiv
+#         # Grid
+#         # ====
+#         dx,dy,dz = self._ddiv
 
-        # Integrate along the specified axis
-        # ==================================
-        if axis.upper() == 'X':
-            # Integrate over y and z for each x
-            result = np.sum(field, axis=(1,2)) * dy * dz
-        elif axis.upper() == 'Y':
-            # Integrate over x and z for each y
-            result = np.sum(field, axis=(0,2)) * dx * dz
-        elif axis.upper() == 'Z':
-            # Integrate over x and y for each z
-            result = np.sum(field, axis=(0,1)) * dx * dy
-        else:
-            raise ValueError("Axis must be 'x', 'y', or 'z'.")
+#         # Integrate along the specified axis
+#         # ==================================
+#         if axis.upper() == 'X':
+#             # Integrate over y and z for each x
+#             result = np.sum(field, axis=(1,2)) * dy * dz
+#         elif axis.upper() == 'Y':
+#             # Integrate over x and z for each y
+#             result = np.sum(field, axis=(0,2)) * dx * dz
+#         elif axis.upper() == 'Z':
+#             # Integrate over x and y for each z
+#             result = np.sum(field, axis=(0,1)) * dx * dy
+#         else:
+#             raise ValueError("Axis must be 'x', 'y', or 'z'.")
 
-        return result
+#         return result
       
-# =====================================================================================
+# # =====================================================================================
 
-    def interpolate_atoms(self, intrpPos, pos, values, num_nnb=8, power=2):
-        """
-        PURPOSE
-            Interpolate values at given positions in a 3D periodic domain using inverse distance weighting.
-            interpolated_value = Σ(wi x vi) / Σ(wi)
-            where wi = 1 / (di^power), di is the distance to the i-th nearest neighbor, and
-            vi is the value at that neighbor.
+#     def interpolate_atoms(self, intrpPos, pos, values, num_nnb=8, power=2):
+#         """
+#         PURPOSE
+#             Interpolate values at given positions in a 3D periodic domain using inverse distance weighting.
+#             interpolated_value = Σ(wi x vi) / Σ(wi)
+#             where wi = 1 / (di^power), di is the distance to the i-th nearest neighbor, and
+#             vi is the value at that neighbor.
 
-        INPUT
-            intrpPos        Array of shape [n_intrp, 3] containing the
-                            3D coordinates of the particles to be interpolated
-            pos             Array of shape [n_particles, 3] containing the 3D coordinates of
-                            the particles among which to interpolate
-            values          Array of shape [n_particles] containing the values to be interpolated
-            num_nnb         Number of nearest neighbors to use for interpolation
-            power           Power for inverse distance weighting (default is 2)
+#         INPUT
+#             intrpPos        Array of shape [n_intrp, 3] containing the
+#                             3D coordinates of the particles to be interpolated
+#             pos             Array of shape [n_particles, 3] containing the 3D coordinates of
+#                             the particles among which to interpolate
+#             values          Array of shape [n_particles] containing the values to be interpolated
+#             num_nnb         Number of nearest neighbors to use for interpolation
+#             power           Power for inverse distance weighting (default is 2)
 
-        OUTPUT
-            interpVal       Interpolated values at given positions in
-                            intrpPos [n_interp]
+#         OUTPUT
+#             interpVal       Interpolated values at given positions in
+#                             intrpPos [n_interp]
 
-        Last revision:
-            H. Hallberg 2025-08-03
-        """
+#         Last revision:
+#             H. Hallberg 2025-08-03
+#         """
 
-        n_interp = intrpPos.shape[0]
-        interpVal = np.zeros(n_interp, dtype=values.dtype)
+#         n_interp = intrpPos.shape[0]
+#         interpVal = np.zeros(n_interp, dtype=values.dtype)
 
-        # Generate periodic images of the source positions
-        images = np.vstack([pos + np.array([dx, dy, dz]) * self._dSize
-                            for dx in (-1, 0, 1)
-                            for dy in (-1, 0, 1)
-                            for dz in (-1, 0, 1)])
+#         # Generate periodic images of the source positions
+#         images = np.vstack([pos + np.array([dx, dy, dz]) * self._dSize
+#                             for dx in (-1, 0, 1)
+#                             for dy in (-1, 0, 1)
+#                             for dz in (-1, 0, 1)])
         
-        # Replicate values for all periodic images
-        values_periodic = np.tile(values, 27)  # 3^3 = 27 periodic images
+#         # Replicate values for all periodic images
+#         values_periodic = np.tile(values, 27)  # 3^3 = 27 periodic images
         
-        # Create KDTree for efficient neighbor search
-        tree = cKDTree(images)
+#         # Create KDTree for efficient neighbor search
+#         tree = cKDTree(images)
         
-        # Parameters for inverse distance weighting
-        k_neighbors = min(num_nnb, len(pos))  # Number of nearest neighbors to use
-        epsilon     = 1e-12  # Small value to avoid division by zero
+#         # Parameters for inverse distance weighting
+#         k_neighbors = min(num_nnb, len(pos))  # Number of nearest neighbors to use
+#         epsilon     = 1e-12  # Small value to avoid division by zero
         
-        # Vectorized neighbor search for all interpolation points at once
-        distances, indices = tree.query(intrpPos, k=k_neighbors)
+#         # Vectorized neighbor search for all interpolation points at once
+#         distances, indices = tree.query(intrpPos, k=k_neighbors)
         
-        # Handle exact matches (distance < epsilon)
-        exact_matches = distances[:, 0] < epsilon
+#         # Handle exact matches (distance < epsilon)
+#         exact_matches = distances[:, 0] < epsilon
         
-        # Initialize output array
-        interpVal = np.zeros(n_interp, dtype=values.dtype)
+#         # Initialize output array
+#         interpVal = np.zeros(n_interp, dtype=values.dtype)
         
-        # For exact matches, use the nearest neighbor value directly
-        if np.any(exact_matches):
-            interpVal[exact_matches] = values_periodic[indices[exact_matches, 0]]
+#         # For exact matches, use the nearest neighbor value directly
+#         if np.any(exact_matches):
+#             interpVal[exact_matches] = values_periodic[indices[exact_matches, 0]]
         
-        # For non-exact matches, use inverse distance weighting
-        non_exact = ~exact_matches
-        if np.any(non_exact):
-            # Get distances and indices for non-exact matches
-            dist_subset = distances[non_exact]
-            idx_subset = indices[non_exact]
+#         # For non-exact matches, use inverse distance weighting
+#         non_exact = ~exact_matches
+#         if np.any(non_exact):
+#             # Get distances and indices for non-exact matches
+#             dist_subset = distances[non_exact]
+#             idx_subset = indices[non_exact]
             
-            # Compute weights: 1 / distance^power
-            weights = 1.0 / (dist_subset ** power)
+#             # Compute weights: 1 / distance^power
+#             weights = 1.0 / (dist_subset ** power)
             
-            # Get values for all neighbors
-            neighbor_values = values_periodic[idx_subset]
+#             # Get values for all neighbors
+#             neighbor_values = values_periodic[idx_subset]
             
-            # Compute weighted sum and total weights
-            weighted_sum = np.sum(weights * neighbor_values, axis=1)
-            total_weight = np.sum(weights, axis=1)
+#             # Compute weighted sum and total weights
+#             weighted_sum = np.sum(weights * neighbor_values, axis=1)
+#             total_weight = np.sum(weights, axis=1)
             
-            # Store interpolated values
-            interpVal[non_exact] = weighted_sum / total_weight
+#             # Store interpolated values
+#             interpVal[non_exact] = weighted_sum / total_weight
 
-        return interpVal
+#         return interpVal
 
-# =====================================================================================
+# # =====================================================================================
 
-    def interpolate_density_maxima(self, den, ene, pf=None):
-        '''
-        PURPOSE
-            Find the coordinates of the maxima in the density field (='atom' positions)
-            The domain is assumed to be defined such that all maxima
-            have coordinates (x,y,z) >= (0,0,0).
-            The density, energy and, optionally, the phase field value(s)
-            at the individual maxima are interpolated too.
+#     def interpolate_density_maxima(self, den, ene, pf=None):
+#         '''
+#         PURPOSE
+#             Find the coordinates of the maxima in the density field (='atom' positions)
+#             The domain is assumed to be defined such that all maxima
+#             have coordinates (x,y,z) >= (0,0,0).
+#             The density, energy and, optionally, the phase field value(s)
+#             at the individual maxima are interpolated too.
 
-        INPUT
-            den                     Density field, [nx, ny, nz]
-            ene                     Energy field, [nx, ny, nz]
-            pf                      Optional list of phase fields, [nx, ny, nz]
+#         INPUT
+#             den                     Density field, [nx, ny, nz]
+#             ene                     Energy field, [nx, ny, nz]
+#             pf                      Optional list of phase fields, [nx, ny, nz]
 
-        OUTPUT
-            atom_coord              Coordinates of the density maxima, [nmaxima x 3]
-            atom_data               Interpolated field values at the density maxima,
-                                    [nmaxima x 2+nPhaseFields].
-                                    The columns hold point data in the order:
-                                    [den ene pf1 pf2 ... pfN]
+#         OUTPUT
+#             atom_coord              Coordinates of the density maxima, [nmaxima x 3]
+#             atom_data               Interpolated field values at the density maxima,
+#                                     [nmaxima x 2+nPhaseFields].
+#                                     The columns hold point data in the order:
+#                                     [den ene pf1 pf2 ... pfN]
 
-        Last revision:
-        H. Hallberg 2025-09-11
-        '''
+#         Last revision:
+#         H. Hallberg 2025-09-11
+#         '''
 
-        if self._verbose: tstart = time.time()
+#         if self._verbose: tstart = time.time()
 
-        # Grid
-        dx,dy,dz = self._ddiv
+#         # Grid
+#         dx,dy,dz = self._ddiv
 
-        size = 1 + 2 * self._density_interp_order
-        footprint = np.ones((size, size, size))
-        footprint[self._density_interp_order, self._density_interp_order, self._density_interp_order] = 0
+#         size = 1 + 2 * self._density_interp_order
+#         footprint = np.ones((size, size, size))
+#         footprint[self._density_interp_order, self._density_interp_order, self._density_interp_order] = 0
 
-        filtered = ndi.maximum_filter(den, footprint=footprint, mode='wrap')
-        #filtered = ndi.maximum_filter(den, footprint=footprint, mode='constant')
+#         filtered = ndi.maximum_filter(den, footprint=footprint, mode='wrap')
+#         #filtered = ndi.maximum_filter(den, footprint=footprint, mode='constant')
 
-        mask_local_maxima = den > filtered
-        coords = np.asarray(np.where(mask_local_maxima),dtype=float).T
+#         mask_local_maxima = den > filtered
+#         coords = np.asarray(np.where(mask_local_maxima),dtype=float).T
 
-        # ndi.maximum_filter works in voxel coordinates, convert to physical coordinates
-        coords[:,0] *= dx
-        coords[:,1] *= dy
-        coords[:,2] *= dz
+#         # ndi.maximum_filter works in voxel coordinates, convert to physical coordinates
+#         coords[:,0] *= dx
+#         coords[:,1] *= dy
+#         coords[:,2] *= dz
 
-        # Filter maxima based on density threshold
-        max_den = np.max(den)
-        valid_maxima = den[mask_local_maxima] >= (self._density_threshold * max_den)
-        coords = coords[valid_maxima]
+#         # Filter maxima based on density threshold
+#         max_den = np.max(den)
+#         valid_maxima = den[mask_local_maxima] >= (self._density_threshold * max_den)
+#         coords = coords[valid_maxima]
 
-        denpos = den[mask_local_maxima][valid_maxima]
-        enepos = ene[mask_local_maxima][valid_maxima]
+#         denpos = den[mask_local_maxima][valid_maxima]
+#         enepos = ene[mask_local_maxima][valid_maxima]
 
-        # Merge maxima within the merge_distance
-        if self._density_merge_distance > 0.0 and len(coords) > 0:
-            tree = cKDTree(coords)
-            clusters = tree.query_ball_tree(tree, r=self._density_merge_distance)
-            unique_clusters = []
-            seen = set()
-            for cluster in clusters:
-                cluster = tuple(sorted(cluster))
-                if cluster not in seen:
-                    seen.add(cluster)
-                    unique_clusters.append(cluster)
+#         # Merge maxima within the merge_distance
+#         if self._density_merge_distance > 0.0 and len(coords) > 0:
+#             tree = cKDTree(coords)
+#             clusters = tree.query_ball_tree(tree, r=self._density_merge_distance)
+#             unique_clusters = []
+#             seen = set()
+#             for cluster in clusters:
+#                 cluster = tuple(sorted(cluster))
+#                 if cluster not in seen:
+#                     seen.add(cluster)
+#                     unique_clusters.append(cluster)
 
-            merged_coords = []
-            merged_denpos = []
-            merged_enepos = []
-            for cluster in unique_clusters:
-                cluster_coords = coords[list(cluster)]
-                cluster_denpos = denpos[list(cluster)]
-                cluster_enepos = enepos[list(cluster)]
-                merged_coords.append(np.mean(cluster_coords, axis=0))
-                merged_denpos.append(np.mean(cluster_denpos))
-                merged_enepos.append(np.mean(cluster_enepos))
+#             merged_coords = []
+#             merged_denpos = []
+#             merged_enepos = []
+#             for cluster in unique_clusters:
+#                 cluster_coords = coords[list(cluster)]
+#                 cluster_denpos = denpos[list(cluster)]
+#                 cluster_enepos = enepos[list(cluster)]
+#                 merged_coords.append(np.mean(cluster_coords, axis=0))
+#                 merged_denpos.append(np.mean(cluster_denpos))
+#                 merged_enepos.append(np.mean(cluster_enepos))
 
-            atom_coord = np.array(merged_coords)
-            denpos = np.array(merged_denpos)
-            enepos = np.array(merged_enepos)
+#             atom_coord = np.array(merged_coords)
+#             denpos = np.array(merged_denpos)
+#             enepos = np.array(merged_enepos)
 
-        # Handle phase field(s), either as a list of fields or as a single field
-        if pf is not None:
-            # If pf is a single array, wrap it in a list
-            if isinstance(pf, np.ndarray) and pf.ndim == 3:
-                pf_list = [pf]
-            else:
-                pf_list = list(pf)
-            nPf = len(pf_list)
-            pfpos = np.zeros((coords.shape[0], nPf), dtype=float)
-            for pfNr, phaseField in enumerate(pf_list):
-                pfpos[:, pfNr] = phaseField[mask_local_maxima][valid_maxima][:coords.shape[0]]
-            atom_data = np.hstack((denpos[:, None], enepos[:, None], pfpos))
-        else:
-            atom_data = np.hstack((denpos[:, None], enepos[:, None]))
+#         # Handle phase field(s), either as a list of fields or as a single field
+#         if pf is not None:
+#             # If pf is a single array, wrap it in a list
+#             if isinstance(pf, np.ndarray) and pf.ndim == 3:
+#                 pf_list = [pf]
+#             else:
+#                 pf_list = list(pf)
+#             nPf = len(pf_list)
+#             pfpos = np.zeros((coords.shape[0], nPf), dtype=float)
+#             for pfNr, phaseField in enumerate(pf_list):
+#                 pfpos[:, pfNr] = phaseField[mask_local_maxima][valid_maxima][:coords.shape[0]]
+#             atom_data = np.hstack((denpos[:, None], enepos[:, None], pfpos))
+#         else:
+#             atom_data = np.hstack((denpos[:, None], enepos[:, None]))
 
-        if self._verbose:
-            tend = time.time()
-            print(f'Time to interpolate density maxima: {tend-tstart:.3f} s')
+#         if self._verbose:
+#             tend = time.time()
+#             print(f'Time to interpolate density maxima: {tend-tstart:.3f} s')
 
-        return atom_coord, atom_data
+#         return atom_coord, atom_data
 
 # =====================================================================================
 
     def evaluate_ampl_dens(self):
         '''
         PURPOSE
-            Get amplitudes and densities for different density field expansions. For use in XPFC simulations.
+            Get the amplitudes and densities for different density field expansions.
+            For use in XPFC simulations.
 
         INPUT
             struct      Crystal structure: BCC, FCC
@@ -681,26 +680,26 @@ class setup_aux(setup_base):
 
 
         Last revision:
-        H. Hallberg 2025-08-26
+        H. Hallberg 2025-09-19
         '''
 
         if self._struct.upper()=='BCC':
             if self._sigma==0:
                 if self._npeaks==2:
                     # Including [110], [200]
-                    ampl = np.array([ 0.116548193580713,  0.058162568591367], dtype=float)
-                    nLnS = np.array([-0.151035610711215, -0.094238426687741], dtype=float)
+                    ampl = np.array([ 0.116548193580713,  0.058162568591367], dtype=self._dtype_cpu)
+                    nLnS = np.array([-0.151035610711215, -0.094238426687741], dtype=self._dtype_cpu)
                 elif self._npeaks==3:
                     # Including [110], [200], [211]
-                    ampl = np.array([ 0.111291217521458,  0.056111205274590, 0.005813371421170], dtype=float)
-                    nLnS = np.array([-0.158574317081128, -0.108067574994277], dtype=float)
+                    ampl = np.array([ 0.111291217521458,  0.056111205274590, 0.005813371421170], dtype=self._dtype_cpu)
+                    nLnS = np.array([-0.158574317081128, -0.108067574994277], dtype=self._dtype_cpu)
                 else:
                     raise ValueError(f'Unsupported value of npeaks={self._npeaks}')
             elif self._sigma==0.1:
                 if self._npeaks==2:
                     # Including [110], [200]
-                    ampl = np.array([ 0.113205280767407,  0.042599977405133], dtype=float)
-                    nLnS = np.array([-0.106228213129645, -0.055509415103115], dtype=float)
+                    ampl = np.array([ 0.113205280767407,  0.042599977405133], dtype=self._dtype_cpu)
+                    nLnS = np.array([-0.106228213129645, -0.055509415103115], dtype=self._dtype_cpu)
                 else:
                     raise ValueError(f'Unsupported value of npeaks={self._npeaks}')
             else:
@@ -709,12 +708,12 @@ class setup_aux(setup_base):
             if self._sigma==0:
                 if self._npeaks==2:
                     # Including [111], [200]
-                    ampl = np.array([ 0.127697395147358,  0.097486643368977], dtype=float)
-                    nLnS = np.array([-0.127233738562750, -0.065826817872435], dtype=float)
+                    ampl = np.array([ 0.127697395147358,  0.097486643368977], dtype=self._dtype_cpu)
+                    nLnS = np.array([-0.127233738562750, -0.065826817872435], dtype=self._dtype_cpu)
                 elif self._npeaks==3:
                     # Including [111], [200], [220]
-                    ampl = np.array([ 0.125151338544038,  0.097120295466816, 0.009505792832995], dtype=float)
-                    nLnS = np.array([-0.138357209505865, -0.081227380909546], dtype=float)
+                    ampl = np.array([ 0.125151338544038,  0.097120295466816, 0.009505792832995], dtype=self._dtype_cpu)
+                    nLnS = np.array([-0.138357209505865, -0.081227380909546], dtype=self._dtype_cpu)
                 else:
                     raise ValueError(f'Unsupported value of npeaks={self._npeaks}')
             else:
@@ -726,37 +725,37 @@ class setup_aux(setup_base):
 
 # =====================================================================================
 
-    def get_phase_field_contour(self, pf, pf_zoom=1.0, evaluate_volume=True):
-        """
-        PURPOSE
-            Find the iso-contour surface of a 3D phase field using marching cubes
+#     def get_phase_field_contour(self, pf, pf_zoom=1.0, evaluate_volume=True):
+#         """
+#         PURPOSE
+#             Find the iso-contour surface of a 3D phase field using marching cubes
         
-        INPUT
-            pf                  Phase field, [nx, ny, nz]
-            pf_zoom             Zoom factor for coarsening/refinement
-            evaluate_volume     If True, also evaluate the volume enclosed by the iso-surface
+#         INPUT
+#             pf                  Phase field, [nx, ny, nz]
+#             pf_zoom             Zoom factor for coarsening/refinement
+#             evaluate_volume     If True, also evaluate the volume enclosed by the iso-surface
 
-        OUTPUT
-            verts               Vertices of the iso-surface triangulation
-            faces               Surface triangulation topology
-            volume              (optional) Volume enclosed by the iso-surface
+#         OUTPUT
+#             verts               Vertices of the iso-surface triangulation
+#             faces               Surface triangulation topology
+#             volume              (optional) Volume enclosed by the iso-surface
 
-        Last revision:
-            H. Hallberg 2025-09-06
-        """
+#         Last revision:
+#             H. Hallberg 2025-09-06
+#         """
 
-        verts, faces, *_ = measure.marching_cubes(zoom(pf,pf_zoom), self._pf_iso_level, spacing=self._ddiv)
-        verts            = verts / pf_zoom
+#         verts, faces, *_ = measure.marching_cubes(zoom(pf,pf_zoom), self._pf_iso_level, spacing=self._ddiv)
+#         verts            = verts / pf_zoom
 
-        if evaluate_volume:
-            v0 = verts[faces[:, 0]]
-            v1 = verts[faces[:, 1]]
-            v2 = verts[faces[:, 2]]
-            cross_product  = np.cross(v1-v0, v2-v0)
-            signed_volumes = np.einsum('ij,ij->i', v0, cross_product)
-            volume         = np.abs(np.sum(signed_volumes) / 6.0)
-            return verts, faces, volume
-        else:
-            return verts, faces
+#         if evaluate_volume:
+#             v0 = verts[faces[:, 0]]
+#             v1 = verts[faces[:, 1]]
+#             v2 = verts[faces[:, 2]]
+#             cross_product  = np.cross(v1-v0, v2-v0)
+#             signed_volumes = np.einsum('ij,ij->i', v0, cross_product)
+#             volume         = np.abs(np.sum(signed_volumes) / 6.0)
+#             return verts, faces, volume
+#         else:
+#             return verts, faces
 
-# =====================================================================================
+# # =====================================================================================
