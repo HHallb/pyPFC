@@ -4,16 +4,6 @@ A Python software package for setting up, running and processing Phase Field Cry
 
 ![PFC atoms](/images/PFC_atoms.png)
 
-## Examples
-The Python codes for running the examples are provided in the `examples` subfolder.
-
-### Example 1
-
-### Example 2
-
-### Example 3
-
-
 ## Control parameters
 The general behavior of pyPFC is controlled by a set of parameters, collected in a Python dictionary. The parameters are described in the table below.
 
