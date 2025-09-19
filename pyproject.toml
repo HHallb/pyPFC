@@ -21,10 +21,10 @@ license-files = ["LICEN[CS]E*"]
 
 # Add your dependencies here
 dependencies = [
-    # "numpy>=2.2.6",
-    # "scipy>=1.16.1"
-    # "pyevtk>=1.6.0"
-    # "torch>=2.8.0+cu128"
+    # "numpy",
+    # "scipy"
+    # "pyevtk"
+    # "torch"
     # "scikit-image"
     # "ovito"
 ]
