@@ -1,7 +1,3 @@
-# Append path to libraries
-import sys
-sys.path.append('./src/')
-
 import pypfc
 import numpy as np
 import time

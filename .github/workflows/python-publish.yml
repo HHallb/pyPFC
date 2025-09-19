@@ -27,7 +27,7 @@ jobs:
           python-version: "3.x"
 
       - name: Install dependencies
-        run: python -m pip install --upgrade pip pyevtk torch numpy scipy scikit-image ovito
+        run: python -m pip install --upgrade pip vtk torch numpy scipy scikit-image ovito
         
       - name: Build release distributions
         run: |

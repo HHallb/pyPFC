@@ -172,11 +172,12 @@ The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionar
 ## Package dependencies
 The following Python packages are required:
 
+* numpy
 * ovito (if pypfc_ovito is to be used)
-* pyvtk
 * scikit-image
 * scipy
 * torch
+* vtk
 
 ## Installation and Usage
 Install using `pip install pypfc` and import with `import pypfc` and (optionally) `import pypfc_ovito`.

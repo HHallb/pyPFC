@@ -1,12 +1,7 @@
-# Append path to libraries
-import sys
-sys.path.append('./src/')
-
 import pypfc
 import numpy as np
 import time
 import torch
-
 from scipy.spatial.transform import Rotation # Added import to define crystal rotations
 
 # Set pyPFC parameters, these are handled as a dictionary

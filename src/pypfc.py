@@ -176,9 +176,6 @@ class setup_simulation(setup_io):
         self._update_scheme = update_scheme
         self.update_density = self.get_update_scheme()
 
-    # def get_update_scheme(self):
-    #     return self._update_scheme
-    
     def set_update_scheme_params(self, params):
         self._update_scheme_params = params
         self.update_density = self.get_update_scheme()  

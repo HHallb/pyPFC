@@ -22,7 +22,7 @@ license = "GPL-3.0-or-later"
 dependencies = [
     # "numpy",
     # "scipy"
-    # "pyevtk"
+    # "vtk"
     # "torch"
     # "scikit-image"
     # "ovito"
