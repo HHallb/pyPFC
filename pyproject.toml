@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyPFC_HHallb"
+version = "0.0.1"
+authors = [
+  { name="Håkan Hallberg", email="hakan.hallb@protonmail.com" },
+]
+keywords = ["phase field crystal", "simulation", "atomistic simulation"]
+description = "Python-based Phase Field Crystal (PFC) simulation tools"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "GNU GPLv3. "
+license-files = ["LICEN[CS]E*"]
+
+# Add your dependencies here
+dependencies = [
+    # "numpy>=2.2.6",
+    # "scipy>=1.16.1"
+    # "pyevtk>=1.6.0"
+    # "torch>=2.8.0+cu128"
+    # "gzip"
+    # "scikit-image"
+    # "ovito"
+]
+
+[project.urls]
+Homepage = "https://github.com/HHallb/pyPFC"
+Repository = "https://github.com/HHallb/pyPFC"
