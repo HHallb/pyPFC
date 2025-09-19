@@ -25,7 +25,6 @@ dependencies = [
     # "scipy>=1.16.1"
     # "pyevtk>=1.6.0"
     # "torch>=2.8.0+cu128"
-    # "gzip"
     # "scikit-image"
     # "ovito"
 ]

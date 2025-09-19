@@ -172,19 +172,11 @@ The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionar
 ## Package dependencies
 The following Python packages are required:
 
-* datetime
-* gzip
-* numpy
-* os
 * ovito (if pypfc_ovito is to be used)
-* pickle
-* re
+* pyvtk
 * scikit-image
 * scipy
-* sys
-* time
 * torch
-* vtk
 
 ## Installation and Usage
 Install using `pip install pypfc` and import with `import pypfc` and (optionally) `import pypfc_ovito`.
