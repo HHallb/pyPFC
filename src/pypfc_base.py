@@ -103,10 +103,9 @@ class setup_base(setup_grid):
                     print(f'GPU {gpuNr}: {torch.cuda.get_device_name(gpuNr)}')
                     print(f'       Compute capability:    {torch.cuda.get_device_properties(gpuNr).major}.{torch.cuda.get_device_properties(gpuNr).minor}')
                     print(f'       Total memory:          {round(torch.cuda.get_device_properties(gpuNr).total_memory/1024**3,2)} GB')
-                    print(f'       Allocated memory:      {round(torch.cuda.memory_allocated(gpuNr)/1024**3,2)} GB') # Returns the maximum GPU memory managed by the caching allocator in bytes for a given device
-                    print(f'       Cached memory:         {round(torch.cuda.memory_reserved(gpuNr)/1024**3,2)} GB')  # Returns the current GPU memory usage by tensors in bytes for a given device
+                    print(f'       Allocated memory:      {round(torch.cuda.memory_allocated(gpuNr)/1024**3,2)} GB')
+                    print(f'       Cached memory:         {round(torch.cuda.memory_reserved(gpuNr)/1024**3,2)} GB')
                     print(f'       Multi processor count: {torch.cuda.get_device_properties(gpuNr).multi_processor_count}')
-                    #print(f'       GPU temperature:       {torch.cuda.temperature(gpuNr)} degC')
                     print(f'')
                 print(f'Current GPU: {torch.cuda.current_device()}')
             torch.cuda.empty_cache() # Clear GPU cache
@@ -236,8 +235,8 @@ class setup_base(setup_grid):
         kz2 = kz[np.newaxis, np.newaxis, :] ** 2
         k2  = kx2 + ky2 + kz2
 
-        k2_d = torch.from_numpy(k2[:,:,:self._nz_half]).to(self._device) # Copy to device
-        k2_d = k2_d.to(dtype=self._dtype_gpu) # Ensure correct dtype
+        k2_d = torch.from_numpy(k2[:,:,:self._nz_half]).to(self._device)
+        k2_d = k2_d.to(dtype=self._dtype_gpu)
         k2_d = k2_d.contiguous()
 
         return k2_d
@@ -474,7 +473,6 @@ class setup_base(setup_grid):
         footprint[self._density_interp_order, self._density_interp_order, self._density_interp_order] = 0
 
         filtered = ndi.maximum_filter(den, footprint=footprint, mode='wrap')
-        #filtered = ndi.maximum_filter(den, footprint=footprint, mode='constant')
 
         mask_local_maxima = den > filtered
         coords = np.asarray(np.where(mask_local_maxima),dtype=self._dtype_cpu).T
@@ -728,16 +726,6 @@ class setup_base(setup_grid):
         # Precompute quantities
         denom_d   = 2 * alpha_d**2
         k2_sqrt_d = torch.sqrt(self._k2_d)
-
-        # # Reshape kpl, DWF, and alpha for broadcasting
-        # kpl_d   = kpl_d.view(1, 1, 1, self._npeaks)
-        # DWF_d   = DWF_d.view(1, 1, 1, self._npeaks)
-        # denom_d = denom_d.view(1, 1, 1, self._npeaks)
-
-        # # Compute the correlation function
-        # C2testval_d = DWF_d * torch.exp(-(k2_sqrt_d.unsqueeze(-1) - kpl_d) ** 2 / denom_d)
-        # C2_d = torch.max(C2testval_d, dim=-1).values
-        # C2_d = C2_d.contiguous()
 
         # Zero-mode peak
         if self._C20_amplitude != 0.0:

@@ -1,6 +1,6 @@
 # Append path to libraries
 import sys
-sys.path.append('/home/hlhh/Insync/OneDriveLTH/python/pyPFC/src/')
+sys.path.append('./src/')
 
 import pypfc
 import numpy as np
@@ -42,12 +42,12 @@ params = {
 
 # Simulation-specific parameters
 # ==============================
-nstep            = 40000                             # Number of simulation steps
-nout             = 1000                              # Evaluate step data in every nout:h step
-n_save_step_data = 1000                              # Save step data in every n_save_step_data:th step
-nfill            = 7                                 # Number of figures to use in filenames (pre-pad with zeroes if needed)
-output_path      = '/home/hlhh/Insync/OneDriveLTH/python/pyPFC/examples/ex03_output/' # Output path
-output_file      = 'pypfc_setup.txt'                                                  # Output file name
+nstep            = 40000                     # Number of simulation steps
+nout             = 1000                      # Evaluate step data in every nout:h step
+n_save_step_data = 1000                      # Save step data in every n_save_step_data:th step
+nfill            = 7                         # Number of figures to use in filenames (pre-pad with zeroes if needed)
+output_path      = './examples/ex03_output/' # Output path
+output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
 # =============================
@@ -160,7 +160,7 @@ for step in range(nstep):
             # =================
             plotnr   = str(step+1).zfill(nfill)
             filename = output_path + 'pfc_data_' + plotnr     
-            pypfc.write_extended_xyz(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'], simulation_time=total_time)   # Save atom data to an extended XYZ file, gzip compressed by default
+            pypfc.write_extended_xyz(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'], simulation_time=total_time)   # Save atom data to an extended XYZ file, gzip-compressed by default
 
 tend = time.time()
 print(f'Time spent in time step loop: {tend-tstart:.3f} s')
@@ -168,4 +168,3 @@ print(f'Time spent in time step loop: {tend-tstart:.3f} s')
 # Do cleanup
 # ==========
 pypfc.cleanup()
-

@@ -1,6 +1,6 @@
 # Append path to libraries
 import sys
-sys.path.append('/home/hlhh/Insync/OneDriveLTH/python/pyPFC/src/')
+sys.path.append('./src/')
 
 import pypfc
 import numpy as np
@@ -40,12 +40,12 @@ params = {
 
 # Simulation-specific parameters
 # ==============================
-nstep            = 8000                               # Number of simulation steps
-nout             = 500                                # Evaluate step data in every nout:h step
-n_save_step_data = 1000                               # Save step data in every n_save_step_data:th step
-nfill            = 7                                  # Number of figures to use in filenames (pre-pad with zeroes if needed)
-output_path      = '/home/hlhh/Insync/OneDriveLTH/python/pyPFC/examples/ex01_output/' # Output path
-output_file      = 'pypfc_setup.txt'                                                  # Output file name
+nstep            = 8000                      # Number of simulation steps
+nout             = 500                       # Evaluate step data in every nout:h step
+n_save_step_data = 1000                      # Save step data in every n_save_step_data:th step
+nfill            = 7                         # Number of figures to use in filenames (pre-pad with zeroes if needed)
+output_path      = './examples/ex01_output/' # Output path
+output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
 # =============================

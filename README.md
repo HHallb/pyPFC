@@ -7,43 +7,43 @@ A Python software package for setting up, running and processing Phase Field Cry
 ## Control parameters
 The general behavior of pyPFC is controlled by a set of parameters, collected in a Python dictionary. The parameters are described in the table below.
 
-| Parameter name         | Defaults to                       | Description                                                                       |
-| ---------------------- | --------------------------------- | --------------------------------------------------------------------------------- |
-| dtime                  | 1.0e-3                            | Non-dimensional time increment
-| struct                 | 'FCC'                             | Crystal structure
+| Parameter name         | Defaults to                       | Description                                                                      
+| ---------------------- | --------------------------------- | ---------------------------------------------------------------------------------
 | alat                   | 1.0                               | Lattice parameter (non-dimensional)
-| sigma                  | 0.0                               | Temperature-like parameter (non-dimensional)
-| npeaks                 | 2                                 | Number of Gaussian peaks, excluding the zero-mode peak, to use in C2
 | alpha                  | [1, 1]                            | C2 Gaussian peak widths, excluding the zero-mode peak
 | C20_amplitude          | 0.0                               | Amplitude of the zero-mode Gaussian peak in C2
 | C20_alpha              | 1.0                               | Width of the zero-mode Gaussian peak in C2
-| pf_gauss_var           | 0.1                               | Variance (sigma) of the Gaussian smoothing kernel used in phase field evaluations
-| normalize_pf           | True                              | Normalize the phase fields to [0,1], or not
-| update_scheme          | '1st_order'                       | Time integration scheme ('1st_order', '2nd_order' or 'exponential')
-| update_scheme_params   | [1.0, 1.0, 1.0, None, None, None] | Parameters in the time integration scheme: [g1, g2, g3, alpha, beta, gamma
-| device_type            | 'gpu'                             | PyTorch device ('cpu' or 'gpu')
+| density_interp_order   | 2                                 | Interpolation order for density maxima localization
+| density_merge_distance | 0.1                               | Distance for merging density maxima (in units of lattice parameters)
+| density_threshold      | 0.5                               | Threshold for density maxima detection
 | device_number          | 0                                 | GPU device number (if multiple GPUs are available)
+| device_type            | 'gpu'                             | PyTorch device ('cpu' or 'gpu')
+| dtime                  | 1.0e-3                            | Non-dimensional time increment
 | dtype_cpu              | np.double                         | Floating-point precision of numpy arrays
 | dtype_gpu              | torch.float64                     | Floating-point precision of PyTorch tensors
-| verbose                | True                              | Verbose output (or not)
 | evaluate_phase_field   | True                              | Evaluate phase field (or not)
-| density_threshold      | 0.5                               | Threshold for density maxima detection
-| density_merge_distance | 0.1                               | Distance for merging density maxima (in units of lattice parameters)
-| density_interp_order   | 2                                 | Interpolation order for density maxima localization
+| normalize_pf           | True                              | Normalize the phase fields to [0,1], or not
+| npeaks                 | 2                                 | Number of Gaussian peaks, excluding the zero-mode peak, to use in C2
+| pf_gauss_var           | 0.1                               | Variance (sigma) of the Gaussian smoothing kernel used in phase field evaluations
 | pf_iso_level           | 0.5                               | Iso-level for phase field contouring
+| sigma                  | 0.0                               | Temperature-like parameter (non-dimensional)
+| struct                 | 'FCC'                             | Crystal structure
 | torch_threads          | 8                                 | Number of CPU threads to use if device_type is 'cpu'
 | torch_threads_interop  | 8                                 | Number of interop threads to use if device_type is 'cpu'
+| update_scheme          | '1st_order'                       | Time integration scheme ('1st_order', '2nd_order' or 'exponential')
+| update_scheme_params   | [1.0, 1.0, 1.0, None, None, None] | Parameters in the time integration scheme: [g1, g2, g3, alpha, beta, gamma]
+| verbose                | True                              | Verbose output (or not)
 
 ## Description of Source Files
-The software is built on classes, contained in separate modules/files, with an inheritance chain (from bottom to top) comprising:
+The software is built on classes, contained in separate modules/files, with an inheritance chain (from top to bottom) comprising:
 
-| No | File (*.py)     | Description             
-| -- | --------------- | ------------------------
-| 4  | **pypfc**       | Main class               
-| 3  | **pypfc_io**    | Data IO methods         
-| 2  | **pypfc_pre**   | Pre-processing methods  
-| 1  | **pypfc_base**  | Base methods            
-| 0  | **pypfc_grid**  | Grid methods            
+| File (*.py)     | Description             
+| --------------- | ----------------------
+| **pypfc_grid**  | Grid methods            
+| **pypfc_base**  | Base methods            
+| **pypfc_pre**   | Pre-processing methods  
+| **pypfc_io**    | Data IO methods         
+| **pypfc**       | Main class               
 
 In addition, **pypfc_ovito.py** provides custom interfaces to selected functionalities in [OVITO](https://www.ovito.org/), useful for post-processing of pyPFC simulation output.
 

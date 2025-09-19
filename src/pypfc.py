@@ -265,143 +265,6 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-#     def evaluate_C2_d(self):
-#         """
-#         PURPOSE
-#             Establish the two-point correlation function for a particular crystal structure.
-
-#         INPUT
-
-#         OUTPUT
-#             C2_d          Two-point pair correlation function [nx, ny, nz/2+1] (on the device)
-
-#         Last revision:
-#         H. Hallberg 2025-09-16
-#         """
-
-#         # Get reciprocal planes
-#         kpl, npl, denpl = self.evaluate_reciprocal_planes()
-
-#         # Convert to PyTorch tensors and move to device
-#         kpl_d   = torch.tensor(kpl,   dtype=self._k2_d.dtype, device=self._k2_d.device)
-#         denpl_d = torch.tensor(denpl, dtype=self._k2_d.dtype, device=self._k2_d.device)
-#         alpha_d = torch.tensor(self._alpha, dtype=self._k2_d.dtype, device=self._k2_d.device)
-#         npl_d   = torch.tensor(npl,   dtype=self._k2_d.dtype, device=self._k2_d.device)
-
-#         # Evaluate the exponential pre-factor (Debye-Waller-like)
-#         DWF_d = torch.exp(-(self._sigma**2) * (kpl_d**2) / (2 * denpl_d * npl_d))
-
-#         # Precompute quantities
-#         denom_d   = 2 * alpha_d**2
-#         k2_sqrt_d = torch.sqrt(self._k2_d)
-
-#         # # Reshape kpl, DWF, and alpha for broadcasting
-#         # kpl_d   = kpl_d.view(1, 1, 1, self._npeaks)
-#         # DWF_d   = DWF_d.view(1, 1, 1, self._npeaks)
-#         # denom_d = denom_d.view(1, 1, 1, self._npeaks)
-
-#         # # Compute the correlation function
-#         # C2testval_d = DWF_d * torch.exp(-(k2_sqrt_d.unsqueeze(-1) - kpl_d) ** 2 / denom_d)
-#         # C2_d = torch.max(C2testval_d, dim=-1).values
-#         # C2_d = C2_d.contiguous()
-
-#         # Zero-mode peak
-#         if self._C20_amplitude != 0.0:
-#             if self._C20_alpha < 0.0:
-#                 raise ValueError("C20_alpha must be positive when C20_amplitude is non-zero.")
-#             zero_peak = self._C20_amplitude * torch.exp(-k2_sqrt_d ** 2 / self._C20_alpha)
-#         else:
-#             zero_peak = torch.zeros_like(k2_sqrt_d)
-
-#         # Use f_tmp_d as workspace (complex type)
-#         self._f_tmp_d.zero_()
-#         # Take real part for max operation
-#         self._f_tmp_d.real.copy_(zero_peak)
-
-#         # Compute the correlation function for all peaks
-#         for ipeak in range(self._npeaks):
-#             peak_val = DWF_d[ipeak] * torch.exp( -(k2_sqrt_d - kpl_d[ipeak]) ** 2 / denom_d[ipeak] )
-#             self._f_tmp_d.real = torch.maximum(self._f_tmp_d.real, peak_val)
-
-#         # Return the real part as the result
-#         C2_d = self._f_tmp_d.real.contiguous()
-
-#         return C2_d
-
-# # =====================================================================================
-
-#     def evaluate_reciprocal_planes(self):
-#         '''
-#         PURPOSE
-#             Establish reciprocal vectors/planes for a particular crystal structure.
-
-#         INPUT
-
-#         OUTPUT
-#             kPlane        Reciprocal lattice plane spacing (a.k.a. "d-spacing"). For cubic systems, the formulae
-#                             is:
-#                                     d = a / sqrt(h^2 + k^2 + l^2)
-
-#                             where a is the lattice parameter. The reciprocal spacing is
-
-#                                     kPlane = 2pi/d
-
-#                             Theorem: For any family of lattice planes separated by distance d, there are 
-#                                     reciprocal lattice vectors perpendicular to the planes, the shortest
-#                                     being 2pi/d.
-
-#             nPlane        Number of symmetrical planes of each family
-#             denPlane      Atomic density within a plane (i.e. "planar density")
-
-#         Last revision:
-#         H. Hallberg 2025-08-26
-#         '''
-
-#         kPlane   = np.zeros(self._npeaks, dtype=float)
-#         denPlane = np.zeros(self._npeaks, dtype=float)
-#         nPlane   = np.zeros(self._npeaks, dtype=int)
-
-#         # Define reciprocal vectors
-#         match self._struct.upper():
-#             case 'SC': #= SC in reciprocal space
-#                 # {100}, {110}, {111}
-#                 nvals = 3
-#                 kpl   = (2*np.pi/self._alat) * np.array([1, np.sqrt(2), np.sqrt(3)], dtype=float)
-#                 pl    = np.array([6, 12, 8], dtype=int)
-#                 denpl = (1/self._alat**2) * np.array([1, 1/np.sqrt(2), 1/np.sqrt(3)], dtype=float)
-#             case 'BCC': # = FCC in reciprocal space
-#                 # {110}, {200}       (...the next would be {211}, {220}, {310}, {222})
-#                 nvals = 2
-#                 kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(2), 2], dtype=float)
-#                 pl    = np.array([12, 6, 24], dtype=int)
-#                 denpl = (1/self._alat**2) * np.array([2/np.sqrt(2), 1], dtype=float)
-#             case 'FCC': # = BCC in reciprocal space
-#                 # {111}, {200}, {220}        (...the next would be {311}, {222})
-#                 nvals = 3
-#                 kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(3), 2, np.sqrt(8)], dtype=float)
-#                 pl    = np.array([8, 6, 12], dtype=int)
-#                 denpl = (1/self._alat**2) * np.array([4/np.sqrt(3), 2, 4/np.sqrt(2)], dtype=float)
-#             case 'DC': # Diamond Cubic (3D)
-#                 # {111}, {220}, {311}         (...the next would be {400}, {331}, {422}, {511})
-#                 nvals = 3
-#                 kpl   = (2*np.pi/self._alat) * np.array([np.sqrt(3), np.sqrt(8), np.sqrt(11)], dtype=float)
-#                 pl    = np.array([8, 12, 24], dtype=int)                                                   
-#                 denpl = (1/self._alat**2) * np.array([4/np.sqrt(3), 4/np.sqrt(2), 1.385641467389298], dtype=float)
-#             case _:
-#                 raise ValueError(f'Unsupported crystal structure: struct={self._struct.upper()}')
-
-#         # Retrieve output data
-#         if nvals>=self._npeaks:
-#             kPlane   = kpl[0:self._npeaks]
-#             nPlane   = pl[0:self._npeaks]
-#             denPlane = denpl[0:self._npeaks]
-#         else:
-#             raise ValueError(f'Not enough peaks defined, npeaks={self._npeaks}')
-
-#         return kPlane, nPlane, denPlane
-
-# # =====================================================================================
-
     def get_update_scheme(self):
 
         '''
@@ -432,7 +295,7 @@ class setup_simulation(setup_io):
                 self._f_Lterm_d = -self._k2_d.mul(g1 - self._C2_d - self._f_H_d).contiguous()
             else:
                 self._f_Lterm_d = -self._k2_d.mul(g1 - self._C2_d).contiguous()
-            self.update_density = self.update_density_1
+            self.update_density = self.__update_density_1
         elif self._update_scheme == '2nd_order':
             if self._update_scheme_params[3:].any() is None or len(self._update_scheme_params) != 6:
                 raise ValueError("alpha, beta, gamma parameters must be provided for the '2nd_order' update_scheme.")
@@ -449,7 +312,7 @@ class setup_simulation(setup_io):
                 self._f_Lterm3_d = (2 * gamma + beta * self._dtime +
                                     2 * (dt ** 2) * (alpha ** 2) *
                                     self._k2_d.mul(g1 - self._C2_d).contiguous())
-            self.update_density = self.update_density_2
+            self.update_density = self.__update_density_2
         elif self._update_scheme == 'exponential':
             if self._use_H2:
                 self._f_Lterm0_d = g1 - self._C2_d - self._f_H_d
@@ -459,7 +322,7 @@ class setup_simulation(setup_io):
                                         torch.tensor(1e-12, device=self._device, dtype=self._dtype_torch),
                                         self._f_Lterm0_d).contiguous()
             self._f_Lterm1_d = torch.exp(-self._k2_d.mul(self._f_Lterm0_d) * dt).contiguous()
-            self.update_density = self.update_density_exp
+            self.update_density = self.__update_density_exp
         else:
             raise ValueError(f"Unknown update_scheme: {self._update_scheme}")
 
@@ -497,7 +360,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def update_density_1(self, f_Lterm_d):
+    def __update_density_1(self, f_Lterm_d):
         '''
         PURPOSE
             Update the (X)PFC density field.
@@ -533,7 +396,7 @@ class setup_simulation(setup_io):
     
 # =====================================================================================
 
-    def update_density_2(self, f_Lterm0_d, f_Lterm1_d, f_Lterm2_d, f_Lterm3_d):
+    def __update_density_2(self, f_Lterm0_d, f_Lterm1_d, f_Lterm2_d, f_Lterm3_d):
         '''
         PURPOSE
             Update the (X)PFC density field to step n+1.
@@ -580,7 +443,7 @@ class setup_simulation(setup_io):
     
 # =====================================================================================
 
-    def update_density_exp(self, f_Lterm0_d, f_Lterm1_d):
+    def __update_density_exp(self, f_Lterm0_d, f_Lterm1_d):
         '''
         PURPOSE
             Update the (X)PFC density field using the exponential time integration scheme,
@@ -688,45 +551,30 @@ class setup_simulation(setup_io):
         def compute_pf(f_wavelet_d):
         #def compute_pf(f_wavelet_d, k2_d, varGauss, f_den_d, normalizePF):
             # Perform the first convolution and retrieve the result to real space
-            #self._tmp_d = torch.fft.irfftn(f_den_d * f_wavelet_d)
             torch.fft.irfftn(self._f_den_d * f_wavelet_d, s=self._tmp_d.shape, out=self._tmp_d)
 
             # Only keep positive values
             self._tmp_d = torch.where(self._tmp_d < 0.0, torch.tensor(0.0, device=self._device), self._tmp_d)
 
             # Perform forward FFT
-            #self._f_tmp_d = torch.fft.rfftn(self._tmp_d)
             torch.fft.rfftn(self._tmp_d, s=self._tmp_d.shape, out=self._f_tmp_d)
 
-            # Evaluate the Gaussian smoothing kernel
-            #denom1 = 2 * varGauss**2
-            ##denom2 = varGauss * torch.sqrt(torch.tensor(2.0, device=self._f_tmp_d.device))
-            ##f_GaussKern_d = torch.exp(-k2_d / denom1) / denom2
-            #denom2 = varGauss * torch.sqrt(torch.tensor(2.0, device=self._device, dtype=self._dtype_gpu))
-            #f_GaussKern_d = torch.exp(-self._k2_d / denom1) / denom2
-
             # Perform the second convolution and retrieve the result to real space
-            #self._tmp_d = torch.fft.irfftn(self._f_tmp_d * f_GaussKern_d)
             torch.fft.irfftn(self._f_tmp_d * self._f_pf_smoothing_kernel_d, s=self._tmp_d.shape, out=self._tmp_d)
 
             # Normalize the phase field to lie in the range [0, 1]
             if self._normalize_pf:
                 pf_min = torch.min(self._tmp_d)
                 pf_max = torch.max(self._tmp_d)
-                #self._tmp_d = (self._tmp_d - pf_min) / (pf_max - pf_min + 1.0e-15)  # Avoid division by zero
                 self._tmp_d.sub_(pf_min)
                 self._tmp_d.div_(pf_max - pf_min + 1.0e-15)  # Avoid division by zero
 
-            #return self._tmp_d
             return self._tmp_d.detach().cpu().numpy()
 
         # Check if f_wavelet_d is a list
         if isinstance(self._f_pf_kernel_d, list):
             # If it is a list, compute pf for each f_wavelet_d
-            #pf_list = [compute_pf(wavelet, self._k2_d, varGauss, self._f_den_d, normalize_pf) for wavelet in self._f_pfkernel_d]
             pf_list = [compute_pf(wavelet) for wavelet in self._f_pf_kernel_d]
-            # Transfer the result to host
-            #pf_list = [pf.detach().cpu().numpy() for pf in pf_list]
 
             if self._verbose:
                  tend = time.time()
@@ -735,10 +583,7 @@ class setup_simulation(setup_io):
             return pf_list
         else:
             # If it is not a list, compute pf for the single f_wavelet_d
-            #pf = compute_pf(self._f_pfkernel_d, self._k2_d, varGauss, self._f_den_d, normalize_pf)
             pf = compute_pf(self._f_pf_kernel_d)
-            # Transfer the result to host
-            #pf = pf.detach().cpu().numpy()
 
             if self._verbose:
                  tend = time.time()
@@ -747,120 +592,3 @@ class setup_simulation(setup_io):
             return pf
         
 # =====================================================================================
-
-#     def evaluate_directional_correlation_kernel(self, H0, Rot):
-#         '''
-#         PURPOSE
-#             Establish the directional correlation kernel for a particular crystal structure.
-
-#         INPUT
-#             kx              Wave vector along the x-axis, [nx]
-#             ky              Wave vector along the y-axis, [ny]
-#             kz              Wave vector along the z-axis, [nz]
-#             latticePar      Lattice parameter
-#             struct          Crystal structure: SC, BCC, FCC, DC
-#             H0              Constant modulation of the peak height
-#             Rot             Lattice rotation matrix, [3, 3]
-    
-#         OUTPUT
-#             f_H             Directional correlation kernel, [nx, ny, nz/2+1]
-
-#         Last revision:
-#         H. Hallberg 2024-10-21
-#         '''
-
-#         if self._verbose: tstart = time.time()
-
-#         # Allocate output array
-#         f_H = np.zeros((self._nx, self._ny, self._nz_half), dtype=self._dtype_cpu)
-
-#         # Define reciprocal lattice vectors (RLV)
-#         rlv  = self.get_rlv(self._struct, self._alat)  # Shape: [nrlv, 3]
-#         nrlv = rlv.shape[0]
-        
-#         # Gauss peak width parameters
-#         gamma = np.ones(nrlv, dtype=np.double)
-#         denom = 2 * gamma**2
-
-#         # Rotate the reciprocal lattice vectors
-#         rlv_rotated = np.dot(rlv, Rot.T)  # Shape: [nrlv, 3]
-
-#         # Create 3D grids for kx, ky, kz
-#         kx = self.get_k(self._nx, self._dx)
-#         ky = self.get_k(self._ny, self._dy)
-#         kz = self.get_k(self._nz, self._dz)
-#         KX, KY, KZ = np.meshgrid(kx, ky, kz[:self._nz_half], indexing='ij')
-
-#         # Loop over reciprocal lattice vectors (small dimension)
-#         for p in range(nrlv):
-#             # Compute squared differences for each reciprocal lattice vector
-#             diff_kx = (KX - rlv_rotated[p, 0])**2
-#             diff_ky = (KY - rlv_rotated[p, 1])**2
-#             diff_kz = (KZ - rlv_rotated[p, 2])**2
-
-#             # Compute the Gaussian contribution for this lattice vector
-#             Htestval = H0 * np.exp(-(diff_kx + diff_ky + diff_kz) / denom[p])
-
-#             # Update the directional correlation kernel by taking the maximum
-#             f_H = np.maximum(f_H, Htestval)
-
-#         f_H_d = torch.from_numpy(f_H).to(self._device) # Copy to GPU device
-#         f_H_d = f_H_d.contiguous()                     # Ensure that the tensor is contiguous in memory
-
-#         if self._verbose:
-#             tend = time.time()
-#             print(f'Time to evaluate directional convolution kernel: {tend-tstart:.3f} s')
-
-#         return f_H_d
-
-# # =====================================================================================
-
-#     def get_rlv(self, struct, alat):
-#         '''
-#         PURPOSE
-#             Get the reciprocal lattice vectors for a particular crystal structure.
-
-#         INPUT
-#             struct      Crystal structure: SC, BCC, FCC, DC
-#             latticePar  Lattice parameter
-    
-#         OUTPUT
-#             RLV         Reciprocal lattice vectors, [nRLV x 3]
-
-#         Last revision:
-#         H. Hallberg 2025-08-27
-#         '''
-
-#         # Define reciprocal lattice vectors
-#         structures = {
-#                 'SC': [
-#                     [ 1,  0,  0], [ 0,  1,  0], [ 0,  0,  1],
-#                     [-1,  0,  0], [ 0, -1,  0], [ 0,  0, -1]
-#                 ],
-#                 'BCC': [
-#                     [ 0,  1,  1], [ 0, -1,  1], [ 0,  1, -1], [ 0, -1, -1],
-#                     [ 1,  0,  1], [-1,  0,  1], [ 1,  0, -1], [-1,  0, -1],
-#                     [ 1,  1,  0], [-1,  1,  0], [ 1, -1,  0], [-1, -1,  0]
-#                 ],
-#                 'FCC': [
-#                     [ 1,  1,  1], [-1,  1,  1], [ 1, -1,  1], [ 1,  1, -1],
-#                     [-1, -1,  1], [ 1, -1, -1], [-1,  1, -1], [-1, -1, -1]
-#                 ],
-#                 'DC': [
-#                     [ 1,  1,  1], [-1,  1,  1], [ 1, -1,  1], [ 1,  1, -1],
-#                     [-1, -1,  1], [ 1, -1, -1], [-1,  1, -1], [-1, -1, -1],
-#                     [ 1,  1,  0], [-1,  1,  0], [ 1, -1,  0], [-1, -1,  0],
-#                     [ 1,  0,  1], [-1,  0,  1], [ 1,  0, -1], [-1,  0, -1],
-#                     [ 0,  1,  1], [ 0, -1,  1], [ 0,  1, -1], [ 0, -1, -1]
-#                 ],
-#             }
-
-#         if struct.upper() not in structures:
-#             raise ValueError(f'Unsupported crystal structure ({struct.upper()}) in get_rlv')
-        
-#         rlv = np.array(structures[struct], dtype=float)
-#         rlv = rlv * (2*np.pi/alat)
-
-#         return rlv
-
-# # =====================================================================================

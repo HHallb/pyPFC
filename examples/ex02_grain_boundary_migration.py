@@ -1,6 +1,6 @@
 # Append path to libraries
 import sys
-sys.path.append('/home/hlhh/Insync/OneDriveLTH/python/pyPFC/src/')
+sys.path.append('./src/')
 
 import pypfc
 import numpy as np
@@ -42,12 +42,12 @@ params = {
 
 # Simulation-specific parameters
 # ==============================
-nstep            = 10000                              # Number of simulation steps
-nout             = 1000                               # Evaluate step data in every nout:h step
-n_save_step_data = 1000                               # Save step data in every n_save_step_data:th step
-nfill            = 7                                  # Number of figures to use in filenames (pre-pad with zeroes if needed)
-output_path      = '/home/hlhh/Insync/OneDriveLTH/python/pyPFC/examples/ex02_output/' # Output path
-output_file      = 'pypfc_setup.txt'                                                  # Output file name
+nstep            = 10000                     # Number of simulation steps
+nout             = 1000                      # Evaluate step data in every nout:h step
+n_save_step_data = 1000                      # Save step data in every n_save_step_data:th step
+nfill            = 7                         # Number of figures to use in filenames (pre-pad with zeroes if needed)
+output_path      = './examples/ex02_output/' # Output path
+output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid to fit the periodicity of the bicrystal
 # =====================================================================
@@ -186,173 +186,3 @@ print(f'Time spent in time step loop: {tend-tstart:.3f} s')
 # Do cleanup
 # ==========
 pypfc.cleanup()
-
-
-
-
-
-
-# Plot results
-# ============
-import matplotlib.pyplot as plt
-import subprocess
-
-unglyph_str   = 'python3 /home/hlhh/Insync/OneDriveLTH/python/pylibs/unglyph.py '
-epsPath       = '/home/hlhh/Insync/OneDriveLTH/ideas/phase_field_crystal/pyPFC/manuscript/figures/'
-saveEps       = True                 # Whether to save EPS files of figures
-axesFontSize  = 12                   # Font size on plot axes
-dpi           = 150#300              # DPI for saved figures
-linewidth     = 2.0                  # Line width for plots
-
-xvals = np.linspace(0, dSize[0], ndiv[0])  # x-coordinates, length nx
-
-
-# Load data from a binary pickle file
-# ===================================
-step = 1000
-filename = output_path + 'step_' + str(step).zfill(nfill)
-step, total_time, ndiv, ddiv, dSize, den, state_output, den_av, pf_av = pypfc.load_pickle(filename, 9)
-
-fig = plt.figure(figsize=(12, 4), dpi=dpi)
-
-# First subplot: contour plot
-ax0 = plt.subplot2grid((2, 1), (0, 0))
-contour = ax0.contourf(den[:,:,0].T, cmap='coolwarm', extent=(0, dSize[0], 0, dSize[1]), extend='both')
-ax0.set_xlim(0, dSize[0])
-ax0.set_ylim(0, dSize[1])
-ax0.axis('equal')
-ax0.axis('off')
-ax0.tick_params(labelbottom=False)  # Hide x labels
-
-# Add colorbar centered below the top subplot
-cbar = fig.colorbar(contour, ax=ax0, orientation='horizontal', pad=0.1, aspect=40, shrink=0.4)
-cbar.set_label('n', fontsize=axesFontSize)
-
-# Second subplot: den_av and pf_av with twin y-axes
-ax1 = plt.subplot2grid((2, 1), (1, 0), sharex=ax0)
-
-# Plot den_av on left y-axis
-line1, = ax1.plot(xvals, den_av, 'k-', linewidth=linewidth, label='den')
-ax1.set_ylabel('yden', color='k')
-ax1.set_xlim(0, dSize[0])
-ax1.set_ylim(-0.15, 0.15)
-ax1.set_yticks(np.arange(-0.15, 0.16, 0.15))
-ax1.tick_params(axis='y', labelcolor='k', labelsize=axesFontSize)
-ax1.tick_params(axis='x', labelsize=axesFontSize)
-ax1.set_xticks([0, dSize[0]])
-ax1.set_xticklabels(['0', 'Lx'])
-
-# Create a second y-axis for pf_av
-ax2 = ax1.twinx()
-line2, = ax2.plot(xvals, pf_av, 'b-', linewidth=linewidth, label='pf')
-ax2.set_ylabel('ypf', color='b')
-ax2.set_ylim(0, 1)
-ax2.set_yticks(np.arange(0, 1.1, 0.25))
-ax2.tick_params(axis='y', labelcolor='b', labelsize=axesFontSize)
-
-# Find x positions where pf_av crosses 0.5
-crossings = np.where(np.diff(np.sign(pf_av - 0.5)))[0]
-x_cross = []
-for idx in crossings:
-    x0, x1 = xvals[idx], xvals[idx+1]
-    y0, y1 = pf_av[idx], pf_av[idx+1]
-    x_cross.append(x0 + (0.5 - y0) * (x1 - x0) / (y1 - y0))
-
-# Add vertical lines at crossings
-for xc in x_cross:
-    ax2.axvline(x=xc, color='red', linestyle='--', linewidth=linewidth)
-
-# Optionally add legends
-lines = [line1, line2]
-labels = [l.get_label() for l in lines]
-ax1.legend(lines, labels, loc='upper left', frameon=False, fontsize=axesFontSize)
-
-plt.tight_layout()
-
-# Optionally save plot to file
-# ============================
-if True:
-    figName = 'ex02_step_1000'
-    epsFile_local = figName +'.eps'
-    epsFile = epsPath + figName +'.eps'
-    plt.savefig(epsFile_local, bbox_inches='tight', pad_inches=0, dpi=fig.dpi)
-    subprocess.call(unglyph_str + epsFile_local + ' ' + epsFile_local, shell=True)
-    subprocess.call('mv ' + epsFile_local + ' ' + epsPath, shell=True)
-
-plt.show()
-
-
-
-
-
-step = nstep
-filename = output_path + 'step_' + str(step).zfill(nfill)
-step, total_time, ndiv, ddiv, dSize, den, state_output, den_av, pf_av = pypfc.load_pickle(filename, 9)
-
-fig = plt.figure(figsize=(12, 4), dpi=dpi)
-
-# First subplot: contour plot
-ax0 = plt.subplot2grid((2, 1), (0, 0))
-contour = ax0.contourf(den[:,:,0].T, cmap='coolwarm', extent=(0, dSize[0], 0, dSize[1]), extend='both')
-ax0.set_xlim(0, dSize[0])
-ax0.set_ylim(0, dSize[1])
-ax0.axis('equal')
-ax0.axis('off')
-ax0.tick_params(labelbottom=False)  # Hide x labels
-
-# Add colorbar centered below the top subplot
-cbar = fig.colorbar(contour, ax=ax0, orientation='horizontal', pad=0.1, aspect=40, shrink=0.4)
-cbar.set_label('n', fontsize=axesFontSize)
-
-# Second subplot: den_av and pf_av with twin y-axes
-ax1 = plt.subplot2grid((2, 1), (1, 0), sharex=ax0)
-
-# Plot den_av on left y-axis
-line1, = ax1.plot(xvals, den_av, 'k-', linewidth=linewidth, label='den')
-ax1.set_ylabel('yden', color='k')
-ax1.set_xlim(0, dSize[0])
-ax1.set_ylim(-0.15, 0.15)
-ax1.set_yticks(np.arange(-0.15, 0.16, 0.15))
-ax1.tick_params(axis='y', labelcolor='k', labelsize=axesFontSize)
-ax1.tick_params(axis='x', labelsize=axesFontSize)
-ax1.set_xticks([0, dSize[0]])
-ax1.set_xticklabels(['0', 'Lx'])
-
-# Create a second y-axis for pf_av
-ax2 = ax1.twinx()
-line2, = ax2.plot(xvals, pf_av, 'b-', linewidth=linewidth, label='pf')
-ax2.set_ylabel('ypf', color='b')
-ax2.set_ylim(0, 1)
-ax2.set_yticks(np.arange(0, 1.1, 0.25))
-ax2.tick_params(axis='y', labelcolor='b', labelsize=axesFontSize)
-
-# Find x positions where pf_av crosses 0.5
-crossings = np.where(np.diff(np.sign(pf_av - 0.5)))[0]
-x_cross = []
-for idx in crossings:
-    x0, x1 = xvals[idx], xvals[idx+1]
-    y0, y1 = pf_av[idx], pf_av[idx+1]
-    x_cross.append(x0 + (0.5 - y0) * (x1 - x0) / (y1 - y0))
-
-# Add vertical lines at crossings
-for xc in x_cross:
-    ax2.axvline(x=xc, color='red', linestyle='--', linewidth=linewidth)
-
-# Optionally add legends
-lines = [line1, line2]
-labels = [l.get_label() for l in lines]
-ax1.legend(lines, labels, loc='upper left', frameon=False, fontsize=axesFontSize)
-
-plt.tight_layout()
-
-# Optionally save plot to file
-# ============================
-if True:
-    figName = 'ex02_step_10000'
-    epsFile_local = figName +'.eps'
-    epsFile = epsPath + figName +'.eps'
-    plt.savefig(epsFile_local, bbox_inches='tight', pad_inches=0, dpi=fig.dpi)
-    subprocess.call(unglyph_str + epsFile_local + ' ' + epsFile_local, shell=True)
-    subprocess.call('mv ' + epsFile_local + ' ' + epsPath, shell=True)
-
-plt.show()
