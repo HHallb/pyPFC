@@ -20,7 +20,6 @@ import numpy as np
 import datetime
 import torch
 import time
-import os
 from scipy.spatial import cKDTree
 from scipy.ndimage import zoom
 from skimage import measure
@@ -29,58 +28,28 @@ from pypfc_grid import setup_grid
 
 class setup_base(setup_grid):
 
-    DEFAULTS = {
-        'struct':                   'FCC',
-        'alat':                     1.0,
-        'sigma':                    0.0,
-        'npeaks':                   2,
-        'dtype_cpu':                np.double,
-        'dtype_gpu':                torch.float64,
-        'device_type':              'gpu',
-        'device_number':            0,
-        'torch_threads':            os.cpu_count(),
-        'torch_threads_interop':    os.cpu_count(),
-        'verbose':                  False,
-        'density_interp_order':     2,
-        'density_threshold':        0.0,
-        'density_merge_distance':   None,
-        'pf_iso_level':             0.5,
-    }
-
-    def __init__(self, ndiv, ddiv, config=None):
-
-        # Merge user parameters with defaults, but only use keys present in DEFAULTS
-        # ==========================================================================
-        cfg = dict(self.DEFAULTS)
-        if config is not None:
-            # Only update with keys that are in DEFAULTS
-            filtered_config = {k: v for k, v in config.items() if k in self.DEFAULTS}
-            cfg.update(filtered_config)
-        # Warn about any keys in config that are not in DEFAULTS
-        ignored = set(config.keys()) - set(self.DEFAULTS.keys())
-        if ignored:
-            print(f"Ignored config keys: {ignored}")
+    def __init__(self, ndiv, ddiv, config):
 
         # Initiate the inherited grid class
         # =================================
         super().__init__(ndiv, ddiv)
 
         # Set the data types
-        self._struct                  = cfg['struct']
-        self._alat                    = cfg['alat']
-        self._sigma                   = cfg['sigma']
-        self._npeaks                  = cfg['npeaks']
-        self._dtype_cpu               = cfg['dtype_cpu']
-        self._dtype_gpu               = cfg['dtype_gpu']
-        self._device_number           = cfg['device_number']
-        self._device_type             = cfg['device_type']
-        self._set_num_threads         = cfg['torch_threads']
-        self._set_num_interop_threads = cfg['torch_threads_interop']
-        self._verbose                 = cfg['verbose']
-        self._density_interp_order    = cfg['density_interp_order']
-        self._density_threshold       = cfg['density_threshold']
-        self._density_merge_distance  = cfg['density_merge_distance']
-        self._pf_iso_level            = cfg['pf_iso_level']
+        self._struct                  = config['struct']
+        self._alat                    = config['alat']
+        self._sigma                   = config['sigma']
+        self._npeaks                  = config['npeaks']
+        self._dtype_cpu               = config['dtype_cpu']
+        self._dtype_gpu               = config['dtype_gpu']
+        self._device_number           = config['device_number']
+        self._device_type             = config['device_type']
+        self._set_num_threads         = config['torch_threads']
+        self._set_num_interop_threads = config['torch_threads_interop']
+        self._verbose                 = config['verbose']
+        self._density_interp_order    = config['density_interp_order']
+        self._density_threshold       = config['density_threshold']
+        self._density_merge_distance  = config['density_merge_distance']
+        self._pf_iso_level            = config['pf_iso_level']
 
         # Set complex GPU array precision based on dtype_gpu
         # ==================================================

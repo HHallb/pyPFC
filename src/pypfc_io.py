@@ -29,52 +29,18 @@ from vtk.util.numpy_support import numpy_to_vtk
 
 class setup_io(setup_pre):
 
-    DEFAULTS = {
-        'struct':                 'FCC',
-        'alat':                   1.0,
-        'sigma':                  0.0,
-        'npeaks':                 2,
-        'dtype_cpu':              np.double,
-        'dtype_gpu':              torch.float64,
-        'device_type':            'gpu',
-        'device_number':          0,
-        'verbose':                False,
-        'density_interp_order':   2,
-        'density_threshold':      0.0,
-        'density_merge_distance': None,
-        'pf_iso_level':           0.5,
-        'torch_threads':          os.cpu_count(),
-        'torch_threads_interop':  os.cpu_count(),
-    }
-
-    def __init__(self, ndiv, ddiv, config=None):
-
-        # Merge user parameters with defaults, but only use keys present in DEFAULTS
-        # ==========================================================================
-        cfg = dict(self.DEFAULTS)
-        if config is not None:
-            # Only update with keys that are in DEFAULTS
-            filtered_config = {k: v for k, v in config.items() if k in self.DEFAULTS}
-            cfg.update(filtered_config)
-        # Warn about any keys in config that are not in DEFAULTS
-        ignored = set(config.keys()) - set(self.DEFAULTS.keys())
-        if ignored:
-            print(f"Ignored config keys: {ignored}")
+    def __init__(self, ndiv, ddiv, config):
 
         # Initiate the inherited class
         # ============================
-        subset_cfg = {k: cfg[k] for k in ['struct', 'alat', 'sigma', 'npeaks', 'device_number', 'device_type',
-                                          'dtype_cpu', 'dtype_gpu', 'verbose', 'density_interp_order',
-                                          'density_threshold', 'density_merge_distance', 'pf_iso_level',
-                                          'torch_threads', 'torch_threads_interop'] if k in cfg}
-        super().__init__(ndiv, ddiv, config=subset_cfg)
+        super().__init__(ndiv, ddiv, config=config)
 
         # Set the data types
-        self._dtype_cpu     = cfg['dtype_cpu']
-        self._dtype_gpu     = cfg['dtype_gpu']
-        self._device_number = cfg['device_number']
-        self._device_type   = cfg['device_type']
-        self._verbose       = cfg['verbose']
+        self._dtype_cpu     = config['dtype_cpu']
+        self._dtype_gpu     = config['dtype_gpu']
+        self._device_number = config['device_number']
+        self._device_type   = config['device_type']
+        self._verbose       = config['verbose']
 
 # =====================================================================================
 

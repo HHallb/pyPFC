@@ -66,11 +66,7 @@ class setup_simulation(setup_io):
 
         # Initiate the inherited class
         # ============================
-        subset_cfg = {k: cfg[k] for k in ['struct', 'alat', 'sigma', 'npeaks', 'device_number',
-                                          'device_type', 'dtype_cpu', 'dtype_gpu', 'verbose',
-                                          'density_interp_order', 'density_threshold', 'density_merge_distance',
-                                          'pf_iso_level', 'torch_threads', 'torch_threads_interop'] if k in cfg}
-        super().__init__(ndiv, ddiv, config=subset_cfg)
+        super().__init__(ndiv, ddiv, config=cfg)
 
         # Handle input arguments
         # ======================
