@@ -4,7 +4,7 @@ A Python software package for setting up, running and processing Phase Field Cry
 
 ![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/images/PFC_atoms.png)
 
-## Control parameters
+## Control Parameters
 The general behavior of pyPFC is controlled by a set of parameters, collected in a Python dictionary. The parameters are described in the table below.
 
 | Parameter name         | Defaults to                       | Description                                                                      
@@ -34,6 +34,43 @@ The general behavior of pyPFC is controlled by a set of parameters, collected in
 | update_scheme_params   | [1.0, 1.0, 1.0, None, None, None] | Parameters in the time integration scheme: [g1, g2, g3, alpha, beta, gamma]
 | verbose                | True                              | Verbose output (or not)
 
+## Quick Start Example
+This is a quick start example for using the pyPFC package to perform a simple phase field crystal (PFC) simulation. The simulation traces the growth of a spherical crystal, centered in a 3D periodic domain. The example can be found as `./examples/ex04_quick_start.py`, where it is commented in more detail. The example demonstrates how to set up a simulation, generate an initial density field, evolve the density field over time and save the results to VTK files for visualization.
+
+Before running this script, ensure that you have the pyPFC package and its dependencies installed.
+
+```python
+import pypfc
+import numpy as np
+
+# Simulation parameters
+nstep       = 4000
+nout        = 1000
+output_path = './examples/ex04_output/'
+
+# Computational grid
+dSize = np.array([20, 20, 20], dtype=float)
+ndiv  = 10 * np.array([20, 20, 20], dtype=int)
+ddiv  = dSize / ndiv
+
+# Create simulation object
+pypfc = pypfc.setup_simulation(ndiv, ddiv)
+
+# Generate initial density field
+den = pypfc.do_single_crystal(params=[dSize[0]*0.25])
+pypfc.set_density(den)
+
+# Evolve density field
+for step in range(nstep):
+    pypfc.do_step_update()
+    if np.mod(step+1, nout) == 0 or step+1 == nstep:
+        print('Step:', step+1)
+        den, _ = pypfc.get_density()
+        atom_coord, atom_data = pypfc.interpolate_density_maxima(den)
+        filename = output_path + 'pfc_data_' + str(step+1)
+        pypfc.write_vtk_points(filename, atom_coord, [atom_data[:,0]], ['den'])
+```
+
 ## Description of Source Files
 The software is built on classes, contained in separate modules/files, with an inheritance chain (from top to bottom) comprising:
 
@@ -49,10 +86,10 @@ In addition, **pypfc_ovito.py** provides custom interfaces to selected functiona
 
 Methods in the different classes are described in individual subsections below.
 
-### The class `pypfc_grid`
+### The Class `pypfc_grid`
 The class is initiated by supplying the arguments `ndiv = [nx,ny,nz]` and `ddiv=[dx,dy,dz]`, where `[nx,ny,nz]` are the number of grid points and `[dx,dy,dz]` the grid spacing along each coordinate direction.
 
-#### Class methods and their arguments
+#### Class Methods and their Arguments
 
 | Method            | Description                                   
 | ----------------- | ----------------------------------------------
@@ -63,10 +100,10 @@ The class is initiated by supplying the arguments `ndiv = [nx,ny,nz]` and `ddiv=
 | `get_dSize`       | Returns the grid size `dSize=ndiv*ddiv`
 | `copy_from(grid)` | Makes a duplicate of a grid class object
 
-### The class `pypfc_base`
+### The Class `pypfc_base`
 The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionary of configuration parameters can also be supplied through `config`.
 
-#### Class methods and their arguments
+#### Class Methods and their Arguments
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
@@ -91,17 +128,17 @@ The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionar
 | `get_field_average_along_axis(field, axis)`                   | Evaluate the mean value of a field variable along a certain axis ('x', 'y' or 'z')
 | `get_integrated_field_along_axis(field, axis)`                | Integrate a field variable along a certain axis ('x', 'y' or 'z')
 | `interpolate_atoms(intrpPos, pos, values, num_nnb, power)`    | Interpolate values at given positions
-| `interpolate_density_maxima(self, den, ene, pf)`              | Interpolate density field maxima, plus energy and  (optionally) also phase field(s)
+| `interpolate_density_maxima(self, den, ene, pf)`              | Interpolate density field maxima, plus (optionally) energy and phase field(s)
 | `get_phase_field_contour(self, pf, pf_zoom, evaluate_volume)` | Find the iso-contour surface of a 3D phase field using marching cubes and (optionally) the enclosed volume
 | `get_rlv(struct, alat)`                                       | Get the reciprocal lattice vectors for a particular crystal structure
 | `evaluate_reciprocal_planes`                                  | Establish the reciprocal vectors/planes for a particular crystal structure
 | `evaluate_C2_d`                                               | Establish the two-point correlation function (on the device) for a particular crystal structure
 | `evaluate_directional_correlation_kernel(self, H0, Rot)`      | Establish the directional correlation kernel for a particular crystal structure
 
-### The class `pypfc_pre`
+### The Class `pypfc_pre`
 The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionary of configuration parameters can also be supplied through `config`.
 
-#### Class methods and their arguments
+#### Class Methods and their Arguments
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
@@ -123,10 +160,10 @@ The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionar
 | `generate_density_field(crd, g)`                              | Define a 3D PFC density field
 | `evaluate_ampl_dens`                                          | Get the amplitudes and densities for different density field expansions
 
-### The class `pypfc_io`
+### The Class `pypfc_io`
 The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionary of configuration parameters can also be supplied through `config`.
 
-#### Class methods and their arguments
+#### Class Methods and their Arguments
 
 | Method                                                                                                                  |Description                                   
 | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- 
@@ -139,10 +176,10 @@ The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionar
 | `write_info_file(filename=, output_path)`                                                                               | Write simulation setup information to a file
 | `append_to_info_file(info, filename=, output_path)`                                                                     | Append linea to a text file
 
-### The class `pypfc`
+### The Class `pypfc`
 The class is initiated by supplying the arguments `ndiv` and `ddiv`. The pypfc class defines the default values of the parameters that control the PFC simulation. A dictionary of configuration parameters can also be supplied through the argument `config`.
 
-#### Class methods and their arguments
+#### Class Methods and their Arguments
 
 | Method                                                                                       | Description                                   
 | -------------------------------------------------------------------------------------------- | ---------------------------------------------- 
@@ -169,7 +206,7 @@ The class is initiated by supplying the arguments `ndiv` and `ddiv`. The pypfc c
 | `evaluate_energy`                                                                            | Evaluate the PFC energy field
 | `get_phase_field`                                                                            | Evaluate the phase field using wavelet filtering
 
-## Package dependencies
+## Package Dependencies
 The following Python packages are required:
 
 * numpy

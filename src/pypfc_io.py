@@ -25,6 +25,7 @@ import re
 import os
 import time
 import torch
+import os
 from vtk.util.numpy_support import numpy_to_vtk
 
 class setup_io(setup_pre):
@@ -142,6 +143,11 @@ class setup_io(setup_pre):
         if self._verbose:
             tstart = time.time()
 
+        # Ensure output directory exists
+        out_dir = os.path.dirname(filename)
+        if out_dir and not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+
         # Determine if file is gzipped and construct full filename
         if filename.endswith('.xyz.gz'):
             full_filename = filename
@@ -223,7 +229,7 @@ class setup_io(setup_pre):
 
         INPUT        
             filename        Output file name
-            coord               Array of shape (natoms, 3) containing atom coordinates
+            coord           Array of shape (natoms, 3) containing atom coordinates
             scalarData      List of 3D numpy arrays with scala point data
             scalarDataName  List of labels/names for the data arrays in 'scalarData'
             vectorData      List of 3D numpy arrays, of size [3], with vector point data
@@ -250,6 +256,11 @@ class setup_io(setup_pre):
 
         if self._verbose:
             tstart = time.time()
+
+        # Ensure output directory exists
+        out_dir = os.path.dirname(filename)
+        if out_dir and not os.path.exists(out_dir):
+            os.makedirs(out_dir)
 
         # Ensure that the input points array is 2D with shape (N, 3)
         assert coord.ndim == 2 and coord.shape[1] == 3, 'Points array must be of shape (N, 3)'
@@ -322,6 +333,11 @@ class setup_io(setup_pre):
         if self._verbose:
             tstart = time.time()
 
+        # Ensure output directory exists
+        out_dir = os.path.dirname(filename)
+        if out_dir and not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+            
         # Grid
         nx,ny,nz = self._ndiv
         dx,dy,dz = self._ddiv

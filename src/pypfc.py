@@ -44,7 +44,7 @@ class setup_simulation(setup_io):
         'evaluate_phase_field':     False,
         'density_interp_order':     2,
         'density_threshold':        0.0,
-        'density_merge_distance':   None,
+        'density_merge_distance':   0.1,
         'pf_iso_level':             0.5,
         'torch_threads':            os.cpu_count(),
         'torch_threads_interop':    os.cpu_count(),
@@ -55,12 +55,11 @@ class setup_simulation(setup_io):
         # Merge user parameters with defaults, but only use keys present in DEFAULTS
         # ==========================================================================
         cfg = dict(self.DEFAULTS)
+        ignored = set()
         if config is not None:
-            # Only update with keys that are in DEFAULTS
             filtered_config = {k: v for k, v in config.items() if k in self.DEFAULTS}
             cfg.update(filtered_config)
-        # Warn about any keys in config that are not in DEFAULTS
-        ignored = set(config.keys()) - set(self.DEFAULTS.keys())
+            ignored = set(config.keys()) - set(self.DEFAULTS.keys())
         if ignored:
             print(f"Ignored config keys: {ignored}")
 

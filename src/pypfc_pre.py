@@ -90,7 +90,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def do_single_crystal(self, xtalRot, params=None, model=0):
+    def do_single_crystal(self, xtalRot=None, params=None, model=0):
         '''
         PURPOSE
             Define a centered crystal in a periodic 3D domain.
@@ -106,8 +106,12 @@ class setup_pre(setup_base):
             density       Density field, real rank-3 array of size [nx x ny x nz]
 
         Last revision:
-        H. Hallberg 2025-09-11
+        H. Hallberg 2025-09-20
         '''
+
+        # Default orientation
+        if xtalRot is None:
+            xtalRot = np.eye(3, dtype=self._dtype_cpu)
 
         # Grid
         nx,ny,nz = self._ndiv

@@ -407,13 +407,13 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def interpolate_density_maxima(self, den, ene, pf=None):
+    def interpolate_density_maxima(self, den, ene=None, pf=None):
         '''
         PURPOSE
             Find the coordinates of the maxima in the density field (='atom' positions)
             The domain is assumed to be defined such that all maxima
             have coordinates (x,y,z) >= (0,0,0).
-            The density, energy and, optionally, the phase field value(s)
+            The density and, optionally, the energy and the phase field value(s)
             at the individual maxima are interpolated too.
 
         INPUT
@@ -429,7 +429,7 @@ class setup_base(setup_grid):
                                     [den ene pf1 pf2 ... pfN]
 
         Last revision:
-        H. Hallberg 2025-09-11
+        H. Hallberg 2025-09-20
         '''
 
         if self._verbose: tstart = time.time()
@@ -457,7 +457,8 @@ class setup_base(setup_grid):
         coords = coords[valid_maxima]
 
         denpos = den[mask_local_maxima][valid_maxima]
-        enepos = ene[mask_local_maxima][valid_maxima]
+        if ene is not None:
+            enepos = ene[mask_local_maxima][valid_maxima]
 
         # Merge maxima within the merge_distance
         if self._density_merge_distance > 0.0 and len(coords) > 0:
@@ -473,18 +474,25 @@ class setup_base(setup_grid):
 
             merged_coords = []
             merged_denpos = []
-            merged_enepos = []
+            merged_enepos = [] if ene is not None else None
             for cluster in unique_clusters:
                 cluster_coords = coords[list(cluster)]
                 cluster_denpos = denpos[list(cluster)]
-                cluster_enepos = enepos[list(cluster)]
                 merged_coords.append(np.mean(cluster_coords, axis=0))
                 merged_denpos.append(np.mean(cluster_denpos))
-                merged_enepos.append(np.mean(cluster_enepos))
-
+                if ene is not None:
+                    cluster_enepos = enepos[list(cluster)]
+                    merged_enepos.append(np.mean(cluster_enepos))
             atom_coord = np.array(merged_coords)
             denpos = np.array(merged_denpos)
-            enepos = np.array(merged_enepos)
+            if ene is not None:
+                enepos = np.array(merged_enepos)
+        else:
+            atom_coord = coords
+            # denpos and enepos are already set above
+            # Only set enepos if ene is not None
+            if ene is not None:
+                enepos = enepos
 
         # Handle phase field(s), either as a list of fields or as a single field
         if pf is not None:
@@ -497,9 +505,15 @@ class setup_base(setup_grid):
             pfpos = np.zeros((coords.shape[0], nPf), dtype=self._dtype_cpu)
             for pfNr, phaseField in enumerate(pf_list):
                 pfpos[:, pfNr] = phaseField[mask_local_maxima][valid_maxima][:coords.shape[0]]
-            atom_data = np.hstack((denpos[:, None], enepos[:, None], pfpos))
+            if ene is not None:
+                atom_data = np.hstack((denpos[:, None], enepos[:, None], pfpos))
+            else:
+                atom_data = np.hstack((denpos[:, None], pfpos))
         else:
-            atom_data = np.hstack((denpos[:, None], enepos[:, None]))
+            if ene is not None:
+                atom_data = np.hstack((denpos[:, None], enepos[:, None]))
+            else:
+                atom_data = denpos[:, None]
 
         if self._verbose:
             tend = time.time()
