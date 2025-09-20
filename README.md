@@ -217,7 +217,7 @@ The following Python packages are required:
 * vtk
 
 ## Installation and Usage
-Install using `pip install pypfc` and import with `import pypfc` and (optionally) `import pypfc_ovito`.
+Install using `pip install pypfc` and import with `import pypfc` and, optionally, `import pypfc_ovito`.
 
 ## Licencing and Acknowledgment
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
