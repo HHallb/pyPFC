@@ -28,11 +28,11 @@ from pypfc_grid import setup_grid
 
 class setup_base(setup_grid):
 
-    def __init__(self, ndiv, ddiv, config):
+    def __init__(self, domain_size, ndiv, config):
 
         # Initiate the inherited grid class
         # =================================
-        super().__init__(ndiv, ddiv)
+        super().__init__(domain_size, ndiv)
 
         # Set the data types
         self._struct                  = config['struct']

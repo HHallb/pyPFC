@@ -46,17 +46,16 @@ output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
 # =============================
-dSize = params['alat'] * np.array([256, 64, 1], dtype=float)   # Domain size along the x, y and z axes
-ndiv  = 16 * np.array([256, 64, 1], dtype=int)                 # Number of grid divisions along the x, y and z axes       
-ddiv  = dSize / ndiv                                           # Grid spacing along the x, y and z axes
-print(f'ndiv:    {ndiv}')
-print(f'ddiv:    {ddiv} [a]')
-print(f'dSize:   {dSize} [a]')
-print(f'nPoints: {np.prod(ndiv):,}')
+domain_size = params['alat'] * np.array([256, 64, 1], dtype=float)   # Domain size along the x, y and z axes
+ndiv  = 16 * np.array([256, 64, 1], dtype=int)                 # Number of grid divisions along the x, y and z axes
+print(f'ndiv:        {ndiv}')
+print(f'ddiv:        {domain_size / ndiv} [a]')
+print(f'domain_size: {domain_size} [a]')
+print(f'nPoints:     {np.prod(ndiv):,}')
 
 # Create a simulation object
 # ==========================
-pypfc = pypfc.setup_simulation(ndiv, ddiv, config=params)
+pypfc = pypfc.setup_simulation(domain_size, ndiv, config=params)
 
 # Save setup information to file
 # ==============================

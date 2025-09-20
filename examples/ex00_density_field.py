@@ -45,17 +45,16 @@ output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
 # =============================
-dSize          = params['alat'] * np.array([32, 1, 1], dtype=float)   # Domain size along the x, y and z axes
-ndiv           = 16 * np.array([32, 1, 1], dtype=int)                 # Number of grid divisions along the x, y and z axes       
-ddiv           = dSize / ndiv                                         # Grid spacing along the x, y and z axes
-print(f'ndiv:    {ndiv}')
-print(f'ddiv:    {ddiv} [a]')
-print(f'dSize:   {dSize} [a]')
-print(f'nPoints: {np.prod(ndiv):,}')
+domain_size = params['alat'] * np.array([32, 1, 1], dtype=float)   # Domain size along the x, y and z axes
+ndiv        = 16 * np.array([32, 1, 1], dtype=int)                 # Number of grid divisions along the x, y and z axes       
+print(f'ndiv:        {ndiv}')
+print(f'ddiv:        {domain_size / ndiv} [a]')
+print(f'domain_size: {domain_size} [a]')
+print(f'nPoints:     {np.prod(ndiv):,}')
 
 # Create a simulation object
 # ==========================
-pypfc = pypfc.setup_simulation(ndiv, ddiv, config=params)
+pypfc = pypfc.setup_simulation(domain_size, ndiv, config=params)
 
 # Save setup information to file
 # ==============================
@@ -64,8 +63,8 @@ pypfc.write_info_file(output_path+output_file)  # Write setup information to a t
 # Generate the initial density field
 # ==================================
 xtalRot = np.eye(3, dtype=float)                                        # No rotation of the seed crystal
-start_x = dSize[0]*0.45                                                 # Crystal starts at this x-coordinate
-end_x   = dSize[0]*0.55                                                 # Crystal ends at this x-coordinate
+start_x = domain_size[0]*0.45                                           # Crystal starts at this x-coordinate
+end_x   = domain_size[0]*0.55                                           # Crystal ends at this x-coordinate
 den     = pypfc.do_single_crystal(xtalRot, [start_x, end_x], model=1)   # Generates a single crystal within an interval along x, and extending throughout y and z
 pypfc.set_density(den)                                                  # Sets the new density field in the pyPFC simulation object
 
@@ -148,7 +147,7 @@ for step in range(nstep):
             # Save data to a binary pickle file
             # =================================
             filename = output_path + 'step_' + str(step+1).zfill(nfill)
-            pypfc.save_pickle(filename, [ step, total_time, ndiv, ddiv, dSize, den, state_output[:state_output_idx+1,:], den_av, pf_av])
+            pypfc.save_pickle(filename, [ step, total_time, ndiv, domain_size, den, state_output[:state_output_idx+1,:], den_av, pf_av])
 
             # Save data to VTK files
             # ======================

@@ -49,21 +49,20 @@ nout        = 1000
 output_path = './examples/ex04_output/'
 
 # Computational grid
-dSize = np.array([20, 20, 20], dtype=float)
-ndiv  = 10 * np.array([20, 20, 20], dtype=int)
-ddiv  = dSize / ndiv
+domain_size = np.array([20, 20, 20])
+ndiv        = 10 * np.array([20, 20, 20])
 
 # Create simulation object
-pypfc = pypfc.setup_simulation(ndiv, ddiv)
+pypfc = pypfc.setup_simulation(domain_size, ndiv)
 
 # Generate initial density field
-den = pypfc.do_single_crystal(params=[dSize[0]*0.25])
+den = pypfc.do_single_crystal(params=[domain_size[0]*0.25])
 pypfc.set_density(den)
 
 # Evolve density field
 for step in range(nstep):
     pypfc.do_step_update()
-    if np.mod(step+1, nout) == 0 or step+1 == nstep:
+    if np.mod(step+1, nout) == 0:
         print('Step:', step+1)
         den, _ = pypfc.get_density()
         atom_coord, atom_data = pypfc.interpolate_density_maxima(den)
@@ -87,7 +86,7 @@ In addition, **pypfc_ovito.py** provides custom interfaces to selected functiona
 Methods in the different classes are described in individual subsections below.
 
 ### The Class `pypfc_grid`
-The class is initiated by supplying the arguments `ndiv = [nx,ny,nz]` and `ddiv=[dx,dy,dz]`, where `[nx,ny,nz]` are the number of grid points and `[dx,dy,dz]` the grid spacing along each coordinate direction.
+The class is initiated by supplying the arguments `domain_size=[Lx,Ly,Lz]` and `ndiv = [nx,ny,nz]`, where `[nx,ny,nz]` are the number of grid points and `[Lx,Ly,Lz]` the domain size along each coordinate direction.
 
 #### Class Methods and their Arguments
 
@@ -101,7 +100,7 @@ The class is initiated by supplying the arguments `ndiv = [nx,ny,nz]` and `ddiv=
 | `copy_from(grid)` | Makes a duplicate of a grid class object
 
 ### The Class `pypfc_base`
-The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionary of configuration parameters can also be supplied through `config`.
+The class is initiated by supplying the arguments `domain_size` and `ndiv`. A dictionary of configuration parameters can also be supplied through `config`.
 
 #### Class Methods and their Arguments
 
@@ -136,7 +135,7 @@ The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionar
 | `evaluate_directional_correlation_kernel(self, H0, Rot)`      | Establish the directional correlation kernel for a particular crystal structure
 
 ### The Class `pypfc_pre`
-The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionary of configuration parameters can also be supplied through `config`.
+The class is initiated by supplying the arguments `domain_size` and `ndiv`. A dictionary of configuration parameters can also be supplied through `config`.
 
 #### Class Methods and their Arguments
 
@@ -161,7 +160,7 @@ The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionar
 | `evaluate_ampl_dens`                                          | Get the amplitudes and densities for different density field expansions
 
 ### The Class `pypfc_io`
-The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionary of configuration parameters can also be supplied through `config`.
+The class is initiated by supplying the arguments `domain_size` and `ndiv`. A dictionary of configuration parameters can also be supplied through `config`.
 
 #### Class Methods and their Arguments
 
@@ -177,7 +176,7 @@ The class is initiated by supplying the arguments `ndiv` and `ddiv`. A dictionar
 | `append_to_info_file(info, filename=, output_path)`                                                                     | Append linea to a text file
 
 ### The Class `pypfc`
-The class is initiated by supplying the arguments `ndiv` and `ddiv`. The pypfc class defines the default values of the parameters that control the PFC simulation. A dictionary of configuration parameters can also be supplied through the argument `config`.
+The class is initiated by supplying the arguments `domain_size` and `ndiv`. The pypfc class defines the default values of the parameters that control the PFC simulation. A dictionary of configuration parameters can also be supplied through the argument `config`.
 
 #### Class Methods and their Arguments
 

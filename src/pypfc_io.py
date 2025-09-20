@@ -30,11 +30,11 @@ from vtk.util.numpy_support import numpy_to_vtk
 
 class setup_io(setup_pre):
 
-    def __init__(self, ndiv, ddiv, config):
+    def __init__(self, domain_size, ndiv, config):
 
         # Initiate the inherited class
         # ============================
-        super().__init__(ndiv, ddiv, config=config)
+        super().__init__(domain_size, ndiv, config=config)
 
         # Set the data types
         self._dtype_cpu     = config['dtype_cpu']

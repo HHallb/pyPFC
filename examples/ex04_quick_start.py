@@ -19,18 +19,17 @@ output_path = './examples/ex04_output/' # Output path
 
 # Define the computational grid
 # =============================
-dSize = np.array([20, 20, 20], dtype=float)  # Domain size along the x, y and z axes, assuming a cubic unit cell with a unit lattice parameter
-ndiv  = 10*np.array([20, 20, 20], dtype=int) # Number of grid divisions along the x, y and z axes
-ddiv  = dSize / ndiv                         # Grid spacing along the x, y and z axes (in this case it will be equal to 1/10 lattice parameter)
+domain_size = np.array([20, 20, 20])    # Domain size along the x, y and z axes, assuming a cubic unit cell with a unit lattice parameter
+ndiv        = 10*np.array([20, 20, 20]) # Number of grid divisions along the x, y and z axes
 
 # Create a simulation object
 # ==========================
-pypfc = pypfc.setup_simulation(ndiv, ddiv)
+pypfc = pypfc.setup_simulation(domain_size, ndiv)
 
 # Generate the initial density field
 # ==================================
-den = pypfc.do_single_crystal(params=[dSize[0]*0.25])  # Generates a spherical crystal with a specified radius (=dSize[0]*0.1)in the center of the domain
-pypfc.set_density(den)                                 # Sets the new density field in the pyPFC simulation object
+den = pypfc.do_single_crystal(params=[domain_size[0]*0.25]) # Generates a spherical crystal with a specified radius (=domain_size[0]*0.1)in the center of the domain
+pypfc.set_density(den)                                      # Sets the new density field in the pyPFC simulation object
 
 # Evolve density field
 # ====================

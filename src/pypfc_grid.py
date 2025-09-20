@@ -18,16 +18,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 class setup_grid:
 
-    def __init__(self, ndiv, ddiv):
+    def __init__(self, domain_size, ndiv):
         self._ndiv    = ndiv
-        self._ddiv    = ddiv
-        self._dx      = ddiv[0]
-        self._dy      = ddiv[1]
-        self._dz      = ddiv[2]
+        self._ddiv    = domain_size / ndiv
+        self._dx      = self._ddiv[0]
+        self._dy      = self._ddiv[1]
+        self._dz      = self._ddiv[2]
         self._nx      = ndiv[0]
         self._ny      = ndiv[1]
         self._nz      = ndiv[2]
-        self._dSize   = ndiv*ddiv
+        self._dSize   = domain_size
         self._Lx      = self._dSize[0]
         self._Ly      = self._dSize[1]
         self._Lz      = self._dSize[2]

@@ -50,7 +50,7 @@ class setup_simulation(setup_io):
         'torch_threads_interop':    os.cpu_count(),
     }
 
-    def __init__(self, ndiv, ddiv, config=None):
+    def __init__(self, domain_size, ndiv, config=None):
 
         # Merge user parameters with defaults, but only use keys present in DEFAULTS
         # ==========================================================================
@@ -65,7 +65,7 @@ class setup_simulation(setup_io):
 
         # Initiate the inherited class
         # ============================
-        super().__init__(ndiv, ddiv, config=cfg)
+        super().__init__(domain_size, ndiv, config=cfg)
 
         # Handle input arguments
         # ======================

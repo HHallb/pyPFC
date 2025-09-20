@@ -23,11 +23,11 @@ from pypfc_base import setup_base
 
 class setup_pre(setup_base):
 
-    def __init__(self, ndiv, ddiv, config):
+    def __init__(self, domain_size, ndiv, config):
 
         # Initiate the inherited class
         # ============================
-        super().__init__(ndiv, ddiv, config=config)
+        super().__init__(domain_size, ndiv, config=config)
 
         # Handle input arguments
         # ======================

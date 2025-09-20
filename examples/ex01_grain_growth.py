@@ -45,17 +45,16 @@ output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
 # =============================
-dSize          = params['alat'] * np.array([64, 64, 64], dtype=float)   # Domain size along the x, y and z axes
-ndiv           = 8 * np.array([64, 64, 64], dtype=int)                  # Number of grid divisions along the x, y and z axes       
-ddiv           = dSize / ndiv                                           # Grid spacing along the x, y and z axes
-print(f'ndiv:    {ndiv}')
-print(f'ddiv:    {ddiv} [a]')
-print(f'dSize:   {dSize} [a]')
-print(f'nPoints: {np.prod(ndiv):,}')
+domain_size = params['alat'] * np.array([64, 64, 64], dtype=float)   # Domain size along the x, y and z axes
+ndiv        = 8 * np.array([64, 64, 64], dtype=int)                  # Number of grid divisions along the x, y and z axes       
+print(f'ndiv:        {ndiv}')
+print(f'ddiv:        {domain_size/ndiv} [a]')
+print(f'domain_size: {domain_size} [a]')
+print(f'nPoints:     {np.prod(ndiv):,}')
 
 # Create a simulation object
 # ==========================
-pypfc = pypfc.setup_simulation(ndiv, ddiv, config=params)
+pypfc = pypfc.setup_simulation(domain_size, ndiv, config=params)
 
 # Save setup information to file
 # ==============================
@@ -65,7 +64,7 @@ pypfc.write_info_file(output_path+output_file)  # Write setup information to a t
 # A centered spherical nucleus in an otherwise liquid domain
 # ====================================================================
 xtalRot    = np.eye(3, dtype=float)                         # No rotation of the seed crystal
-xtalRadius = 0.1 * min(dSize)                               # Radius of the spherical seed crystal
+xtalRadius = 0.1 * min(domain_size)                         # Radius of the spherical seed crystal
 den        = pypfc.do_single_crystal(xtalRot, [xtalRadius]) # Generates a single crystal in the center of the domain
 pypfc.set_density(den)                                      # Sets the new density field in the pyPFC simulation object
 
@@ -145,7 +144,7 @@ for step in range(nstep):
             # Save data to a binary pickle file
             # =================================
             filename = output_path + 'step_' + str(step+1).zfill(nfill)
-            pypfc.save_pickle(filename, [ step, total_time, ndiv, ddiv, dSize, den, state_output[:state_output_idx+1,:]])
+            pypfc.save_pickle(filename, [ step, total_time, ndiv, domain_size, den, state_output[:state_output_idx+1,:]])
 
             # Save data to VTK files
             # ======================

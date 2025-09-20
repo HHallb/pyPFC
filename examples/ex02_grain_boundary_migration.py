@@ -51,17 +51,16 @@ theta = np.deg2rad(22.6198649480404) # Tilt angle for a Sigma_13_(510)[001] CSL 
 ndiv0 = np.array([42, 42, 16], dtype=int)
 nrep  = np.array([20, 4,  1], dtype=int)
 ddiv  = np.array([0.060702613257057, 0.060702613257057, params['alat']/ndiv0[2]], dtype=float)
-dSize = ndiv0 * ddiv * nrep # Domain size along the x, y and z axes
+domain_size = ndiv0 * ddiv * nrep # Domain size along the x, y and z axes
 ndiv  = ndiv0 * nrep        # Number of grid divisions along the x, y and z axes
-ddiv  = dSize / ndiv        # Grid spacing along the x, y and z axes
-print(f'ndiv:    {ndiv}')
-print(f'ddiv:    {ddiv} [a]')
-print(f'dSize:   {dSize} [a]')
-print(f'nPoints: {np.prod(ndiv):,}')
+print(f'ndiv:        {ndiv}')
+print(f'ddiv:        {ddiv} [a]')
+print(f'domain_size: {domain_size} [a]')
+print(f'nPoints:     {np.prod(ndiv):,}')
 
 # Create a simulation object
 # ==========================
-pypfc = pypfc.setup_simulation(ndiv, ddiv, config=params)
+pypfc = pypfc.setup_simulation(domain_size, ndiv, config=params)
 
 # Save setup information to file
 # ==============================
@@ -73,8 +72,8 @@ pypfc.write_info_file(output_path+output_file)  # Write setup information to a t
 xtalRot        = np.zeros((3,3,2), dtype=float)                                             # Rotation matrices of the two crystals
 xtalRot[:,:,0] = Rotation.from_euler('z',  theta/2).as_matrix()                             # Rotation of crystal #1
 xtalRot[:,:,1] = Rotation.from_euler('z', -theta/2).as_matrix()                             # Rotation of crystal #2
-gb_x1          = dSize[0]*0.25                                                              # x-position of the first grain boundary along the x-axis
-gb_x2          = dSize[0]*0.75                                                              # x-position of the second grain boundary along the x-axis
+gb_x1          = domain_size[0]*0.25                                                        # x-position of the first grain boundary along the x-axis
+gb_x2          = domain_size[0]*0.75                                                        # x-position of the second grain boundary along the x-axis
 liq_width      = 2*params['alat']                                                           # Width of the initial liquid zone at the grain boundaries
 den            = pypfc.do_bicrystal(xtalRot, [gb_x1, gb_x2], liq_width=liq_width, model=2)  # Generates a bicrystal in the center of the domain
 pypfc.set_density(den)                                                                      # Sets the new density field in the pyPFC simulation object
@@ -167,7 +166,7 @@ for step in range(nstep):
             # Save data to a binary pickle file
             # =================================
             filename = output_path + 'step_' + str(step+1).zfill(nfill)
-            pypfc.save_pickle(filename, [ step, total_time, ndiv, ddiv, dSize, den, state_output[:state_output_idx+1,:], den_av, pf_av])
+            pypfc.save_pickle(filename, [ step, total_time, ndiv, domain_size, den, state_output[:state_output_idx+1,:], den_av, pf_av])
 
             # Save data to VTK files
             # ======================
