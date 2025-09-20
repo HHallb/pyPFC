@@ -24,19 +24,19 @@ ndiv        = 10*np.array([20, 20, 20]) # Number of grid divisions along the x, 
 
 # Create a simulation object
 # ==========================
-pypfc = pypfc.setup_simulation(domain_size, ndiv)
+sim = pypfc.setup_simulation(domain_size, ndiv)
 
 # Generate the initial density field
 # ==================================
-den = pypfc.do_single_crystal(params=[domain_size[0]*0.25]) # Generates a spherical crystal with a specified radius (=domain_size[0]*0.1)in the center of the domain
-pypfc.set_density(den)                                      # Sets the new density field in the pyPFC simulation object
+den = sim.do_single_crystal(params=[domain_size[0]*0.25]) # Generates a spherical crystal with a specified radius (=domain_size[0]*0.1)in the center of the domain
+sim.set_density(den)                                      # Sets the new density field in the pyPFC simulation object
 
 # Evolve density field
 # ====================
 for step in range(nstep):
 
     # Update density
-    pypfc.do_step_update()
+    sim.do_step_update()
 
     # Evaluate and save data at specified intervals
     if np.mod(step+1,nout)==0 or step+1==nstep:
@@ -47,14 +47,14 @@ for step in range(nstep):
 
         # Evaluate data in the current step
         # =================================
-        den, _                = pypfc.get_density()                   # Retrieve the density field
-        atom_coord, atom_data = pypfc.interpolate_density_maxima(den) # Interpolate density maxima
+        den, _                = sim.get_density()                   # Retrieve the density field
+        atom_coord, atom_data = sim.interpolate_density_maxima(den) # Interpolate density maxima
 
         # Save atom data to a VTK file
         # ============================
         filename = output_path + 'pfc_data_' + str(step+1)
-        pypfc.write_vtk_points(filename, atom_coord, [atom_data[:,0]], ['den'])
+        sim.write_vtk_points(filename, atom_coord, [atom_data[:,0]], ['den'])
 
 # Do cleanup
 # ==========
-pypfc.cleanup()
+sim.cleanup()

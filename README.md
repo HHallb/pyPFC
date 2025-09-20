@@ -53,21 +53,21 @@ domain_size = np.array([20, 20, 20])
 ndiv        = 10 * np.array([20, 20, 20])
 
 # Create simulation object
-pypfc = pypfc.setup_simulation(domain_size, ndiv)
+sim = pypfc.setup_simulation(domain_size, ndiv)
 
 # Generate initial density field
-den = pypfc.do_single_crystal(params=[domain_size[0]*0.25])
-pypfc.set_density(den)
+den = sim.do_single_crystal(params=[domain_size[0]*0.25])
+sim.set_density(den)
 
 # Evolve density field
 for step in range(nstep):
-    pypfc.do_step_update()
+    sim.do_step_update()
     if np.mod(step+1, nout) == 0:
         print('Step:', step+1)
-        den, _ = pypfc.get_density()
-        atom_coord, atom_data = pypfc.interpolate_density_maxima(den)
+        den, _ = sim.get_density()
+        atom_coord, atom_data = sim.interpolate_density_maxima(den)
         filename = output_path + 'pfc_data_' + str(step+1)
-        pypfc.write_vtk_points(filename, atom_coord, [atom_data[:,0]], ['den'])
+        sim.write_vtk_points(filename, atom_coord, [atom_data[:,0]], ['den'])
 ```
 
 ## Description of Source Files

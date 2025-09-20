@@ -54,58 +54,58 @@ print(f'nPoints:     {np.prod(ndiv):,}')
 
 # Create a simulation object
 # ==========================
-pypfc = pypfc.setup_simulation(domain_size, ndiv, config=params)
+sim = pypfc.setup_simulation(domain_size, ndiv, config=params)
 
 # Save setup information to file
 # ==============================
-pypfc.write_info_file(output_path+output_file)  # Write setup information to a text file
+sim.write_info_file(output_path+output_file)  # Write setup information to a text file
 
 # Generate the initial density field
 # ==================================
-xtalRot = np.eye(3, dtype=float)                                        # No rotation of the seed crystal
-start_x = domain_size[0]*0.45                                           # Crystal starts at this x-coordinate
-end_x   = domain_size[0]*0.55                                           # Crystal ends at this x-coordinate
-den     = pypfc.do_single_crystal(xtalRot, [start_x, end_x], model=1)   # Generates a single crystal within an interval along x, and extending throughout y and z
-pypfc.set_density(den)                                                  # Sets the new density field in the pyPFC simulation object
+xtalRot = np.eye(3, dtype=float)                                    # No rotation of the seed crystal
+start_x = domain_size[0]*0.45                                       # Crystal starts at this x-coordinate
+end_x   = domain_size[0]*0.55                                       # Crystal ends at this x-coordinate
+den     = sim.do_single_crystal(xtalRot, [start_x, end_x], model=1) # Generates a single crystal within an interval along x, and extending throughout y and z
+sim.set_density(den)                                                # Sets the new density field in the pyPFC simulation object
 
 # Evaluate energy
 # ===============
-ene, mean_ene = pypfc.get_energy()  # Evaluate the PFC free energy and its mean value
+ene, mean_ene = sim.get_energy()  # Evaluate the PFC free energy and its mean value
 
 # Evaluate phase field
 # ====================
-pf = pypfc.get_phase_field() # Evaluate the phase field
+pf = sim.get_phase_field() # Evaluate the phase field
 
 # Interpolate density field maxima
 # ================================
-atom_coord, atom_data = pypfc.interpolate_density_maxima(den, ene, pf)  # Interpolate density maxima positions and associated data (density, energy, phase field)
-natoms = atom_coord.shape[0]                                            # Retrieve the number of atoms (= density peaks)
+atom_coord, atom_data = sim.interpolate_density_maxima(den, ene, pf) # Interpolate density maxima positions and associated data (density, energy, phase field)
+natoms = atom_coord.shape[0]                                         # Retrieve the number of atoms (= density peaks)
 
 # Save data to VTK files
 # ======================
 plotnr   = str(0).zfill(nfill)
 filename = output_path + 'pfc_data_' + plotnr
-pypfc.write_vtk_structured_grid(filename, [den], ['den'])                                                               # Save the continuous density field to structured grid VTK file
-pypfc.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'])    # Save the discrete density maxima (atoms) to VTK point file
+sim.write_vtk_structured_grid(filename, [den], ['den'])                                                               # Save the continuous density field to structured grid VTK file
+sim.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'])    # Save the discrete density maxima (atoms) to VTK point file
 
 # Prepare storage of state data and save the intial state
 # =======================================================
 total_time         = 0.0                                    # Initialize total simulation time
 state_output_idx   = 0                                      # Initialize state output index
 state_output       = np.zeros((nstep+1, 5), dtype=float)    # Allocate array for state data: time, natoms, mean_ene, mean_den, cpu_time
-_ , mean_den       = pypfc.get_density()                    # Evaluate the mean density
+_ , mean_den       = sim.get_density()                      # Evaluate the mean density
 state_output[0,:]  = [0.0, natoms, mean_ene, mean_den, 0.0] # Save initial state data
 state_output_idx  += 1                                      # Step up state output index
 
 # Evolve density field
 # ====================
-tstart = time.time()        # Start timer
-pypfc.set_verbose(False)    # Turn off verbose output during the time step loop
+tstart = time.time()   # Start timer
+sim.set_verbose(False) # Turn off verbose output during the time step loop
 
 for step in range(nstep):
 
     # Update density
-    pypfc.do_step_update()
+    sim.do_step_update()
 
     # Step up timer
     total_time += params['dtime']   
@@ -115,11 +115,11 @@ for step in range(nstep):
 
         # Evaluate data in the current step
         # =================================
-        den, mean_den         = pypfc.get_density()                            # Evaluate the density field and its mean value
-        ene, mean_ene         = pypfc.get_energy()                             # Evaluate the PFC free energy and its mean value
-        pf                    = pypfc.get_phase_field()                        # Evaluate the phase field
-        atom_coord, atom_data = pypfc.interpolate_density_maxima(den, ene, pf) # Interpolate density maxima positions and associated data (density, energy, phase field)
-        natoms                = atom_coord.shape[0]                            # Retrieve the number of atoms (= number of interpolated density peaks)
+        den, mean_den         = sim.get_density()                            # Evaluate the density field and its mean value
+        ene, mean_ene         = sim.get_energy()                             # Evaluate the PFC free energy and its mean value
+        pf                    = sim.get_phase_field()                        # Evaluate the phase field
+        atom_coord, atom_data = sim.interpolate_density_maxima(den, ene, pf) # Interpolate density maxima positions and associated data (density, energy, phase field)
+        natoms                = atom_coord.shape[0]                          # Retrieve the number of atoms (= number of interpolated density peaks)
 
         # Save state data
         # ===============
@@ -133,7 +133,7 @@ for step in range(nstep):
 
         # Save state data to file
         # =======================
-        pypfc.append_to_info_file(state_string, output_path+output_file)
+        sim.append_to_info_file(state_string, output_path+output_file)
 
         # Save step data
         # ===============
@@ -141,24 +141,24 @@ for step in range(nstep):
 
             # Integrate fields along x
             # ========================
-            den_av = pypfc.get_field_average_along_axis(den, 'x')
-            pf_av  = pypfc.get_field_average_along_axis(pf, 'x')
+            den_av = sim.get_field_average_along_axis(den, 'x')
+            pf_av  = sim.get_field_average_along_axis(pf, 'x')
         
             # Save data to a binary pickle file
             # =================================
             filename = output_path + 'step_' + str(step+1).zfill(nfill)
-            pypfc.save_pickle(filename, [ step, total_time, ndiv, domain_size, den, state_output[:state_output_idx+1,:], den_av, pf_av])
+            sim.save_pickle(filename, [ step, total_time, ndiv, domain_size, den, state_output[:state_output_idx+1,:], den_av, pf_av])
 
             # Save data to VTK files
             # ======================
             plotnr   = str(step+1).zfill(nfill)
             filename = output_path + 'pfc_data_' + plotnr     
-            pypfc.write_vtk_structured_grid(filename, [den], ['den'])
-            pypfc.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'])
+            sim.write_vtk_structured_grid(filename, [den], ['den'])
+            sim.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'])
 
 tend = time.time()
 print(f'Time spent in time step loop: {tend-tstart:.3f} s')
 
 # Do cleanup
 # ==========
-pypfc.cleanup()
+sim.cleanup()
