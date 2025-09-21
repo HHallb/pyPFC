@@ -50,7 +50,7 @@ class setup_simulation(setup_io):
         'torch_threads_interop':    os.cpu_count(),
     }
 
-    def __init__(self, domain_size, ndiv, config=None):
+    def __init__(self, domain_size, ndiv=None, config=None):
 
         # Merge user parameters with defaults, but only use keys present in DEFAULTS
         # ==========================================================================
@@ -63,6 +63,23 @@ class setup_simulation(setup_io):
         if ignored:
             print(f"Ignored config keys: {ignored}")
 
+        # Ensure domain_size is a numpy array
+        # ===================================
+        domain_size = np.array(domain_size, dtype=float)
+
+        # Ensure ndiv is a numpy array
+        # ============================
+        if ndiv is not None:
+            ndiv = np.array(ndiv, dtype=int)
+        else:
+            ndiv = np.array(domain_size) / cfg['alat'] * 8 # Default to 8 points per lattice spacing
+            ndiv = ndiv.astype(int)
+
+        # Check that all ndiv values are even
+        # ===================================
+        if not np.all(ndiv % 2 == 0):
+            raise ValueError(f"All values in ndiv must be even, but got ndiv={ndiv}")
+            
         # Initiate the inherited class
         # ============================
         super().__init__(domain_size, ndiv, config=cfg)

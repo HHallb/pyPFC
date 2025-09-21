@@ -355,7 +355,7 @@ class setup_base(setup_grid):
         interpVal = np.zeros(n_interp, dtype=self._dtype_cpu)
 
         # Generate periodic images of the source positions
-        images = np.vstack([pos + np.array([dx, dy, dz]) * self._dSize
+        images = np.vstack([pos + np.array([dx, dy, dz]) * self._domain_size
                             for dx in (-1, 0, 1)
                             for dy in (-1, 0, 1)
                             for dz in (-1, 0, 1)])

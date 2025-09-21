@@ -48,11 +48,11 @@ output_file      = 'pypfc_setup.txt'         # Output file name
 # Define the computational grid to fit the periodicity of the bicrystal
 # =====================================================================
 theta = np.deg2rad(22.6198649480404) # Tilt angle for a Sigma_13_(510)[001] CSL grain boundary
-ndiv0 = np.array([42, 42, 16], dtype=int)
-nrep  = np.array([20, 4,  1], dtype=int)
-ddiv  = np.array([0.060702613257057, 0.060702613257057, params['alat']/ndiv0[2]], dtype=float)
+ndiv0 = np.array([42, 42, 16])
+nrep  = np.array([20, 4,  1])
+ddiv  = np.array([0.060702613257057, 0.060702613257057, params['alat']/ndiv0[2]])
 domain_size = ndiv0 * ddiv * nrep # Domain size along the x, y and z axes
-ndiv  = ndiv0 * nrep        # Number of grid divisions along the x, y and z axes
+ndiv  = ndiv0 * nrep              # Number of grid divisions along the x, y and z axes
 print(f'ndiv:        {ndiv}')
 print(f'ddiv:        {ddiv} [a]')
 print(f'domain_size: {domain_size} [a]')

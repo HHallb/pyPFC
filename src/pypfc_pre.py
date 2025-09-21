@@ -70,8 +70,18 @@ class setup_pre(setup_base):
     def get_energy(self):
         return self._ene
 
+    def set_ampl(self, ampl):
+        ampl         = np.array(ampl, dtype=self._dtype_cpu)
+        self._ampl   = ampl
+        self._ampl_d = torch.from_numpy(ampl).to(self._device)
+
     def get_ampl(self):
         return self._ampl
+
+    def set_nlns(self, nlns):
+        nlns         = np.array(nlns, dtype=self._dtype_cpu)
+        self._nlns   = nlns
+        self._nlns_d = torch.from_numpy(nlns).to(self._device)
 
     def get_nlns(self):
         return self._nlns

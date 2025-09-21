@@ -17,18 +17,17 @@ nstep       = 4000                      # Number of simulation steps
 nout        = 1000                      # Evaluate and save data in every nout:h step
 output_path = './examples/ex04_output/' # Output path
 
-# Define the computational grid
-# =============================
-domain_size = np.array([20, 20, 20])    # Domain size along the x, y and z axes, assuming a cubic unit cell with a unit lattice parameter
-ndiv        = 10*np.array([20, 20, 20]) # Number of grid divisions along the x, y and z axes
+# Define the computational domain
+# ===============================
+domain_size = [20, 20, 20] # Domain size along the x, y and z axes, measured in lattice parameters
 
 # Create a simulation object
 # ==========================
-sim = pypfc.setup_simulation(domain_size, ndiv)
+sim = pypfc.setup_simulation(domain_size)
 
 # Generate the initial density field
 # ==================================
-den = sim.do_single_crystal(params=[domain_size[0]*0.25]) # Generates a spherical crystal with a specified radius (=domain_size[0]*0.1)in the center of the domain
+den = sim.do_single_crystal(params=[domain_size[0]*0.25]) # Generates a spherical crystal with a specified radius (=domain_size[0]*0.1) at the center of the domain
 sim.set_density(den)                                      # Sets the new density field in the pyPFC simulation object
 
 # Evolve density field

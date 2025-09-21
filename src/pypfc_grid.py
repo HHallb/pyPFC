@@ -19,19 +19,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 class setup_grid:
 
     def __init__(self, domain_size, ndiv):
-        self._ndiv    = ndiv
-        self._ddiv    = domain_size / ndiv
-        self._dx      = self._ddiv[0]
-        self._dy      = self._ddiv[1]
-        self._dz      = self._ddiv[2]
-        self._nx      = ndiv[0]
-        self._ny      = ndiv[1]
-        self._nz      = ndiv[2]
-        self._dSize   = domain_size
-        self._Lx      = self._dSize[0]
-        self._Ly      = self._dSize[1]
-        self._Lz      = self._dSize[2]
-        self._nz_half = self._nz // 2 + 1
+        self._ndiv        = ndiv
+        self._ddiv        = domain_size / ndiv
+        self._dx          = self._ddiv[0]
+        self._dy          = self._ddiv[1]
+        self._dz          = self._ddiv[2]
+        self._nx          = ndiv[0]
+        self._ny          = ndiv[1]
+        self._nz          = ndiv[2]
+        self._domain_size = domain_size
+        self._Lx          = self._domain_size[0]
+        self._Ly          = self._domain_size[1]
+        self._Lz          = self._domain_size[2]
+        self._nz_half     = self._nz // 2 + 1
 
     def set_ndiv(self, ndiv):
         self._ndiv = ndiv
@@ -49,27 +49,21 @@ class setup_grid:
         self._dz = ddiv[2]
 
     def get_ddiv(self):
-        return self.__ddiv
+        return self._ddiv
 
-    # def set_dSize(self, dSize):
-    #     self._dSize = dSize
-    #     self._Lx = dSize[0]
-    #     self._Ly = dSize[1]
-    #     self._Lz = dSize[2]
-
-    def get_dSize(self):
-        return self._dSize
+    def get_domain_size(self):
+        return self._domain_size
 
     def copy_from(self, grid):
-        self._ndiv  = grid.get_ndiv()
-        self._ddiv  = grid.get_ddiv()
-        self._dSize = grid.get_dSize()
-        self._dx    = self._ddiv[0]
-        self._dy    = self._ddiv[1]
-        self._dz    = self._ddiv[2]
-        self._nx    = self._ndiv[0]
-        self._ny    = self._ndiv[1]
-        self._nz    = self._ndiv[2]
-        self._Lx    = self._dSize[0]
-        self._Ly    = self._dSize[1]
-        self._Lz    = self._dSize[2]
+        self._ndiv        = grid.get_ndiv()
+        self._ddiv        = grid.get_ddiv()
+        self._domain_size = grid.get_domain_size()
+        self._dx          = self._ddiv[0]
+        self._dy          = self._ddiv[1]
+        self._dz          = self._ddiv[2]
+        self._nx          = self._ndiv[0]
+        self._ny          = self._ndiv[1]
+        self._nz          = self._ndiv[2]
+        self._Lx          = self._domain_size[0]
+        self._Ly          = self._domain_size[1]
+        self._Lz          = self._domain_size[2]

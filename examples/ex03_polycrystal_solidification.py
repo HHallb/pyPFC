@@ -46,8 +46,8 @@ output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
 # =============================
-domain_size = params['alat'] * np.array([256, 64, 1], dtype=float) # Domain size along the x, y and z axes
-ndiv  = 16 * np.array([256, 64, 1], dtype=int)                     # Number of grid divisions along the x, y and z axes
+domain_size = params['alat'] * np.array([256, 64, 1]) # Domain size along the x, y and z axes
+ndiv  = 16 * np.array([256, 64, 1])                   # Number of grid divisions along the x, y and z axes
 print(f'ndiv:        {ndiv}')
 print(f'ddiv:        {domain_size / ndiv} [a]')
 print(f'domain_size: {domain_size} [a]')
@@ -59,7 +59,7 @@ sim = pypfc.setup_simulation(domain_size, ndiv, config=params)
 
 # Save setup information to file
 # ==============================
-sim.write_info_file(output_path+output_file)  # Write setup information to a text file
+sim.write_info_file(output_path+output_file) # Write setup information to a text file
 
 # Generate the initial density field
 # ==================================

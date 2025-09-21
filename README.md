@@ -48,12 +48,11 @@ nstep       = 4000
 nout        = 1000
 output_path = './examples/ex04_output/'
 
-# Computational grid
-domain_size = np.array([20, 20, 20])
-ndiv        = 10 * np.array([20, 20, 20])
+# Computational domain
+domain_size = [20, 20, 20]
 
 # Create simulation object
-sim = pypfc.setup_simulation(domain_size, ndiv)
+sim = pypfc.setup_simulation(domain_size)
 
 # Generate initial density field
 den = sim.do_single_crystal(params=[domain_size[0]*0.25])
@@ -85,24 +84,18 @@ In addition, **pypfc_ovito.py** provides custom interfaces to selected functiona
 
 Methods in the different classes are described in individual subsections below.
 
-### The Class `pypfc_grid`
-The class is initiated by supplying the arguments `domain_size=[Lx,Ly,Lz]` and `ndiv = [nx,ny,nz]`, where `[nx,ny,nz]` are the number of grid points and `[Lx,Ly,Lz]` the domain size along each coordinate direction.
-
-#### Class Methods and their Arguments
+### The Class `pypfc_grid`: Class Methods and their Arguments
 
 | Method            | Description                                   
 | ----------------- | ----------------------------------------------
-| `set_ndiv(ndiv)`  | Sets the number of grid points `nx,ny,nz`
+| `set_ndiv(ndiv)`  | Sets the number of grid points `[nx,ny,nz]`
 | `get_ndiv`        | Returns `ndiv`
-| `set_ddiv(ddiv)`  | Sets the grid spacing `dx,dy,dz`
+| `set_ddiv(ddiv)`  | Sets the grid spacing `[dx,dy,dz]`
 | `get_ddiv`        | Returns `ddiv`
-| `get_dSize`       | Returns the grid size `dSize=ndiv*ddiv`
-| `copy_from(grid)` | Makes a duplicate of a grid class object
+| `get_domain_size` | Returns the grid size `domain_size=ndiv*ddiv`
+| `copy_from(grid)` | Makes a duplicate of a grid object
 
-### The Class `pypfc_base`
-The class is initiated by supplying the arguments `domain_size` and `ndiv`. A dictionary of configuration parameters can also be supplied through `config`.
-
-#### Class Methods and their Arguments
+### The Class `pypfc_base`: Class Methods and their Arguments
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
@@ -134,10 +127,7 @@ The class is initiated by supplying the arguments `domain_size` and `ndiv`. A di
 | `evaluate_C2_d`                                               | Establish the two-point correlation function (on the device) for a particular crystal structure
 | `evaluate_directional_correlation_kernel(self, H0, Rot)`      | Establish the directional correlation kernel for a particular crystal structure
 
-### The Class `pypfc_pre`
-The class is initiated by supplying the arguments `domain_size` and `ndiv`. A dictionary of configuration parameters can also be supplied through `config`.
-
-#### Class Methods and their Arguments
+### The Class `pypfc_pre`: Class Methods and their Arguments
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
@@ -147,7 +137,9 @@ The class is initiated by supplying the arguments `domain_size` and `ndiv`. A di
 | `get_density`                                                 | Get PFC density field
 | `set_energy(ene)`                                             | Set PFC energy field
 | `get_energy(ene)`                                             | Get PFC energy field
+| `set_ampl`                                                    | Set amplitudes of the density field approximation
 | `get_ampl`                                                    | Get amplitudes of the density field approximation
+| `set_nlns`                                                    | Set liquid/solid densities in the density field approximation
 | `get_nlns`                                                    | Get liquid/solid densities in the density field approximation
 | `set_sigma(sigma)`                                            | Set sigma
 | `get_sigma`                                                   | Get sigma
@@ -159,10 +151,7 @@ The class is initiated by supplying the arguments `domain_size` and `ndiv`. A di
 | `generate_density_field(crd, g)`                              | Define a 3D PFC density field
 | `evaluate_ampl_dens`                                          | Get the amplitudes and densities for different density field expansions
 
-### The Class `pypfc_io`
-The class is initiated by supplying the arguments `domain_size` and `ndiv`. A dictionary of configuration parameters can also be supplied through `config`.
-
-#### Class Methods and their Arguments
+### The Class `pypfc_io`: Class Methods and their Arguments
 
 | Method                                                                                                                  |Description                                   
 | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- 
@@ -176,7 +165,8 @@ The class is initiated by supplying the arguments `domain_size` and `ndiv`. A di
 | `append_to_info_file(info, filename=, output_path)`                                                                     | Append linea to a text file
 
 ### The Class `pypfc`
-The class is initiated by supplying the arguments `domain_size` and `ndiv`. The pypfc class defines the default values of the parameters that control the PFC simulation. A dictionary of configuration parameters can also be supplied through the argument `config`.
+
+The class is initiated by supplying the arguments `domain_size=[Lx,Ly,Lz]` and `ndiv = [nx,ny,nz]`, where `[Lx,Ly,Lz]` is the domain size and `[nx,ny,nz]` define the number of grid points along each coordinate direction. The values in `[nx,ny,nz]` must all be even numbers, an error will be raised otherwise. The only required input is `domain_size`. All other parameters, including `ndiv` are set by defaults, but can be modified as desired. An optional dictionary of configuration parameters can be supplied through the argument `config`.
 
 #### Class Methods and their Arguments
 

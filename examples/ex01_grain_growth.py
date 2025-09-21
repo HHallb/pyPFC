@@ -45,8 +45,11 @@ output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
 # =============================
-domain_size = params['alat'] * np.array([64, 64, 64], dtype=float)   # Domain size along the x, y and z axes
-ndiv        = 8 * np.array([64, 64, 64], dtype=int)                  # Number of grid divisions along the x, y and z axes       
+#domain_size = params['alat'] * np.array([64, 64, 64]) # Domain size along the x, y and z axes
+#ndiv        = 8 * np.array([64, 64, 64])              # Number of grid divisions along the x, y and z axes       
+domain_size = params['alat'] * np.array([32,32,32]) # Domain size along the x, y and z axes
+ndiv        = 8 * np.array([32, 32, 32])              # Number of grid divisions along the x, y and z axes
+
 print(f'ndiv:        {ndiv}')
 print(f'ddiv:        {domain_size/ndiv} [a]')
 print(f'domain_size: {domain_size} [a]')

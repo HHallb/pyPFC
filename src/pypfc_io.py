@@ -95,7 +95,7 @@ class setup_io(setup_pre):
         prop_str = 'pos:R:3:' + ':'.join([f'{lbl}:R:1' for lbl in atom_data_labels])
         header = (
             f"{natoms}\n"
-            f'Lattice="{self._dSize[0]:.6f} 0.0 0.0 0.0 {self._dSize[1]:.6f} 0.0 0.0 0.0 {self._dSize[2]:.6f}" '
+            f'Lattice="{self._domain_size[0]:.6f} 0.0 0.0 0.0 {self._domain_size[1]:.6f} 0.0 0.0 0.0 {self._domain_size[2]:.6f}" '
             f'Properties={prop_str} Time={simulation_time:.6f}\n'
         )
 
@@ -130,7 +130,7 @@ class setup_io(setup_pre):
 
         OUTPUT
             coord       Array of shape (natoms, 3) containing atom coordinates
-            dSize       Domain size: [Lx, Ly, Lz]
+            domain_size Domain size: [Lx, Ly, Lz]
             time        Simulation time
             partDen     Particle PFC density, [natoms]
             partEne     Particle PFC energy, [natoms]
@@ -186,7 +186,7 @@ class setup_io(setup_pre):
         lattice_match = re.search(r'Lattice="([^"]*)"', header_line)
         if lattice_match:
             lattice_values = lattice_match.group(1).split()
-            dSize = [float(lattice_values[0]), float(lattice_values[4]), float(lattice_values[8])]
+            domain_size = [float(lattice_values[0]), float(lattice_values[4]), float(lattice_values[8])]
         else:
             raise ValueError("Could not parse Lattice information from header")
         
@@ -217,7 +217,7 @@ class setup_io(setup_pre):
             tend = time.time()
             print(f'Time to read extended XYZ file {filename}: {tend - tstart:.2f} s')
 
-        return coord, dSize, time, atom_data
+        return coord, domain_size, time, atom_data
     
 # =====================================================================================
 
@@ -486,7 +486,7 @@ class setup_io(setup_pre):
                 f.write(f"   dx:                     {self._dx}\n")
                 f.write(f"   dy:                     {self._dy}\n")
                 f.write(f"   dz:                     {self._dz}\n")
-                f.write(f"Total grid size:           {self._dSize}\n")
+                f.write(f"Total grid size:           {self._domain_size}\n")
                 f.write(f"   Lx:                     {self._Lx}\n")
                 f.write(f"   Ly:                     {self._Ly}\n")
                 f.write(f"   Lz:                     {self._Lz}\n")
