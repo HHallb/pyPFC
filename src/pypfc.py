@@ -65,7 +65,7 @@ class setup_simulation(setup_io):
 
         # Ensure domain_size is a numpy array
         # ===================================
-        domain_size = np.array(domain_size, dtype=self._dtype_cpu)
+        domain_size = np.array(domain_size, dtype=float)
 
         # Ensure ndiv is a numpy array
         # ============================

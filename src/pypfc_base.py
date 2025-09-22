@@ -723,10 +723,16 @@ class setup_base(setup_grid):
         # Take real part for max operation
         self._f_tmp_d.real.copy_(zero_peak)
 
-        # Compute the correlation function for all peaks
+        # # Compute the correlation function for all peaks
+        # for ipeak in range(self._npeaks):
+        #     peak_val = DWF_d[ipeak] * torch.exp( -(k2_sqrt_d - kpl_d[ipeak]) ** 2 / denom_d[ipeak] )
+        #     self._f_tmp_d.real = torch.maximum(self._f_tmp_d.real, peak_val)
+
+        # Envelope: largest absolute value at each grid point
         for ipeak in range(self._npeaks):
             peak_val = DWF_d[ipeak] * torch.exp( -(k2_sqrt_d - kpl_d[ipeak]) ** 2 / denom_d[ipeak] )
-            self._f_tmp_d.real = torch.maximum(self._f_tmp_d.real, peak_val)
+            mask = peak_val.abs() > self._f_tmp_d.real.abs()
+            self._f_tmp_d.real[mask] = peak_val[mask]
 
         # Return the real part as the result
         C2_d = self._f_tmp_d.real.contiguous()
