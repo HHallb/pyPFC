@@ -244,7 +244,7 @@ Import pyPFC into your Python code by `import pypfc` and, optionally, `import py
 ## [Licencing](#license)
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
 
-## Troubleshooting Q&A
+## Troubleshooting Q&A(#troubleshooting)
 
 #### Q: I have a Nvidia GPU installed but pyPFC tells me I don't.
 **A:** Ensure that PyTorch is installed with CUDA enabled. To be sure, you can also check your setup by running:
