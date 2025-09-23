@@ -45,10 +45,8 @@ output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
 # =============================
-#domain_size = params['alat'] * np.array([64, 64, 64]) # Domain size along the x, y and z axes
-#ndiv        = 8 * np.array([64, 64, 64])              # Number of grid divisions along the x, y and z axes       
-domain_size = params['alat'] * np.array([32,32,32]) # Domain size along the x, y and z axes
-ndiv        = 8 * np.array([32, 32, 32])              # Number of grid divisions along the x, y and z axes
+domain_size = params['alat'] * np.array([64, 64, 64]) # Domain size along the x, y and z axes
+ndiv        = 8 * np.array([64, 64, 64])              # Number of grid divisions along the x, y and z axes       
 
 print(f'ndiv:        {ndiv}')
 print(f'ddiv:        {domain_size/ndiv} [a]')
@@ -67,7 +65,7 @@ sim.write_info_file(output_path+output_file)  # Write setup information to a tex
 # A centered spherical nucleus in an otherwise liquid domain
 # ====================================================================
 xtalRot    = np.eye(3, dtype=float)                       # No rotation of the seed crystal
-xtalRadius = 0.1 * min(domain_size)                       # Radius of the spherical seed crystal
+xtalRadius = 0.1 * domain_size[0]                         # Radius of the spherical seed crystal
 den        = sim.do_single_crystal(xtalRot, [xtalRadius]) # Generates a single crystal in the center of the domain
 sim.set_density(den)                                      # Sets the new density field in the pyPFC simulation object
 

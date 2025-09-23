@@ -1,11 +1,11 @@
 
-# pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
-A Python software package for setting up, running and processing Phase Field Crystal (PFC) simulations. The code uses PyTorch to allow execution on both CPUs and GPUs, depending on the available hardware. The PFC implementation in pyPFC relies on heavy use of FFTs and is set on a regular Cartesian 3D grid. Periodic boundary conditions are assumed along all coordinate axes.
+# [pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations](#main-header)
+A Python software package for setting up, running and processing Phase Field Crystal (PFC) simulations. The code uses PyTorch to allow execution on both CPUs and GPUs, depending on the available hardware. The PFC implementation in pyPFC relies on heavy use of FFTs and is set on a regular Cartesian 3D grid. Periodic boundary conditions are assumed along all coordinate axes. pyPFC evolves the density field in non-dimensional time and spatial dimensions are expressed in units of lattice parameters.
 
 ![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/images/PFC_atoms.png)
 
-## Control Parameters
-The general behavior of pyPFC is controlled by a set of parameters, collected in a Python dictionary. The parameters are described in the table below.
+## [Configuration Parameters](#params)
+The general behavior of pyPFC is controlled by a set of configuration parameters, collected in a Python dictionary. The parameters are described in the table below.
 
 | Parameter name         | Defaults to                       | Description                                                                      
 | ---------------------- | --------------------------------- | ---------------------------------------------------------------------------------
@@ -34,10 +34,12 @@ The general behavior of pyPFC is controlled by a set of parameters, collected in
 | update_scheme_params   | [1.0, 1.0, 1.0, None, None, None] | Parameters in the time integration scheme: [g1, g2, g3, alpha, beta, gamma]
 | verbose                | True                              | Verbose output (or not)
 
-## Quick Start Example
+## [Quick Start Example](#quick-start-example)
 This is a quick start example for using the pyPFC package to perform a simple phase field crystal (PFC) simulation. The simulation traces the growth of a spherical crystal, centered in a 3D periodic domain. The example can be found as `./examples/ex04_quick_start.py`, where it is commented in more detail. The example demonstrates how to set up a simulation, generate an initial density field, evolve the density field over time and save the results to VTK files for visualization.
 
-Before running this script, ensure that you have the pyPFC package and its dependencies installed.
+It can be noted that the only strictly required input to pyPFC is `domain_size`, defining the size of the simulation domain in units of lattice parameters along each coordinate axis. All other configuration [parameters](#control-parameters) are set to default values, which can be adjusted as needed.
+
+Before running this script, ensure that you have the pyPFC package and its [dependencies](#package-dependencies) installed.
 
 ```python
 import pypfc
@@ -69,7 +71,7 @@ for step in range(nstep):
         sim.write_vtk_points(filename, atom_coord, [atom_data[:,0]], ['den'])
 ```
 
-## Description of Source Files
+## [Description of Source Files](#description-of-source-files)
 The software is built on classes, contained in separate modules/files, with an inheritance chain (from top to bottom) comprising:
 
 | File (*.py)     | Description             
@@ -84,7 +86,7 @@ In addition, **pypfc_ovito.py** provides custom interfaces to selected functiona
 
 Methods in the different classes are described in individual subsections below.
 
-### The Class `pypfc_grid`: Class Methods and their Arguments
+### [The Class `pypfc_grid`: Class Methods and their Arguments](#class-pypfc_grid)
 
 | Method            | Description                                   
 | ----------------- | ----------------------------------------------
@@ -95,7 +97,7 @@ Methods in the different classes are described in individual subsections below.
 | `get_domain_size` | Returns the grid size `domain_size=ndiv*ddiv`
 | `copy_from(grid)` | Makes a duplicate of a grid object
 
-### The Class `pypfc_base`: Class Methods and their Arguments
+### [The Class `pypfc_base`: Class Methods and their Arguments](#class-pypfc_base)
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
@@ -127,7 +129,7 @@ Methods in the different classes are described in individual subsections below.
 | `evaluate_C2_d`                                               | Establish the two-point correlation function (on the device) for a particular crystal structure
 | `evaluate_directional_correlation_kernel(self, H0, Rot)`      | Establish the directional correlation kernel for a particular crystal structure
 
-### The Class `pypfc_pre`: Class Methods and their Arguments
+### [The Class `pypfc_pre`: Class Methods and their Arguments](#class-pypfc_pre)
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
@@ -151,7 +153,7 @@ Methods in the different classes are described in individual subsections below.
 | `generate_density_field(crd, g)`                              | Define a 3D PFC density field
 | `evaluate_ampl_dens`                                          | Get the amplitudes and densities for different density field expansions
 
-### The Class `pypfc_io`: Class Methods and their Arguments
+### [The Class `pypfc_io`: Class Methods and their Arguments](#class-pypfc_io)
 
 | Method                                                                                                                  |Description                                   
 | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- 
@@ -164,7 +166,7 @@ Methods in the different classes are described in individual subsections below.
 | `write_info_file(filename=, output_path)`                                                                               | Write simulation setup information to a file
 | `append_to_info_file(info, filename=, output_path)`                                                                     | Append linea to a text file
 
-### The Class `pypfc`
+### [The Class `pypfc`](#class-pypfc)
 
 The class is initiated by supplying the arguments `domain_size=[Lx,Ly,Lz]` and `ndiv = [nx,ny,nz]`, where `[Lx,Ly,Lz]` is the domain size and `[nx,ny,nz]` define the number of grid points along each coordinate direction. The values in `[nx,ny,nz]` must all be even numbers, an error will be raised otherwise. The only required input is `domain_size`. All other parameters, including `ndiv` are set by defaults, but can be modified as desired. An optional dictionary of configuration parameters can be supplied through the argument `config`.
 
@@ -195,7 +197,17 @@ The class is initiated by supplying the arguments `domain_size=[Lx,Ly,Lz]` and `
 | `evaluate_energy`                                                                            | Evaluate the PFC energy field
 | `get_phase_field`                                                                            | Evaluate the phase field using wavelet filtering
 
-## Package Dependencies
+### [The Class `pypfc_ovito`](#class-pypfc_ovito)
+This class provides pyPFC interfaces to a limited subset of the functionalities in [OVITO](https://www.ovito.org/).
+
+#### Class Methods and their Arguments
+
+| Method                                                                                       | Description                                   
+| -------------------------------------------------------------------------------------------- | ---------------------------------------------- 
+| `do_ovito_ptm(refRot, outputEulerAng, outputStrain)`                                         | Evaluate crystal structure, orientation and elastic Green-Lagrange strain using OVITO's Polyhedral Template Matching (PTM)
+| `do_ovito_dxa(rep, tol)`                                                                     | Perform dislocation analysis (DXA) using OVITO
+
+## [Package Dependencies](#package-dependencies)
 The following Python packages are required:
 
 * numpy
@@ -205,13 +217,16 @@ The following Python packages are required:
 * torch
 * vtk
 
-## Installation and Usage
-Install using `pip install pypfc` and import with `import pypfc` and, optionally, `import pypfc_ovito`.
+## [Installation and Usage](#installation)
+The simplest way to install pyPFC is via pip, which should ensure that all package [dependencies](#package-dependencies) are met automatically.
+Install using `pip install pypfc` or `sudo pip install pypfc`.
 
-## Licencing and Acknowledgment
+Import pyPFC into your Python code by `import pypfc` and, optionally, `import pypfc_ovito`. See the [quick start example](#quick-start-example) or the examples provided in `./examples/`.
+
+## [Licencing](#license)
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
 
-## References
+## [References](#references)
 Further details on PFC modeling and example applications can be found in:
 
 1. [K.H. Blixt and H. Hallberg, **Phase Field Crystal Modeling of Grain Boundary Migration: Mobility, Energy and Structural Variability**, *Acta Materialia*, 297:121318, 2025](https://doi.org/10.1016/j.actamat.2025.121318)

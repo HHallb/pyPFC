@@ -691,7 +691,7 @@ class setup_base(setup_grid):
             C2_d          Two-point pair correlation function [nx, ny, nz/2+1] (on the device)
 
         Last revision:
-        H. Hallberg 2025-09-16
+        H. Hallberg 2025-09-22
         """
 
         # Get reciprocal planes
@@ -723,16 +723,18 @@ class setup_base(setup_grid):
         # Take real part for max operation
         self._f_tmp_d.real.copy_(zero_peak)
 
-        # # Compute the correlation function for all peaks
-        # for ipeak in range(self._npeaks):
-        #     peak_val = DWF_d[ipeak] * torch.exp( -(k2_sqrt_d - kpl_d[ipeak]) ** 2 / denom_d[ipeak] )
-        #     self._f_tmp_d.real = torch.maximum(self._f_tmp_d.real, peak_val)
-
-        # Envelope: largest absolute value at each grid point
-        for ipeak in range(self._npeaks):
-            peak_val = DWF_d[ipeak] * torch.exp( -(k2_sqrt_d - kpl_d[ipeak]) ** 2 / denom_d[ipeak] )
-            mask = peak_val.abs() > self._f_tmp_d.real.abs()
-            self._f_tmp_d.real[mask] = peak_val[mask]
+        # Compute the correlation function for all peaks
+        if self._C20_amplitude < 0.0:
+            # Envelope as the largest absolute value at each grid point. This is needed if the zero-mode
+            # peak has a negative amplitude, but consumes slightly more memory
+            for ipeak in range(self._npeaks):
+                peak_val = DWF_d[ipeak] * torch.exp( -(k2_sqrt_d - kpl_d[ipeak]) ** 2 / denom_d[ipeak] )
+                mask = peak_val.abs() > self._f_tmp_d.real.abs()
+                self._f_tmp_d.real[mask] = peak_val[mask]
+        else:
+            for ipeak in range(self._npeaks):
+                peak_val = DWF_d[ipeak] * torch.exp( -(k2_sqrt_d - kpl_d[ipeak]) ** 2 / denom_d[ipeak] )
+                self._f_tmp_d.real = torch.maximum(self._f_tmp_d.real, peak_val)
 
         # Return the real part as the result
         C2_d = self._f_tmp_d.real.contiguous()
