@@ -241,7 +241,7 @@ Import pyPFC into your Python code by `import pypfc` and, optionally, `import py
 > [!TIP]
 > GPU support must unfortunately be enabled manually since PyPI only provides the CPU version of torch. As an example: to install PyTorch with CUDA 12.1 enabled, run: `pip install torch --index-url https://download.pytorch.org/whl/cu121`. For other CUDA versions and further information, please refer to the official [PyTorch documentation](https://pytorch.org/get-started/locally/).
 
-## Troubleshooting Q&A(#troubleshooting)
+## [Troubleshooting Q&A](#troubleshooting)
 
 #### Q: I have a Nvidia GPU installed but pyPFC tells me I don't.
 **A:** Ensure that PyTorch is installed with CUDA enabled. To be sure, you can also check your setup by running:
