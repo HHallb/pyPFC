@@ -219,6 +219,8 @@ The following Python packages are required:
 * torch
 * vtk
 
+Note that PyPI only installs torch with CPU support. To add GPU support, refer to [Installation and Usage](#installation-and-usage).
+
 ## [Installation and Usage](#installation-and-usage)
 The simplest way to install pyPFC is via pip, which should ensure that package [dependencies](#package-dependencies) are met automatically. Note, however, that **PyTorch is only installed with CPU support** since PyPI only provides the CPU version of torch. For GPU support, see the tip a couple of lines down in this section.
 
@@ -239,7 +241,7 @@ pip install .
 Import pyPFC into your Python code by `import pypfc` and, optionally, `import pypfc_ovito`. See the [quick start example](#quick-start-example) or the examples provided in `./examples/`.
 
 > [!TIP]
-> GPU support must unfortunately be enabled manually since PyPI only provides the CPU version of torch. As an example: to install PyTorch with CUDA 12.1 enabled, run: `pip install torch --index-url https://download.pytorch.org/whl/cu121`. For other CUDA versions and further information, please refer to the official [PyTorch documentation](https://pytorch.org/get-started/locally/).
+> To install torch with CUDA 12.1 enabled, run: `pip install torch --index-url https://download.pytorch.org/whl/cu121`. For other CUDA versions and further information, please refer to the official [PyTorch documentation](https://pytorch.org/get-started/locally/).
 
 ## [Troubleshooting Q&A](#troubleshooting)
 
@@ -253,11 +255,16 @@ print(torch.version.cuda)
 ```
 If `is_available()` is `False` or `device_count()` is `0`, PyTorch cannot see your GPU. See [Installation and Usage](#installation-and-usage) on how to enable CUDA. 
 
+---
 #### Q: The solid crystal phase fails to stabilize and/or appears to "melt" away.
 **A:** This is most likely due to `domain_size` not being set correctly to accommodate the current lattice peridicity.
 
+---
+
 #### Q: The atom positions obtained by `interpolate_density_maxima` do not seem to coincide with the density field maxima.
 **A:** This is likely related to either insufficient grid resolution or too low interpolation order. The former issue is mitigated by reducing the values in `ddiv` and in the latter case `density_interp_order` should be increased. Usually `density_interp_order=2` is fine and increasing the number will also increase the time spent on interpolation.
+
+---
 
 ## [Licencing](#license)
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
