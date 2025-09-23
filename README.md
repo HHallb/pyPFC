@@ -240,7 +240,7 @@ pip install .
 ```
 Import pyPFC into your Python code by `import pypfc` and, optionally, `import pypfc_ovito`. See the [quick start example](#quick-start-example) or the examples provided in `./examples/`.
 
-> [!TIP]
+> [!IMPORTANT]
 > To install torch with CUDA 12.1 enabled, run: `pip install torch --index-url https://download.pytorch.org/whl/cu121`. For other CUDA versions and further information, please refer to the official [PyTorch documentation](https://pytorch.org/get-started/locally/).
 
 ## [Troubleshooting Q&A](#troubleshooting)
