@@ -4,7 +4,7 @@ A Python software package for setting up, running and processing Phase Field Cry
 
 ![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/images/PFC_atoms.png)
 
-## [Configuration Parameters](#params)
+## [Configuration Parameters](#configuration-parameters)
 The general behavior of pyPFC is controlled by a set of configuration parameters, collected in a Python dictionary. The parameters are described in the table below.
 
 | Parameter name         | Defaults to                       | Description                                                                      
@@ -37,7 +37,7 @@ The general behavior of pyPFC is controlled by a set of configuration parameters
 ## [Quick Start Example](#quick-start-example)
 This is a quick start example for using the pyPFC package to perform a simple phase field crystal (PFC) simulation. The simulation traces the growth of a spherical crystal, centered in a 3D periodic domain. The example can be found as `./examples/ex04_quick_start.py`, where it is commented in more detail. The example demonstrates how to set up a simulation, generate an initial density field, evolve the density field over time and save the results to VTK files for visualization.
 
-It can be noted that the only strictly required input to pyPFC is `domain_size`, defining the size of the simulation domain in units of lattice parameters along each coordinate axis. All other configuration [parameters](#control-parameters) are set to default values, which can be adjusted as needed.
+It can be noted that the only strictly required input to pyPFC is `domain_size`, defining the size of the simulation domain in units of lattice parameters along each coordinate axis. All other configuration [parameters](#configuration-parameters) are set to default values, which can be adjusted as needed.
 
 Before running this script, ensure that you have the pyPFC package and its [dependencies](#package-dependencies) installed.
 
