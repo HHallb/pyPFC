@@ -1,3 +1,5 @@
+![PyPI](https://img.shields.io/pypi/v/pypfc)
+![License](https://img.shields.io/github/license/HHallb/pyPFC)
 
 # [pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations](#main-header)
 A Python software package for setting up, running and processing Phase Field Crystal (PFC) simulations. The code uses PyTorch to allow execution on both CPUs and GPUs, depending on the available hardware. The PFC implementation in pyPFC relies on heavy use of FFTs and is set on a regular Cartesian 3D grid. Periodic boundary conditions are assumed along all coordinate axes. pyPFC evolves the density field in non-dimensional time and spatial dimensions are expressed in units of lattice parameters.
@@ -219,8 +221,21 @@ The following Python packages are required:
 
 ## [Installation and Usage](#installation)
 The simplest way to install pyPFC is via pip, which should ensure that all package [dependencies](#package-dependencies) are met automatically.
-Install using `pip install pypfc` or `sudo pip install pypfc`.
 
+Install from PyPI using:
+```bash
+pip install pypfc
+```
+or
+```bash
+sudo pip install pypfc
+```
+Alternatively from source by:
+```bash
+git clone https://github.com/HHallb/pyPFC.git
+cd pyPFC
+pip install .
+```
 Import pyPFC into your Python code by `import pypfc` and, optionally, `import pypfc_ovito`. See the [quick start example](#quick-start-example) or the examples provided in `./examples/`.
 
 ## [Licencing](#license)
