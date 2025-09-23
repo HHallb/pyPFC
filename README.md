@@ -230,7 +230,7 @@ or
 ```bash
 sudo pip install pypfc
 ```
-Alternatively from source by:
+Alternatively, install from source by:
 ```bash
 git clone https://github.com/HHallb/pyPFC.git
 cd pyPFC
