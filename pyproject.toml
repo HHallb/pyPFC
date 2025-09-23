@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pypfc"
-version = "0.0.2"
+version = "0.0.3"
 authors = [
   { name="Håkan Hallberg", email="hakan.hallb@protonmail.com" },
 ]
 keywords = ["phase field crystal", "simulation", "atomistic simulation"]
 description = "A Python Package for Phase Field Crystal (PFC) Simulations"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -20,12 +20,12 @@ license = "GPL-3.0-or-later"
 
 # Add your dependencies here
 dependencies = [
-    # "numpy",
-    # "scipy"
-    # "vtk"
-    # "torch"
-    # "scikit-image"
-    # "ovito"
+    "numpy",
+    "scipy"
+    "vtk"
+    "torch"
+    "scikit-image"
+    "ovito"
 ]
 
 [project.urls]
