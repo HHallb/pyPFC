@@ -220,7 +220,7 @@ The following Python packages are required:
 * vtk
 
 ## [Installation and Usage](#installation-and-usage)
-The simplest way to install pyPFC is via pip, which should ensure that package [dependencies](#package-dependencies) are met automatically. Note, however, that **PyTorch is only installed with CPU support** since PyPI only provides the CPU version of torch. For GPU support, see the tip below.
+The simplest way to install pyPFC is via pip, which should ensure that package [dependencies](#package-dependencies) are met automatically. Note, however, that **PyTorch is only installed with CPU support** since PyPI only provides the CPU version of torch. For GPU support, see the tip a couple of lines down in this section.
 
 Install from PyPI using:
 ```bash
