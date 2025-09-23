@@ -220,7 +220,7 @@ The following Python packages are required:
 * vtk
 
 ## [Installation and Usage](#installation)
-The simplest way to install pyPFC is via pip, which should ensure that all package [dependencies](#package-dependencies) are met automatically.
+The simplest way to install pyPFC is via pip, which should ensure that package [dependencies](#package-dependencies) are met automatically.
 
 Install from PyPI using:
 ```bash
@@ -237,6 +237,10 @@ cd pyPFC
 pip install .
 ```
 Import pyPFC into your Python code by `import pypfc` and, optionally, `import pypfc_ovito`. See the [quick start example](#quick-start-example) or the examples provided in `./examples/`.
+
+> [!IMPORTANT]  
+> If your system is equipped with one or more GPUs and pypfc reprorts that no GPU is found, it might be necessary to manually install torch with cuda support. Please refer to the official [PyTorch documentation](https://pytorch.org/get-started/locally/)
+
 
 ## [Licencing](#license)
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
