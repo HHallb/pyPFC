@@ -21,10 +21,10 @@ license = "GPL-3.0-or-later"
 # Add your dependencies here
 dependencies = [
     "numpy",
-    "scipy"
-    "vtk"
-    "torch"
-    "scikit-image"
+    "scipy",
+    "vtk",
+    "torch",
+    "scikit-image",
     #"ovito"
 ]
 
