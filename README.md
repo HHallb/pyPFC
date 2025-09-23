@@ -241,9 +241,6 @@ Import pyPFC into your Python code by `import pypfc` and, optionally, `import py
 > [!TIP]
 > GPU support must unfortunately be enabled manually since PyPI only provides the CPU version of torch. As an example: to install PyTorch with CUDA 12.1 enabled, run: `pip install torch --index-url https://download.pytorch.org/whl/cu121`. For other CUDA versions and further information, please refer to the official [PyTorch documentation](https://pytorch.org/get-started/locally/).
 
-## [Licencing](#license)
-This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
-
 ## Troubleshooting Q&A(#troubleshooting)
 
 #### Q: I have a Nvidia GPU installed but pyPFC tells me I don't.
@@ -261,6 +258,9 @@ If `is_available()` is `False` or `device_count()` is `0`, PyTorch cannot see yo
 
 #### Q: The atom positions obtained by `interpolate_density_maxima` do not seem to coincide with the density field maxima
 **A:** This is likely related to either insufficient grid resolution or too low interpolation order. The former issue is mitigated by reducing the values in `ddiv` and in the latter case `density_interp_order` should be increased. Usually `density_interp_order=2` is fine and increasing the number will also increase the time spent on interpolation.
+
+## [Licencing](#license)
+This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
 
 ## [References](#references)
 Further details on PFC modeling and example applications can be found in:
