@@ -25,7 +25,7 @@ dependencies = [
     "vtk"
     "torch"
     "scikit-image"
-    "ovito"
+    #"ovito"
 ]
 
 [project.urls]
