@@ -256,3 +256,8 @@ Further details on PFC modeling and example applications can be found in:
 6. [K.H. Blixt and H. Hallberg, **Grain boundary and particle interaction: Enveloping and pass-through mechanisms studied by 3D phase field crystal simulations**, *Materials & Design*, 220:110845, 2022](https://doi.org/10.1016/j.matdes.2022.110845)
 7. [K.H. Blixt and H. Hallberg, **Grain boundary stiffness based on phase field crystal simulations**, *Materials Letters*, 318:132178, 2022](https://doi.org/10.1016/j.matlet.2022.132178)
 8. [K.H. Blixt and H. Hallberg, **Evaluation of grain boundary energy, structure and stiffness from phase field crystal simulations**, *Modelling and Simulation in Materials Science and Engineering*, 30(1):014002, 2022](https://doi.org/10.1088/1361-651X/ac3ca1)
+
+## Troubleshooting
+> [!TIP]  
+1. If a solid crystal phase fails to stabilize or appears to "melt" away, it is most likely due to `domain_size` not being set correctly to accommodate the current lattice peridicity.
+2. If interpolated density maxima ("atoms") obtained by `interpolate_density_maxima` appear to not coincide with the density field maxima, it is likely related to either insufficient grid resolution or too low interpolation order. The former issue is mitigated by reducing the values in `ddiv` and ,in the latter case, in which case `density_interp_order` should be increased. Usually `density_interp_order=2` is fine and increasing the number will also increase the time to perform the interpolation.
