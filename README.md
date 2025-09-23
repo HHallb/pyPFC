@@ -219,8 +219,8 @@ The following Python packages are required:
 * torch
 * vtk
 
-## [Installation and Usage](#installation)
-The simplest way to install pyPFC is via pip, which should ensure that package [dependencies](#package-dependencies) are met automatically. Note, however, that PyTorch is only installed with CPU support. For GPU support, see the tip below.
+## [Installation and Usage](#installation-and-usage)
+The simplest way to install pyPFC is via pip, which should ensure that package [dependencies](#package-dependencies) are met automatically. Note, however, that **PyTorch is only installed with CPU support** since PyPI only provides the CPU version of torch. For GPU support, see the tip below.
 
 Install from PyPI using:
 ```bash
@@ -239,11 +239,28 @@ pip install .
 Import pyPFC into your Python code by `import pypfc` and, optionally, `import pypfc_ovito`. See the [quick start example](#quick-start-example) or the examples provided in `./examples/`.
 
 > [!TIP]
-> GPU support must be installed manually since PyPI only provides the CPU version of torch. To install PyTorch with CUDA 12.1 enabled, run:
-`pip install torch --index-url https://download.pytorch.org/whl/cu121`. For other CUDA versions and further information, please refer to the official [PyTorch documentation](https://pytorch.org/get-started/locally/).
+> GPU support must unfortunately be enabled manually since PyPI only provides the CPU version of torch. As an example: to install PyTorch with CUDA 12.1 enabled, run: `pip install torch --index-url https://download.pytorch.org/whl/cu121`. For other CUDA versions and further information, please refer to the official [PyTorch documentation](https://pytorch.org/get-started/locally/).
 
 ## [Licencing](#license)
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
+
+## Troubleshooting Q&A
+
+#### Q: I have a Nvidia GPU installed but pyPFC tells me I don't.
+**A:** Ensure that PyTorch is installed with CUDA enabled. To be sure, you can also check your setup by running:
+```python
+import torch
+print(torch.cuda.is_available())
+print(torch.cuda.device_count())
+print(torch.version.cuda)
+```
+If `is_available()` is `False` or `device_count()` is `0`, PyTorch cannot see your GPU. See [Installation and Usage](#installation-and-usage) on how to enable CUDA. 
+
+#### Q: The solid crystal phase fails to stabilize and/or appears to "melt" away.
+**A:** This is most likely due to `domain_size` not being set correctly to accommodate the current lattice peridicity.
+
+#### Q: The atom positions obtained by `interpolate_density_maxima` do not seem to coincide with the density field maxima
+**A:** This is likely related to either insufficient grid resolution or too low interpolation order. The former issue is mitigated by reducing the values in `ddiv` and in the latter case `density_interp_order` should be increased. Usually `density_interp_order=2` is fine and increasing the number will also increase the time spent on interpolation.
 
 ## [References](#references)
 Further details on PFC modeling and example applications can be found in:
@@ -256,7 +273,3 @@ Further details on PFC modeling and example applications can be found in:
 6. [K.H. Blixt and H. Hallberg, **Grain boundary and particle interaction: Enveloping and pass-through mechanisms studied by 3D phase field crystal simulations**, *Materials & Design*, 220:110845, 2022](https://doi.org/10.1016/j.matdes.2022.110845)
 7. [K.H. Blixt and H. Hallberg, **Grain boundary stiffness based on phase field crystal simulations**, *Materials Letters*, 318:132178, 2022](https://doi.org/10.1016/j.matlet.2022.132178)
 8. [K.H. Blixt and H. Hallberg, **Evaluation of grain boundary energy, structure and stiffness from phase field crystal simulations**, *Modelling and Simulation in Materials Science and Engineering*, 30(1):014002, 2022](https://doi.org/10.1088/1361-651X/ac3ca1)
-
-## Troubleshooting
-1. If a solid crystal phase fails to stabilize or appears to "melt" away, it is most likely due to `domain_size` not being set correctly to accommodate the current lattice peridicity.
-2. If interpolated density maxima ("atoms") obtained by `interpolate_density_maxima` appear to not coincide with the density field maxima, it is likely related to either insufficient grid resolution or too low interpolation order. The former issue is mitigated by reducing the values in `ddiv` and, in the latter case, `density_interp_order` should be increased. Usually `density_interp_order=2` is fine and increasing the number will also increase the time to perform the interpolation.
