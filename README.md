@@ -256,7 +256,7 @@ If `is_available()` is `False` or `device_count()` is `0`, PyTorch cannot see yo
 #### Q: The solid crystal phase fails to stabilize and/or appears to "melt" away.
 **A:** This is most likely due to `domain_size` not being set correctly to accommodate the current lattice peridicity.
 
-#### Q: The atom positions obtained by `interpolate_density_maxima` do not seem to coincide with the density field maxima
+#### Q: The atom positions obtained by `interpolate_density_maxima` do not seem to coincide with the density field maxima.
 **A:** This is likely related to either insufficient grid resolution or too low interpolation order. The former issue is mitigated by reducing the values in `ddiv` and in the latter case `density_interp_order` should be increased. Usually `density_interp_order=2` is fine and increasing the number will also increase the time spent on interpolation.
 
 ## [Licencing](#license)
