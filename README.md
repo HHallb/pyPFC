@@ -103,6 +103,8 @@ Methods in the different classes are described in individual subsections below.
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
+| `set_alpha(alpha)`                                            | Set C2 peak widths
+| `get_alpha`                                                   | Get C2 peak widths
 | `set_verbose(verbose)`                                        | Set verbose output flag
 | `get_verbose`                                                 | Get verbose output flag
 | `set_dtype_cpu(dtype)`                                        | Set the cpu floating point precision
@@ -130,6 +132,8 @@ Methods in the different classes are described in individual subsections below.
 | `evaluate_reciprocal_planes`                                  | Establish the reciprocal vectors/planes for a particular crystal structure
 | `evaluate_C2_d`                                               | Establish the two-point correlation function (on the device) for a particular crystal structure
 | `evaluate_directional_correlation_kernel(self, H0, Rot)`      | Establish the directional correlation kernel for a particular crystal structure
+| `get_xtal_nearest_neighbors`                                  | Provides the number of nearest neighbors and neighbor distances for different crystal structures
+| `get_csp(pos, normalize_csp)`                                 | Evaluate the centro-symmetry parameter (CSP) for a set of atoms
 
 ### [The Class `pypfc_pre`: Class Methods and their Arguments](#class-pypfc_pre)
 
@@ -206,8 +210,9 @@ This class provides pyPFC interfaces to a limited subset of the functionalities 
 
 | Method                                                                                       | Description                                   
 | -------------------------------------------------------------------------------------------- | ---------------------------------------------- 
-| `do_ovito_ptm(refRot, outputEulerAng, outputStrain)`                                         | Evaluate crystal structure, orientation and elastic Green-Lagrange strain using OVITO's Polyhedral Template Matching (PTM)
+| `do_ovito_csp(num_neighbors)`                                                                | Evaluate Centro-Symmetry Parameter (CSP) using OVITO's CentroSymmetryModifier
 | `do_ovito_dxa(rep, tol)`                                                                     | Perform dislocation analysis (DXA) using OVITO
+| `do_ovito_ptm(refRot, outputEulerAng, outputStrain)`                                         | Evaluate crystal structure, orientation and elastic Green-Lagrange strain using OVITO's Polyhedral Template Matching (PTM)
 
 ## [Package Dependencies](#package-dependencies)
 The following Python packages are required:

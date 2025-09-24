@@ -39,6 +39,7 @@ class setup_base(setup_grid):
         self._alat                    = config['alat']
         self._sigma                   = config['sigma']
         self._npeaks                  = config['npeaks']
+        self._alpha                   = np.array(config['alpha'], dtype=config['dtype_cpu'])
         self._dtype_cpu               = config['dtype_cpu']
         self._dtype_gpu               = config['dtype_gpu']
         self._device_number           = config['device_number']
@@ -143,6 +144,12 @@ class setup_base(setup_grid):
         torch.set_num_interop_threads(nthreads_interop)
         self._set_num_threads         = nthreads
         self._set_num_interop_threads = nthreads_interop
+
+    def set_alpha(self, alpha):
+        self._alpha = alpha
+
+    def get_alpha(self):
+        return self._alpha
 
 # =====================================================================================
 
@@ -429,97 +436,243 @@ class setup_base(setup_grid):
                                     [den ene pf1 pf2 ... pfN]
 
         Last revision:
-        H. Hallberg 2025-09-20
+        H. Hallberg 2025-09-24
         '''
 
         if self._verbose: tstart = time.time()
 
-        # Grid
-        dx,dy,dz = self._ddiv
-
-        size = 1 + 2 * self._density_interp_order
-        footprint = np.ones((size, size, size))
-        footprint[self._density_interp_order, self._density_interp_order, self._density_interp_order] = 0
-
-        filtered = ndi.maximum_filter(den, footprint=footprint, mode='wrap')
-
-        mask_local_maxima = den > filtered
-        coords = np.asarray(np.where(mask_local_maxima),dtype=self._dtype_cpu).T
-
-        # ndi.maximum_filter works in voxel coordinates, convert to physical coordinates
-        coords[:,0] *= dx
-        coords[:,1] *= dy
-        coords[:,2] *= dz
-
-        # Filter maxima based on density threshold
+        # Grid spacing
+        dx, dy, dz = self._ddiv
+        
+        # Get density threshold early to avoid recomputation
         max_den = np.max(den)
-        valid_maxima = den[mask_local_maxima] >= (self._density_threshold * max_den)
-        coords = coords[valid_maxima]
+        density_threshold = self._density_threshold * max_den
+        # Optimized local maxima detection using maximum_filter (this is actually quite efficient)
+        size = 1 + 2 * self._density_interp_order
+        footprint = np.ones((size, size, size), dtype=bool)
+        footprint[self._density_interp_order, self._density_interp_order, self._density_interp_order] = False
+        
+        # Find local maxima - maximum_filter is optimized in scipy
+        filtered = ndi.maximum_filter(den, footprint=footprint, mode='wrap')
+        
+        # Combine maxima detection and threshold filtering in one operation
+        valid_maxima_mask = (den > filtered) & (den >= density_threshold)
+        
+        # Early exit if no maxima found
+        if not np.any(valid_maxima_mask):
+            atom_coord = np.array([]).reshape(0, 3)
+            atom_data = np.array([]).reshape(0, 1)
+            return atom_coord, atom_data
+            
+        # Extract coordinates efficiently - avoid transpose operations
+        maxima_indices = np.where(valid_maxima_mask)
+        n_maxima = len(maxima_indices[0])
+        
+        # Pre-allocate coordinate array and fill directly
+        coords = np.empty((n_maxima, 3), dtype=self._dtype_cpu)
+        coords[:, 0] = maxima_indices[0] * dx
+        coords[:, 1] = maxima_indices[1] * dy 
+        coords[:, 2] = maxima_indices[2] * dz
+        
+        # Extract field values directly using the indices
+        denpos = den[maxima_indices]
+        enepos = ene[maxima_indices] if ene is not None else None
 
-        denpos = den[mask_local_maxima][valid_maxima]
-        if ene is not None:
-            enepos = ene[mask_local_maxima][valid_maxima]
-
-        # Merge maxima within the merge_distance
-        if self._density_merge_distance > 0.0 and len(coords) > 0:
+        # Simplified clustering - most efficient for typical PFC use cases
+        if self._density_merge_distance > 0.0 and n_maxima > 1:
+            # Use KDTree for all cases - it's consistently fast and memory efficient
             tree = cKDTree(coords)
-            clusters = tree.query_ball_tree(tree, r=self._density_merge_distance)
-            unique_clusters = []
-            seen = set()
-            for cluster in clusters:
-                cluster = tuple(sorted(cluster))
-                if cluster not in seen:
-                    seen.add(cluster)
-                    unique_clusters.append(cluster)
-
-            merged_coords = []
-            merged_denpos = []
-            merged_enepos = [] if ene is not None else None
-            for cluster in unique_clusters:
-                cluster_coords = coords[list(cluster)]
-                cluster_denpos = denpos[list(cluster)]
-                merged_coords.append(np.mean(cluster_coords, axis=0))
-                merged_denpos.append(np.mean(cluster_denpos))
-                if ene is not None:
-                    cluster_enepos = enepos[list(cluster)]
-                    merged_enepos.append(np.mean(cluster_enepos))
-            atom_coord = np.array(merged_coords)
-            denpos = np.array(merged_denpos)
+            visited = np.zeros(n_maxima, dtype=bool)
+            
+            cluster_coords = []
+            cluster_denpos = []
+            cluster_enepos = [] if ene is not None else None
+            
+            for i in range(n_maxima):
+                if visited[i]:
+                    continue
+                    
+                # Find all points within merge distance using KDTree
+                neighbors = tree.query_ball_point(coords[i], r=self._density_merge_distance)
+                
+                # Mark as visited
+                visited[neighbors] = True
+                
+                # Average the cluster - use numpy indexing directly
+                if len(neighbors) == 1:
+                    # Single point - no averaging needed
+                    cluster_coords.append(coords[i])
+                    cluster_denpos.append(denpos[i])
+                    if ene is not None:
+                        cluster_enepos.append(enepos[i])
+                else:
+                    # Multiple points - compute averages
+                    cluster_coords.append(np.mean(coords[neighbors], axis=0))
+                    cluster_denpos.append(np.mean(denpos[neighbors]))
+                    if ene is not None:
+                        cluster_enepos.append(np.mean(enepos[neighbors]))
+            
+            atom_coord = np.array(cluster_coords)
+            denpos = np.array(cluster_denpos)
             if ene is not None:
-                enepos = np.array(merged_enepos)
+                enepos = np.array(cluster_enepos)
         else:
             atom_coord = coords
-            # denpos and enepos are already set above
-            # Only set enepos if ene is not None
-            if ene is not None:
-                enepos = enepos
 
-        # Handle phase field(s), either as a list of fields or as a single field
+        # Handle phase field(s) efficiently
         if pf is not None:
-            # If pf is a single array, wrap it in a list
             if isinstance(pf, np.ndarray) and pf.ndim == 3:
                 pf_list = [pf]
             else:
                 pf_list = list(pf)
-            nPf = len(pf_list)
-            pfpos = np.zeros((coords.shape[0], nPf), dtype=self._dtype_cpu)
-            for pfNr, phaseField in enumerate(pf_list):
-                pfpos[:, pfNr] = phaseField[mask_local_maxima][valid_maxima][:coords.shape[0]]
+            
+            n_pf = len(pf_list)
+            n_atoms = len(atom_coord)
+            
+            # Extract phase field values efficiently
+            pfpos = np.empty((n_atoms, n_pf), dtype=self._dtype_cpu)
+            for pf_idx, phase_field in enumerate(pf_list):
+                if self._density_merge_distance > 0.0 and n_maxima != n_atoms:
+                    # Merging occurred - use first value (approximate)
+                    pf_values = phase_field[maxima_indices]
+                    pfpos[:, pf_idx] = pf_values[:n_atoms]
+                else:
+                    # No merging - direct extraction
+                    pfpos[:, pf_idx] = phase_field[maxima_indices]
+            
+            # Assemble final data array efficiently
             if ene is not None:
-                atom_data = np.hstack((denpos[:, None], enepos[:, None], pfpos))
+                atom_data = np.column_stack((denpos, enepos, pfpos))
             else:
-                atom_data = np.hstack((denpos[:, None], pfpos))
+                atom_data = np.column_stack((denpos, pfpos))
         else:
+            # No phase fields - simpler assembly
             if ene is not None:
-                atom_data = np.hstack((denpos[:, None], enepos[:, None]))
+                atom_data = np.column_stack((denpos, enepos))
             else:
-                atom_data = denpos[:, None]
+                atom_data = denpos[:, np.newaxis]
 
         if self._verbose:
             tend = time.time()
-            print(f'Time to interpolate density maxima: {tend-tstart:.3f} s')
+            print(f'Time to interpolate {atom_coord.shape[0]} density maxima: {tend-tstart:.3f} s')
 
         return atom_coord, atom_data
+    
+# =====================================================================================
+
+    # def interpolate_density_maxima_WORKING(self, den, ene=None, pf=None):
+    #         '''
+    #         PURPOSE
+    #             Find the coordinates of the maxima in the density field (='atom' positions)
+    #             The domain is assumed to be defined such that all maxima
+    #             have coordinates (x,y,z) >= (0,0,0).
+    #             The density and, optionally, the energy and the phase field value(s)
+    #             at the individual maxima are interpolated too.
+
+    #         INPUT
+    #             den                     Density field, [nx, ny, nz]
+    #             ene                     Energy field, [nx, ny, nz]
+    #             pf                      Optional list of phase fields, [nx, ny, nz]
+
+    #         OUTPUT
+    #             atom_coord              Coordinates of the density maxima, [nmaxima x 3]
+    #             atom_data               Interpolated field values at the density maxima,
+    #                                     [nmaxima x 2+nPhaseFields].
+    #                                     The columns hold point data in the order:
+    #                                     [den ene pf1 pf2 ... pfN]
+
+    #         Last revision:
+    #         H. Hallberg 2025-09-20
+    #         '''
+
+    #         if self._verbose: tstart = time.time()
+
+    #         # Grid
+    #         dx,dy,dz = self._ddiv
+
+    #         size = 1 + 2 * self._density_interp_order
+    #         footprint = np.ones((size, size, size))
+    #         footprint[self._density_interp_order, self._density_interp_order, self._density_interp_order] = 0
+
+    #         filtered = ndi.maximum_filter(den, footprint=footprint, mode='wrap')
+
+    #         mask_local_maxima = den > filtered
+    #         coords = np.asarray(np.where(mask_local_maxima),dtype=self._dtype_cpu).T
+
+    #         # ndi.maximum_filter works in voxel coordinates, convert to physical coordinates
+    #         coords[:,0] *= dx
+    #         coords[:,1] *= dy
+    #         coords[:,2] *= dz
+
+    #         # Filter maxima based on density threshold
+    #         max_den = np.max(den)
+    #         valid_maxima = den[mask_local_maxima] >= (self._density_threshold * max_den)
+    #         coords = coords[valid_maxima]
+
+    #         denpos = den[mask_local_maxima][valid_maxima]
+    #         if ene is not None:
+    #             enepos = ene[mask_local_maxima][valid_maxima]
+
+    #         # Merge maxima within the merge_distance
+    #         if self._density_merge_distance > 0.0 and len(coords) > 0:
+    #             tree = cKDTree(coords)
+    #             clusters = tree.query_ball_tree(tree, r=self._density_merge_distance)
+    #             unique_clusters = []
+    #             seen = set()
+    #             for cluster in clusters:
+    #                 cluster = tuple(sorted(cluster))
+    #                 if cluster not in seen:
+    #                     seen.add(cluster)
+    #                     unique_clusters.append(cluster)
+
+    #             merged_coords = []
+    #             merged_denpos = []
+    #             merged_enepos = [] if ene is not None else None
+    #             for cluster in unique_clusters:
+    #                 cluster_coords = coords[list(cluster)]
+    #                 cluster_denpos = denpos[list(cluster)]
+    #                 merged_coords.append(np.mean(cluster_coords, axis=0))
+    #                 merged_denpos.append(np.mean(cluster_denpos))
+    #                 if ene is not None:
+    #                     cluster_enepos = enepos[list(cluster)]
+    #                     merged_enepos.append(np.mean(cluster_enepos))
+    #             atom_coord = np.array(merged_coords)
+    #             denpos = np.array(merged_denpos)
+    #             if ene is not None:
+    #                 enepos = np.array(merged_enepos)
+    #         else:
+    #             atom_coord = coords
+    #             # denpos and enepos are already set above
+    #             # Only set enepos if ene is not None
+    #             if ene is not None:
+    #                 enepos = enepos
+
+    #         # Handle phase field(s), either as a list of fields or as a single field
+    #         if pf is not None:
+    #             # If pf is a single array, wrap it in a list
+    #             if isinstance(pf, np.ndarray) and pf.ndim == 3:
+    #                 pf_list = [pf]
+    #             else:
+    #                 pf_list = list(pf)
+    #             nPf = len(pf_list)
+    #             pfpos = np.zeros((coords.shape[0], nPf), dtype=self._dtype_cpu)
+    #             for pfNr, phaseField in enumerate(pf_list):
+    #                 pfpos[:, pfNr] = phaseField[mask_local_maxima][valid_maxima][:coords.shape[0]]
+    #             if ene is not None:
+    #                 atom_data = np.hstack((denpos[:, None], enepos[:, None], pfpos))
+    #             else:
+    #                 atom_data = np.hstack((denpos[:, None], pfpos))
+    #         else:
+    #             if ene is not None:
+    #                 atom_data = np.hstack((denpos[:, None], enepos[:, None]))
+    #             else:
+    #                 atom_data = denpos[:, None]
+
+    #         if self._verbose:
+    #             tend = time.time()
+    #             print(f'Time to interpolate {atom_coord.shape[0]} density maxima: {tend-tstart:.3f} s')
+
+    #         return atom_coord, atom_data
     
 # =====================================================================================
 
@@ -807,5 +960,138 @@ class setup_base(setup_grid):
             print(f'Time to evaluate directional convolution kernel: {tend-tstart:.3f} s')
 
         return f_H_d
+
+# =====================================================================================
+
+    def get_xtal_nearest_neighbors(self):
+        """
+        PURPOSE
+            Get nearest neighbor information for different crystal structures.
+
+        INPUT
+            struct          Crystal structure: SC, BCC, FCC, DC
+            alat            Lattice parameter
+
+        OUTPUT
+            nnb             Number of nearest and next-nearest neighbors [nvals]
+            nnb_dist        Distances to the nearest and next-nearest neighbors [nvals]
+
+        Last revision:
+            H. Hallberg 2025-09-24
+        """
+
+        # Nearest and next nearest neighbor positions
+        if self._struct.upper() == 'SC':
+            # SC
+            nnb_dist = self._alat * np.array([1.0, 1.0], dtype=self._dtype_cpu)
+            nnb      = np.array([6, 12], dtype=int)
+        elif self._struct.upper() == 'BCC':
+            # BCC
+            nnb_dist = self._alat * np.array([np.sqrt(3)/2, 1.0], dtype=self._dtype_cpu)
+            nnb      = np.array([8, 6], dtype=int)
+        elif self._struct.upper() == 'FCC':
+            # FCC
+            nnb_dist = self._alat * np.array([1/np.sqrt(2), 1.0, np.sqrt(3/2), np.sqrt(2), np.sqrt(5/2), np.sqrt(3), np.sqrt(7/2), 2.0], dtype=self._dtype_cpu)
+            nnb      = np.array([12, 6, 24, 12, 24, 8, 48, 6], dtype=int)
+        elif self._struct.upper() == 'DC':
+            # DC
+            nnb_dist = self._alat * np.array([np.sqrt(3)/4, 1/np.sqrt(2)], dtype=self._dtype_cpu)
+            nnb      = np.array([4, 12], dtype=int)
+        else:
+            raise ValueError(f'Unsupported crystal structure: {self._struct}')
+
+        return nnb, nnb_dist
+
+# =====================================================================================
+
+    def get_csp(self, pos, normalize_csp=False):
+        """
+        PURPOSE
+            Calculate the centro-symmetry parameter (CSP) for a set of atoms in a 3D periodic domain.
+
+            Reference:
+                C.L. Kelchner, S.J. Plimpton and J.C. Hamilton, Dislocation nucleation and defect
+                structure during surface indentation, Phys. Rev. B, 58(17):11085-11088, 1998
+
+        INPUT
+            pos             Array of shape [natoms, 3] containing the 3D coordinates of the atoms
+            normalize_csp   If True, the CSP values are normalized to the range [0,1]
+
+        OUTPUT
+            csp             Array containing the CSP value for each atom [natoms]
+
+        Last revision:
+            H. Hallberg 2025-09-24
+        """
+
+        if self._verbose:
+            tstart = time.time()
+
+        # Determine the number of nearest neighbors based on crystal structure
+        nnb, _      = self.get_xtal_nearest_neighbors()
+        n_neighbors = nnb[0]
+
+        # Ensure n_neighbors is even for CSP calculation
+        if n_neighbors % 2 != 0:
+            n_neighbors += 1
+            if self._verbose:
+                print(f"Warning: Adjusted num_neighbors to {n_neighbors} (must be even for CSP)")
+
+        # Generate periodic images more efficiently - only if needed for boundary atoms
+        # For most atoms, neighbors are likely within the main domain
+        offsets = np.array([[dx, dy, dz] for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1)])
+        periodic_images = np.vstack([pos + offset * self._domain_size for offset in offsets])
+
+        # Create KDTree for efficient neighbor search
+        tree = cKDTree(periodic_images)
+
+        # Pre-compute triangular indices for efficiency (avoid recomputation in loop)
+        triu_indices = np.triu_indices(n_neighbors, k=1)
+        n_pairs = n_neighbors // 2
+        
+        # Vectorized neighbor finding for all atoms at once
+        distances, indices = tree.query(pos, k=n_neighbors + 1)  # +1 to exclude self
+        neighbor_indices = indices[:, 1:]  # Exclude the atom itself
+        
+        # Get all neighbor positions for all atoms at once
+        all_neighbor_positions = periodic_images[neighbor_indices]  # Shape: (n_atoms, n_neighbors, 3)
+        
+        # Calculate relative positions for all atoms at once
+        pos_expanded = pos[:, np.newaxis, :]  # Shape: (n_atoms, 1, 3)
+        neighbors_rel = all_neighbor_positions - pos_expanded  # Shape: (n_atoms, n_neighbors, 3)
+        
+        # Vectorized CSP calculation for all atoms at once
+        # Create pairwise sums for all atoms simultaneously
+        neighbors_i = neighbors_rel[:, :, np.newaxis, :]  # Shape: (n_atoms, n_neighbors, 1, 3)
+        neighbors_j = neighbors_rel[:, np.newaxis, :, :]  # Shape: (n_atoms, 1, n_neighbors, 3)
+        pairwise_sums = neighbors_i + neighbors_j  # Shape: (n_atoms, n_neighbors, n_neighbors, 3)
+        
+        # Compute squared magnitudes for all pairs, all atoms
+        pairwise_contributions = np.sum(pairwise_sums**2, axis=3)  # Shape: (n_atoms, n_neighbors, n_neighbors)
+        
+        # Extract upper triangular parts for all atoms at once
+        pair_contributions_all = pairwise_contributions[:, triu_indices[0], triu_indices[1]]  # Shape: (n_atoms, n_unique_pairs)
+        
+        # Get the N/2 smallest contributions for each atom
+        smallest_contributions = np.partition(pair_contributions_all, n_pairs - 1, axis=1)[:, :n_pairs]
+        csp = np.sum(smallest_contributions, axis=1)
+
+        # Normalize CSP values to the range [0, 1] if requested
+        if normalize_csp:
+            csp_min = np.min(csp)
+            csp_max = np.max(csp)
+            if csp_max > csp_min:
+                csp = (csp - csp_min) / (csp_max - csp_min)
+            else:
+                csp = np.zeros_like(csp)
+
+        if self._verbose:
+            tend = time.time()
+            print(f"Time to evaluate CSP for {pos.shape[0]} atoms: {tend-tstart:.3f} s")
+            print(f"   Using {n_neighbors} neighbors for {self._struct} structure")
+            print(f"   CSP range: [{np.min(csp):.6f}, {np.max(csp):.6f}]")
+            print(f"   Mean CSP:   {np.mean(csp):.6f}")
+
+        return csp
 
 # =====================================================================================

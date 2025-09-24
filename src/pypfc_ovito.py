@@ -16,10 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+from operator import pos
 import numpy as np
+import time
 from ovito.data import DataCollection, Particles, SimulationCell
 from ovito.pipeline import Pipeline, StaticSource
 from ovito.modifiers import PolyhedralTemplateMatchingModifier
+from ovito.modifiers import CentroSymmetryModifier
 from ovito.modifiers import DislocationAnalysisModifier, ReplicateModifier
 from pypfc_grid import setup_grid
 from scipy.spatial.transform import Rotation as scipyRot
@@ -100,6 +103,11 @@ class setup(setup_grid):
         Last revision:
             H. Hallberg 2025-08-29
         """
+
+        # Start timer for verbose output
+        # ==============================
+        if self._verbose:
+            tstart = time.time()
 
         # Check if particle positions are set
         # ===================================
@@ -216,7 +224,13 @@ class setup(setup_grid):
         angles        = 2 * np.arccos(np.clip(np.abs(q_syms_quat[..., 3]), -1.0, 1.0))  # shape (N, 24)
         min_indices   = np.argmin(angles, axis=1)  # shape (N,)
         quats         = q_syms_quat[np.arange(N), min_indices]
-            
+
+        # Verbose output
+        # ==============            
+        if self._verbose:
+            tend = time.time()
+            print(f"Time for do_ovito_ptm: {tend - tstart:.3f} seconds")
+                
         # Return output
         # =============
         if outputEulerAng:
@@ -268,6 +282,11 @@ class setup(setup_grid):
         Last revision:
             H. Hallberg 2025-08-29
         """
+
+        # Start timer for verbose output
+        # ==============================
+        if self._verbose:
+            tstart = time.time()
 
         # Check if particle positions are set
         # ===================================
@@ -356,7 +375,7 @@ class setup(setup_grid):
         data = pipeline.compute()
 
         if self._verbose:
-            print('doOvitoDXA:')
+            print('do_ovito_dxa:')
             print(f'   Found {len(data.dislocations.lines)} dislocations')
 
         # Extract dislocation data
@@ -394,6 +413,93 @@ class setup(setup_grid):
         disl_burg_vec = np.array(disl_burg_vec, dtype=self._dtype_cpu)
         disl_type_ids = np.array(disl_type_ids, dtype=int)
 
+        if self._verbose:
+            tend = time.time()
+            print(f"Time for do_ovito_dxa: {tend - tstart:.3f} seconds")
+            print(f"Total dislocations found: {len(disl_type_ids)}")
+
         return disl_type_ids, disl_coord, disl_line_len, disl_line_dir, disl_burg_vec, disl_segm_pts
+    
+# =====================================================================================
+
+    def do_ovito_csp(self, num_neighbors=12):
+        """
+        PURPOSE
+            Evaluate Centro-Symmetry Parameter (CSP) using OVITO's CentroSymmetryModifier.
+
+            The CSP is a measure of local crystal disorder and is useful for identifying 
+            defects, surfaces, and grain boundaries in crystal structures.
+
+            References:
+                A. Stukowski (2010), Visualization and analysis of atomistic simulation data
+                with OVITO - the Open Visualization Tool, Modelling Simul. Mater. Sci. Eng. 18, 015012.
+                https://10.1088/0965-0393/18/1/015012
+
+                C.L. Kelchner, S.J. Plimpton and J.C. Hamilton, Dislocation nucleation and defect
+                structure during surface indentation, Phys. Rev. B, 58(17):11085-11088, 1998
+
+        INPUT
+            num_neighbors   Number of nearest neighbors to consider for CSP calculation.
+                            The default is 12, valid for FCC. For BCC, use 8.
+
+        OUTPUT
+            csp             Centro-symmetry parameter evaluated at each particle [nparticles]
+        
+        Last revision:
+            H. Hallberg 2025-09-24
+        """
+
+        # Start timer for verbose output
+        # ==============================
+        if self._verbose:
+            tstart = time.time()
+
+        # Check if particle positions are set
+        # ===================================
+        if self._pos is None:
+            raise ValueError("Particle positions (self._pos) must be set before calling this method.")
+            
+        # Prepare OVITO DataCollection
+        # ============================
+        data      = DataCollection()
+        particles = Particles()
+        particles.create_property('Position', data=self._pos)
+        data.objects.append(particles)
+
+        # Define 3D periodic boundary conditions
+        # ======================================
+        cell      = SimulationCell(pbc=(True, True, True))
+        cell[:,0] = [self._dSize[0], 0, 0]
+        cell[:,1] = [0, self._dSize[1], 0]
+        cell[:,2] = [0, 0, self._dSize[2]]
+        data.objects.append(cell)
+
+        # Create a pipeline
+        # =================
+        pipeline        = Pipeline()
+        pipeline.source = StaticSource(data=data)
+
+        # Add CSP modifier
+        # ================
+        modifier               = CentroSymmetryModifier()
+        modifier.num_neighbors = num_neighbors
+        pipeline.modifiers.append(modifier)
+        
+        # Compute the pipeline
+        # ====================
+        data = pipeline.compute()
+
+        # Extract CSP values
+        # ==================
+        csp_property = data.particles['Centrosymmetry']
+        csp          = np.array(csp_property, dtype=self._dtype_cpu)
+
+        if self._verbose:
+            tend = time.time()
+            print(f"Time to run do_ovito_csp for {self._pos.shape[0]} atoms: {tend-tstart:.3f} s")
+            print(f"   CSP range: [{np.min(csp):.6f}, {np.max(csp):.6f}]")
+            print(f"   Mean CSP:   {np.mean(csp):.6f}")
+
+        return csp
     
 # =====================================================================================
