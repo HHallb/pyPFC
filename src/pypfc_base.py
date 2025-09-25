@@ -560,7 +560,7 @@ class setup_base(setup_grid):
     
 # =====================================================================================
 
-    # def interpolate_density_maxima_WORKING(self, den, ene=None, pf=None):
+    # def interpolate_density_maxima_BACKUP25050924(self, den, ene=None, pf=None):
     #         '''
     #         PURPOSE
     #             Find the coordinates of the maxima in the density field (='atom' positions)

@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [Unreleased] - 2025-09-24
 
 ### Added
 - Function `get_xtal_nearest_neighbors()` in `pypfc_base` class to define the number of nearest neighbors and neighbor distances for different crystal structures
@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Improved performance of `interpolate_density_maxima()` method by ~5%
 
 ### Fixed
-- [Add any bug fixes here]
+- Added declaration and typing of class variable `alpha` in `pypfc_base` class
 
 ### Deprecated
 - [Add any deprecated features here]
