@@ -1,7 +1,7 @@
 ![PyPI](https://img.shields.io/pypi/v/pypfc)
 ![License](https://img.shields.io/github/license/HHallb/pyPFC)
 
-# [pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations](#main-header)
+# pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
 A Python software package for setting up, running and processing Phase Field Crystal (PFC) simulations. The code uses PyTorch to allow execution on both CPUs and GPUs, depending on the available hardware. The PFC implementation in pyPFC relies on heavy use of FFTs and is set on a regular Cartesian 3D grid. Periodic boundary conditions are assumed along all coordinate axes. pyPFC evolves the density field in non-dimensional time and spatial dimensions are expressed in units of lattice parameters.
 
 ![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/images/PFC_atoms.png)
@@ -58,7 +58,7 @@ The general behavior of pyPFC is controlled by a set of configuration parameters
 ## Quick Start Example
 This is a quick start example for using the pyPFC package to perform a simple phase field crystal (PFC) simulation. The simulation traces the growth of a spherical crystal, centered in a 3D periodic domain. The example can be found as `./examples/ex04_quick_start.py`, where it is commented in more detail. The example demonstrates how to set up a simulation, generate an initial density field, evolve the density field over time and save the results to VTK files for visualization.
 
-It can be noted that the only strictly required input to pyPFC is `domain_size`, defining the size of the simulation domain in units of lattice parameters along each coordinate axis. All other configuration [parameters](#configuration-parameters) are set to default values, which can be adjusted as needed.
+It can be noted that the only strictly required input to pyPFC is `domain_size`, defining the size of the simulation domain in units of lattice parameters along each coordinate axis. All other [configuration parameters](#configuration-parameters) are set to default values, which can be adjusted as needed.
 
 Before running this script, ensure that you have the pyPFC package and its [dependencies](#package-dependencies) installed.
 
@@ -246,7 +246,7 @@ The following Python packages are required:
 Note that PyPI only installs torch with CPU support. To add GPU support, refer to [Installation and Usage](#installation-and-usage).
 
 ## Installation and Usage
-The simplest way to install pyPFC is via pip, which should ensure that package [dependencies](#package-dependencies) are met automatically. Note, however, that **PyTorch is only installed with CPU support** since PyPI only provides the CPU version of torch. For GPU support, see the tip a couple of lines down in this section.
+The simplest way to install pyPFC is via pip, which should ensure that [package dependencies](#package-dependencies) are met automatically. Note, however, that **PyTorch is only installed with CPU support** since PyPI only provides the CPU version of torch. For GPU support, see the tip a couple of lines down in this section.
 
 Install from PyPI using:
 ```bash
