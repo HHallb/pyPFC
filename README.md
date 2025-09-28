@@ -6,25 +6,26 @@ A Python software package for setting up, running and processing Phase Field Cry
 
 ![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/images/PFC_atoms.png)
 
-## [Table of Contents](#table-of-contents)
+## Table of Contents
 <!--ts-->
 - [pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations](#main-header)
   - [Configuration Parameters](#configuration-parameters)
   - [Quick Start Example](#quick-start-example)
   - [Description of Source Files](#description-of-source-files)
-    - [The Class `pypfc_grid`](#class-pypfc_grid)
-    - [The Class `pypfc_base`](#class-pypfc_base)
-    - [The Class `pypfc_pre`](#class-pypfc_pre)
-    - [The Class `pypfc_io`](#class-pypfc_io)
-    - [The Class `pypfc`](#class-pypfc)
-    - [The Class `pypfc_ovito`](#class-pypfc_ovito)
+    - [Class `pypfc_grid`](#class-pypfc_grid)
+    - [Class `pypfc_base`](#class-pypfc_base)
+    - [Class `pypfc_pre`](#class-pypfc_pre)
+    - [Class `pypfc_io`](#class-pypfc_io)
+    - [Class `pypfc`](#class-pypfc)
+    - [Class `pypfc_ovito`](#class-pypfc_ovito)
+  - [Package dependencies](#package-dependencies)  
   - [Installation and Usage](#installation-and-usage)
-  - [Troubleshooting Q&A](#troubleshooting)
-  - [Licencing](#license)
+  - [Troubleshooting](#troubleshooting)
+  - [Licencing](#licensing)
   - [References](#references)
 <!--te-->
 
-## [Configuration Parameters](#configuration-parameters)
+## Configuration Parameters
 The general behavior of pyPFC is controlled by a set of configuration parameters, collected in a Python dictionary. The parameters are described in the table below.
 
 | Parameter name         | Defaults to                       | Description                                                                      
@@ -54,7 +55,7 @@ The general behavior of pyPFC is controlled by a set of configuration parameters
 | update_scheme_params   | [1.0, 1.0, 1.0, None, None, None] | Parameters in the time integration scheme: [g1, g2, g3, alpha, beta, gamma]
 | verbose                | True                              | Verbose output (or not)
 
-## [Quick Start Example](#quick-start-example)
+## Quick Start Example
 This is a quick start example for using the pyPFC package to perform a simple phase field crystal (PFC) simulation. The simulation traces the growth of a spherical crystal, centered in a 3D periodic domain. The example can be found as `./examples/ex04_quick_start.py`, where it is commented in more detail. The example demonstrates how to set up a simulation, generate an initial density field, evolve the density field over time and save the results to VTK files for visualization.
 
 It can be noted that the only strictly required input to pyPFC is `domain_size`, defining the size of the simulation domain in units of lattice parameters along each coordinate axis. All other configuration [parameters](#configuration-parameters) are set to default values, which can be adjusted as needed.
@@ -91,7 +92,7 @@ for step in range(nstep):
         sim.write_vtk_points(filename, atom_coord, [atom_data[:,0]], ['den'])
 ```
 
-## [Description of Source Files](#description-of-source-files)
+## Description of Source Files
 The software is built on classes, contained in separate modules/files, with an inheritance chain (from top to bottom) comprising:
 
 | File (*.py)     | Description             
@@ -106,7 +107,7 @@ In addition, **pypfc_ovito.py** provides custom interfaces to selected functiona
 
 Methods in the different classes are described in individual subsections below.
 
-### [The Class `pypfc_grid`](#class-pypfc_grid)
+### Class `pypfc_grid`
 
 | Method            | Description                                   
 | ----------------- | ----------------------------------------------
@@ -117,7 +118,7 @@ Methods in the different classes are described in individual subsections below.
 | `get_domain_size` | Returns the grid size `domain_size=ndiv*ddiv`
 | `copy_from(grid)` | Makes a duplicate of a grid object
 
-### [The Class `pypfc_base`](#class-pypfc_base)
+### Class `pypfc_base`
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
@@ -153,7 +154,7 @@ Methods in the different classes are described in individual subsections below.
 | `get_xtal_nearest_neighbors`                                  | Provides the number of nearest neighbors and neighbor distances for different crystal structures
 | `get_csp(pos, normalize_csp)`                                 | Evaluate the centro-symmetry parameter (CSP) for a set of atoms
 
-### [The Class `pypfc_pre`](#class-pypfc_pre)
+### Class `pypfc_pre`
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
@@ -177,7 +178,7 @@ Methods in the different classes are described in individual subsections below.
 | `generate_density_field(crd, g)`                              | Define a 3D PFC density field
 | `evaluate_ampl_dens`                                          | Get the amplitudes and densities for different density field expansions
 
-### [The Class `pypfc_io`](#class-pypfc_io)
+### Class `pypfc_io`
 
 | Method                                                                                                                  |Description                                   
 | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- 
@@ -190,7 +191,7 @@ Methods in the different classes are described in individual subsections below.
 | `write_info_file(filename=, output_path)`                                                                               | Write simulation setup information to a file
 | `append_to_info_file(info, filename=, output_path)`                                                                     | Append linea to a text file
 
-### [The Class `pypfc`](#class-pypfc)
+### Class `pypfc`
 
 The class is initiated by supplying the arguments `domain_size=[Lx,Ly,Lz]` and `ndiv = [nx,ny,nz]`, where `[Lx,Ly,Lz]` is the domain size and `[nx,ny,nz]` define the number of grid points along each coordinate direction. The values in `[nx,ny,nz]` must all be even numbers, an error will be raised otherwise. The only required input is `domain_size`. All other parameters, including `ndiv` are set by defaults, but can be modified as desired. An optional dictionary of configuration parameters can be supplied through the argument `config`.
 
@@ -221,7 +222,7 @@ The class is initiated by supplying the arguments `domain_size=[Lx,Ly,Lz]` and `
 | `evaluate_energy`                                                                            | Evaluate the PFC energy field
 | `get_phase_field`                                                                            | Evaluate the phase field using wavelet filtering
 
-### [The Class `pypfc_ovito`](#class-pypfc_ovito)
+### Class `pypfc_ovito`
 This class provides pyPFC interfaces to a limited subset of the functionalities in [OVITO](https://www.ovito.org/).
 
 #### Class Methods and their Arguments
@@ -232,7 +233,7 @@ This class provides pyPFC interfaces to a limited subset of the functionalities 
 | `do_ovito_dxa(rep, tol)`                                                                     | Perform dislocation analysis (DXA) using OVITO
 | `do_ovito_ptm(refRot, outputEulerAng, outputStrain)`                                         | Evaluate crystal structure, orientation and elastic Green-Lagrange strain using OVITO's Polyhedral Template Matching (PTM)
 
-## [Package Dependencies](#package-dependencies)
+## Package Dependencies
 The following Python packages are required:
 
 * numpy
@@ -244,7 +245,7 @@ The following Python packages are required:
 
 Note that PyPI only installs torch with CPU support. To add GPU support, refer to [Installation and Usage](#installation-and-usage).
 
-## [Installation and Usage](#installation-and-usage)
+## Installation and Usage
 The simplest way to install pyPFC is via pip, which should ensure that package [dependencies](#package-dependencies) are met automatically. Note, however, that **PyTorch is only installed with CPU support** since PyPI only provides the CPU version of torch. For GPU support, see the tip a couple of lines down in this section.
 
 Install from PyPI using:
@@ -266,7 +267,7 @@ Import pyPFC into your Python code by `import pypfc` and, optionally, `import py
 > [!IMPORTANT]
 > To install torch with CUDA 12.1 enabled, run: `pip install torch --index-url https://download.pytorch.org/whl/cu121`. For other CUDA versions and further information, please refer to the official [PyTorch documentation](https://pytorch.org/get-started/locally/).
 
-## [Troubleshooting Q&A](#troubleshooting)
+## Troubleshooting
 
 #### Q: I have a Nvidia GPU installed but pyPFC tells me I don't.
 **A:** Ensure that PyTorch is installed with CUDA enabled. To be sure, you can also check your setup by running:
@@ -289,10 +290,10 @@ If `is_available()` is `False` or `device_count()` is `0`, PyTorch cannot see yo
 
 ---
 
-## [Licencing](#license)
+## Licencing
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
 
-## [References](#references)
+## References
 Further details on PFC modeling and example applications can be found in:
 
 1. [K.H. Blixt and H. Hallberg, **Phase Field Crystal Modeling of Grain Boundary Migration: Mobility, Energy and Structural Variability**, *Acta Materialia*, 297:121318, 2025](https://doi.org/10.1016/j.actamat.2025.121318)
