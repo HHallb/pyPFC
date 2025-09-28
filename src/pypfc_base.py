@@ -184,6 +184,10 @@ class setup_base(setup_grid):
         k[:npoints//2] = np.arange(0, npoints//2) * delk
         k[npoints//2:] = np.arange(-npoints//2, 0) * delk
 
+        ktorch = 2 * torch.pi * torch.fft.fftfreq(npoints, d=dspacing, device=self._device)
+        print(f"Old k: {k[:5]}")
+        print(f"New k: {ktorch[:5].cpu().numpy()}")
+
         return k
     
     # =====================================================================================

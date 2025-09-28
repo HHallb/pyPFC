@@ -6,6 +6,24 @@ A Python software package for setting up, running and processing Phase Field Cry
 
 ![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/images/PFC_atoms.png)
 
+## [Table of Contents](#table-of-contents)
+<!--ts-->
+- [pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations](#main-header)
+  - [Configuration Parameters](#configuration-parameters)
+  - [Quick Start Example](#quick-start-example)
+  - [Description of Source Files](#description-of-source-files)
+    - [The Class `pypfc_grid`: Class Methods and their Arguments](#class-pypfc_grid)
+    - [The Class `pypfc_base`: Class Methods and their Arguments](#class-pypfc_base)
+    - [The Class `pypfc_pre`: Class Methods and their Arguments](#class-pypfc_pre)
+    - [The Class `pypfc_io`: Class Methods and their Arguments](#class-pypfc_io)
+    - [The Class `pypfc`](#class-pypfc)
+    - [The Class `pypfc_ovito`](#class-pypfc_ovito)
+  - [Installation and Usage](#installation-and-usage)
+  - [Troubleshooting Q&A](#troubleshooting)
+  - [Licencing](#license)
+  - [References](#references)
+<!--te-->
+
 ## [Configuration Parameters](#configuration-parameters)
 The general behavior of pyPFC is controlled by a set of configuration parameters, collected in a Python dictionary. The parameters are described in the table below.
 
@@ -262,7 +280,7 @@ If `is_available()` is `False` or `device_count()` is `0`, PyTorch cannot see yo
 
 ---
 #### Q: The solid crystal phase fails to stabilize and/or appears to "melt" away.
-**A:** This is most likely due to `domain_size` not being set correctly to accommodate the current lattice peridicity.
+**A:** This is most likely due to `domain_size` not being set correctly to accommodate the current lattice periodicity.
 
 ---
 
