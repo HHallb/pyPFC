@@ -18,7 +18,7 @@ A Python software package for setting up, running and processing Phase Field Cry
     - [Class `pypfc_io`](#class-pypfc_io)
     - [Class `pypfc`](#class-pypfc)
     - [Class `pypfc_ovito`](#class-pypfc_ovito)
-  - [Package dependencies](#package-dependencies)  
+  - [Package Dependencies](#package-dependencies)  
   - [Installation and Usage](#installation-and-usage)
   - [Troubleshooting](#troubleshooting)
   - [Licencing](#licensing)
