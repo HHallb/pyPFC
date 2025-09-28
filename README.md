@@ -12,10 +12,10 @@ A Python software package for setting up, running and processing Phase Field Cry
   - [Configuration Parameters](#configuration-parameters)
   - [Quick Start Example](#quick-start-example)
   - [Description of Source Files](#description-of-source-files)
-    - [The Class `pypfc_grid`: Class Methods and their Arguments](#class-pypfc_grid)
-    - [The Class `pypfc_base`: Class Methods and their Arguments](#class-pypfc_base)
-    - [The Class `pypfc_pre`: Class Methods and their Arguments](#class-pypfc_pre)
-    - [The Class `pypfc_io`: Class Methods and their Arguments](#class-pypfc_io)
+    - [The Class `pypfc_grid`](#class-pypfc_grid)
+    - [The Class `pypfc_base`](#class-pypfc_base)
+    - [The Class `pypfc_pre`](#class-pypfc_pre)
+    - [The Class `pypfc_io`](#class-pypfc_io)
     - [The Class `pypfc`](#class-pypfc)
     - [The Class `pypfc_ovito`](#class-pypfc_ovito)
   - [Installation and Usage](#installation-and-usage)
@@ -106,7 +106,7 @@ In addition, **pypfc_ovito.py** provides custom interfaces to selected functiona
 
 Methods in the different classes are described in individual subsections below.
 
-### [The Class `pypfc_grid`: Class Methods and their Arguments](#class-pypfc_grid)
+### [The Class `pypfc_grid`](#class-pypfc_grid)
 
 | Method            | Description                                   
 | ----------------- | ----------------------------------------------
@@ -117,7 +117,7 @@ Methods in the different classes are described in individual subsections below.
 | `get_domain_size` | Returns the grid size `domain_size=ndiv*ddiv`
 | `copy_from(grid)` | Makes a duplicate of a grid object
 
-### [The Class `pypfc_base`: Class Methods and their Arguments](#class-pypfc_base)
+### [The Class `pypfc_base`](#class-pypfc_base)
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
@@ -153,7 +153,7 @@ Methods in the different classes are described in individual subsections below.
 | `get_xtal_nearest_neighbors`                                  | Provides the number of nearest neighbors and neighbor distances for different crystal structures
 | `get_csp(pos, normalize_csp)`                                 | Evaluate the centro-symmetry parameter (CSP) for a set of atoms
 
-### [The Class `pypfc_pre`: Class Methods and their Arguments](#class-pypfc_pre)
+### [The Class `pypfc_pre`](#class-pypfc_pre)
 
 | Method                                                        | Description                                   
 | ------------------------------------------------------------- | ---------------------------------------------- 
@@ -177,7 +177,7 @@ Methods in the different classes are described in individual subsections below.
 | `generate_density_field(crd, g)`                              | Define a 3D PFC density field
 | `evaluate_ampl_dens`                                          | Get the amplitudes and densities for different density field expansions
 
-### [The Class `pypfc_io`: Class Methods and their Arguments](#class-pypfc_io)
+### [The Class `pypfc_io`](#class-pypfc_io)
 
 | Method                                                                                                                  |Description                                   
 | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- 
