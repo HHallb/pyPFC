@@ -8,7 +8,7 @@ A Python software package for setting up, running and processing Phase Field Cry
 
 ## Table of Contents
 <!--ts-->
-- [pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations](#main-header)
+- [pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations](#pypfc-an-open-source-python-package-for-phase-field-crystal-simulations)
   - [Configuration Parameters](#configuration-parameters)
   - [Quick Start Example](#quick-start-example)
   - [Description of Source Files](#description-of-source-files)
