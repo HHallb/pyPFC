@@ -16,9 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 '''
 
+import numpy as np
+
 class setup_grid:
 
     def __init__(self, domain_size, ndiv):
+
+        # Check that all grid divisions are even numbers
+        if not all(np.mod(n, 2) == 0 for n in ndiv):
+            raise ValueError(f"All grid divisions must be even numbers, got ndiv={ndiv}")
+        
         self._ndiv        = ndiv
         self._ddiv        = domain_size / ndiv
         self._dx          = self._ddiv[0]
@@ -34,6 +41,9 @@ class setup_grid:
         self._nz_half     = self._nz // 2 + 1
 
     def set_ndiv(self, ndiv):
+        # Check that all grid divisions are even numbers
+        if not all(np.mod(n, 2) == 0 for n in ndiv):
+            raise ValueError(f"All grid divisions must be even numbers, got ndiv={ndiv}")
         self._ndiv = ndiv
         self._nx = ndiv[0]
         self._ny = ndiv[1]

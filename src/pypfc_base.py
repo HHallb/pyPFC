@@ -171,22 +171,18 @@ class setup_base(setup_grid):
             k           Wave vector
 
         Last revision:
-        H. Hallberg 2025-08-26
+        H. Hallberg 2025-09-30
         '''
 
         # Check input
         if np.mod(npoints,2) != 0:
-            raise ValueError(f'The number of grid points must be an even number, npoints={npoints}')
+            raise ValueError(f"The number of grid points must be an even number, got npoints={npoints}")
 
         delk = 2*np.pi / (npoints*dspacing)
         k    = np.zeros(npoints, dtype=self._dtype_cpu)
 
         k[:npoints//2] = np.arange(0, npoints//2) * delk
         k[npoints//2:] = np.arange(-npoints//2, 0) * delk
-
-        ktorch = 2 * torch.pi * torch.fft.fftfreq(npoints, d=dspacing, device=self._device)
-        print(f"Old k: {k[:5]}")
-        print(f"New k: {ktorch[:5].cpu().numpy()}")
 
         return k
     
@@ -200,27 +196,34 @@ class setup_base(setup_grid):
         INPUT
 
         OUTPUT
-            k2_d         k2=kx**2+ky**2 +kz**2,  [nx, ny, nz] (on the device)
+            k2_d    k2=kx**2+ky**2 +kz**2,  [nx, ny, nz] (on the device)
 
         Last revision:
-        H. Hallberg 2025-08-26
+        H. Hallberg 2025-09-30
         '''
 
-        kx = self.get_k(self._nx, self._dx)
-        ky = self.get_k(self._ny, self._dy)
-        kz = self.get_k(self._nz, self._dz)
+        # kx = self.get_k(self._nx, self._dx)
+        # ky = self.get_k(self._ny, self._dy)
+        # kz = self.get_k(self._nz, self._dz)
+        # kx2 = kx[:, np.newaxis, np.newaxis] ** 2
+        # ky2 = ky[np.newaxis, :, np.newaxis] ** 2
+        # kz2 = kz[np.newaxis, np.newaxis, :] ** 2
+        # k2  = kx2 + ky2 + kz2
+        # k2_d = torch.from_numpy(k2[:,:,:self._nz_half]).to(self._device)
+        # k2_d = k2_d.to(dtype=self._dtype_gpu)
+        # k2_d = k2_d.contiguous()
+        # return k2_d
 
-        kx2 = kx[:, np.newaxis, np.newaxis] ** 2
-        ky2 = ky[np.newaxis, :, np.newaxis] ** 2
-        kz2 = kz[np.newaxis, np.newaxis, :] ** 2
-        k2  = kx2 + ky2 + kz2
-
-        k2_d = torch.from_numpy(k2[:,:,:self._nz_half]).to(self._device)
-        k2_d = k2_d.to(dtype=self._dtype_gpu)
-        k2_d = k2_d.contiguous()
-
-        return k2_d
-
+        kx    = 2 * torch.pi * torch.fft.fftfreq(self._nx, d=self._dx, device=self._device, dtype=self._dtype_gpu)
+        ky    = 2 * torch.pi * torch.fft.fftfreq(self._ny, d=self._dy, device=self._device, dtype=self._dtype_gpu)
+        kz    = 2 * torch.pi * torch.fft.fftfreq(self._nz, d=self._dz, device=self._device, dtype=self._dtype_gpu)
+        k2_d  = torch.zeros((self._nx, self._ny, self._nz_half), dtype=self._dtype_gpu, device=self._device)
+        k2_d += kx[:, None, None] ** 2
+        k2_d += ky[None, :, None] ** 2
+        k2_d += kz[None, None, :self._nz_half] ** 2
+        
+        return k2_d.contiguous()
+    
     # =====================================================================================
 
     def get_integrated_field_in_volume(self, field, limits):

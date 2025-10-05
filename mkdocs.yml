@@ -1,0 +1,142 @@
+# pyPFC Documentation Configuration
+site_name: pyPFC Documentation
+site_description: An Open-Source Python Package for GPU-accelerated Phase Field Crystal Simulations
+site_author: H. Hallberg
+site_url: https://HHallb.github.io/pyPFC
+
+# Repository information
+repo_name: HHallb/pyPFC
+repo_url: https://github.com/HHallb/pyPFC
+edit_uri: edit/main/docs/
+
+# Copyright
+copyright: Copyright &copy; 2025 H. Hallberg
+
+# Configuration
+theme:
+  name: material
+  
+  # Color palette
+  palette:
+    - scheme: default
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  
+  # Theme features
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.top
+    - search.highlight
+    - search.share
+    - toc.follow
+    - content.code.copy
+    - content.code.select
+    - content.action.edit
+    - content.action.view
+  
+  # Favicon and logo
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+
+# Extensions
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: HHallb
+      repo: pyPFC
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Plugins
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
+            show_source: true
+            show_signature_annotations: true
+            separate_signature: true
+  - mkdocs-jupyter:
+      execute: false
+      include_source: true
+
+# JavaScript for math rendering
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+# CSS styling
+extra_css:
+  - stylesheets/extra.css
+
+# Navigation structure
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: quick_start.md
+    - Examples: examples.md
+  - API Reference:
+    - Core Classes: api/core.md
+  - About:
+    - License: LICENSE
+
+# Additional settings
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/HHallb/pyPFC
+  version:
+    provider: mike

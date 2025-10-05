@@ -26,6 +26,7 @@ Thumbs.db
 
 # Project specific
 examples/ex*_output*/
+examples/test_*
 
 # Distribution / packaging
 .Python

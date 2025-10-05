@@ -34,7 +34,7 @@ class setup(setup_grid):
 
         # Initiate the inherited grid class
         # =================================
-        super().__init__(ndiv, ddiv)
+        super().__init__(ddiv*ndiv, ndiv)
 
         # Handle input arguments
         # ======================
@@ -212,17 +212,17 @@ class setup(setup_grid):
         # Map to the cubic fundamental zone (minimum misorientation)
         # ==========================================================
         cubic_group   = scipyRot.create_group('O')
-        sym_quats     = cubic_group.as_quat()  # shape (24, 4)
+        sym_quats     = cubic_group.as_quat()                                               # (24, 4)
         N             = quats.shape[0]
         # Tile and repeat to get all combinations (N*24, 4)
-        quats_tile    = np.tile(quats, (24, 1))            # (24*N, 4)
-        sym_quats_rep = np.repeat(sym_quats, N, axis=0) # (24*N, 4)
+        quats_tile    = np.tile(quats, (24, 1))                                             # (24*N, 4)
+        sym_quats_rep = np.repeat(sym_quats, N, axis=0)                                     # (24*N, 4)
         # Compose: sym * quat (elementwise)
         q_syms        = scipyRot.from_quat(sym_quats_rep) * scipyRot.from_quat(quats_tile)  # (24*N,)
-        q_syms_quat   = q_syms.as_quat().reshape(24, N, 4).transpose(1, 0, 2)  # (N, 24, 4)
+        q_syms_quat   = q_syms.as_quat().reshape(24, N, 4).transpose(1, 0, 2)               # (N, 24, 4)
         # Compute rotation angles for all symmetry-equivalent quaternions
-        angles        = 2 * np.arccos(np.clip(np.abs(q_syms_quat[..., 3]), -1.0, 1.0))  # shape (N, 24)
-        min_indices   = np.argmin(angles, axis=1)  # shape (N,)
+        angles        = 2 * np.arccos(np.clip(np.abs(q_syms_quat[..., 3]), -1.0, 1.0))      # (N, 24)
+        min_indices   = np.argmin(angles, axis=1)                                           # (N,)
         quats         = q_syms_quat[np.arange(N), min_indices]
 
         # Verbose output
