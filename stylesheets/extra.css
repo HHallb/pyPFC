@@ -1,0 +1,87 @@
+/* Custom styles for pyPFC documentation */
+
+:root {
+  --pfc-primary: #1976d2;
+  --pfc-accent: #3f51b5;
+  --pfc-success: #4caf50;
+  --pfc-warning: #ff9800;
+  --pfc-error: #f44336;
+}
+
+/* Code blocks styling */
+.highlight {
+  border-radius: 4px;
+}
+
+/* Admonition styling */
+.admonition {
+  border-radius: 6px;
+  border-left: 4px solid var(--pfc-primary);
+}
+
+.admonition.note {
+  border-left-color: var(--pfc-primary);
+}
+
+.admonition.tip {
+  border-left-color: var(--pfc-success);
+}
+
+.admonition.warning {
+  border-left-color: var(--pfc-warning);
+}
+
+.admonition.danger {
+  border-left-color: var(--pfc-error);
+}
+
+/* Table styling */
+table {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Navigation styling */
+.md-nav__item--active > .md-nav__link {
+  color: var(--pfc-primary);
+}
+
+/* Logo and branding */
+.md-header__title {
+  font-weight: 600;
+}
+
+/* Content spacing */
+.md-content__inner {
+  padding-bottom: 2rem;
+}
+
+/* Mermaid diagrams */
+.mermaid {
+  text-align: center;
+  margin: 1em 0;
+}
+
+/* Performance indicators */
+.performance-indicator {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+.performance-indicator.fast {
+  background-color: var(--pfc-success);
+  color: white;
+}
+
+.performance-indicator.medium {
+  background-color: var(--pfc-warning);
+  color: white;
+}
+
+.performance-indicator.slow {
+  background-color: var(--pfc-error);
+  color: white;
+}
