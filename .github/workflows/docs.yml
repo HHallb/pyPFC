@@ -1,11 +1,10 @@
 name: Deploy MkDocs to GitHub Pages
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+  # Only deploy from docs-ready branch when documentation is complete
+  # push:
+  #   branches: [ docs-ready ]
+  workflow_dispatch:  # Manual trigger only
 
 permissions:
   contents: read
