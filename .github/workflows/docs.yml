@@ -37,4 +37,14 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        mkdocs gh-deploy --force
+        mkdocs build
+        # Deploy to docs/ subdirectory to preserve existing homepage
+        git fetch origin gh-pages:gh-pages || git checkout --orphan gh-pages
+        git checkout gh-pages
+        rm -rf docs/ || true
+        mkdir -p docs
+        cp -r site/* docs/
+        git add docs/
+        git commit -m "Deploy MkDocs to docs/ subdirectory" || true
+        git push origin gh-pages
+        git checkout main

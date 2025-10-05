@@ -2,7 +2,7 @@
 site_name: pyPFC Documentation
 site_description: An Open-Source Python Package for GPU-accelerated Phase Field Crystal Simulations
 site_author: H. Hallberg
-site_url: https://HHallb.github.io/pyPFC
+site_url: https://HHallb.github.io/pyPFC/docs/
 
 # Repository information
 repo_name: HHallb/pyPFC
