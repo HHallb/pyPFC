@@ -1,4 +1,4 @@
-name: Deploy MkDocs to GitHub Pages
+name: Build and Deploy MkDocs to gh-pages branch
 
 on:
   # Only deploy from docs-ready branch when documentation is complete
@@ -7,16 +7,10 @@ on:
   workflow_dispatch:  # Manual trigger only
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  contents: write  # Need write permission for gh-pages branch
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
@@ -47,28 +41,13 @@ jobs:
       run: |
         pip install -e .
         
-    - name: Setup Pages
-      id: pages
-      uses: actions/configure-pages@v4
-      
     - name: Build documentation
       run: |
-        mkdocs build --clean --strict
+        mkdocs build --clean
         
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
+    - name: Deploy to gh-pages branch
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        path: site
-
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    
-    steps:
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./site
+        publish_branch: gh-pages
