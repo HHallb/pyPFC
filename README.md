@@ -189,7 +189,7 @@ Methods in the different classes are described in individual subsections below.
 | `save_pickle(filename, data)`                                                                                           | Save a list of data objects to a binary pickle file
 | `load_pickle(filename, ndata)`                                                                                          | Load data objetcs from a binary pickle file
 | `write_info_file(filename=, output_path)`                                                                               | Write simulation setup information to a file
-| `append_to_info_file(info, filename=, output_path)`                                                                     | Append linea to a text file
+| `append_to_info_file(info, filename=, output_path)`                                                                     | Append string to a text file
 
 ### Class `pypfc`
 

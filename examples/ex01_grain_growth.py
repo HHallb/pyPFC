@@ -22,8 +22,8 @@ params = {
     'update_scheme_params':   [1.0, 1.0, 1.0, None, None, None],    # Parameters in the time integration scheme: g1, g2, g3, alpha, beta, gamma
     'device_type':            'cpu',#'gpu',                                # PyTorch device (CPU or GPU)
     'device_number':          0,                                    # GPU device number (if multiple GPUs are available, defaults to 0)
-    'dtype_cpu':              np.double,                            # Set precision of numpy arrays
-    'dtype_gpu':              torch.float64,                        # Set precision of PyTorch tensors
+    'dtype_cpu':              np.single, #np.double,                            # Set precision of numpy arrays
+    'dtype_gpu':              torch.float32, #torch.float64,                        # Set precision of PyTorch tensors
     'verbose':                True,                                 # Verbose output (or not)
     'evaluate_phase_field':   True,                                 # Evaluate phase field (or not)
     'density_threshold':      0.5,                                  # Threshold for density maxima detection
@@ -40,13 +40,15 @@ nstep            = 8000                      # Number of simulation steps
 nout             = 500                       # Evaluate step data in every nout:h step
 n_save_step_data = 10*1000                      # Save step data in every n_save_step_data:th step
 nfill            = 7                         # Number of figures to use in filenames (pre-pad with zeroes if needed)
-output_path      = './examples/ex01_output_cpu_64x64x64_double_precision/' # Output path
+output_path      = './examples/ex01_output_cpu_32x32x32_single_precision/' # Output path
 output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
 # =============================
-domain_size = params['alat'] * np.array([64, 64, 64]) # Domain size along the x, y and z axes
-ndiv        = 8 * np.array([64, 64, 64])              # Number of grid divisions along the x, y and z axes       
+#domain_size = params['alat'] * np.array([64, 64, 64]) # Domain size along the x, y and z axes
+#ndiv        = 8 * np.array([64, 64, 64])              # Number of grid divisions along the x, y and z axes       
+domain_size = params['alat'] * np.array([32, 32, 32]) # Domain size along the x, y and z axes
+ndiv        = 8 * np.array([32, 32, 32])              # Number of grid divisions along the x, y and z axes       
 
 print(f'ndiv:        {ndiv}')
 print(f'ddiv:        {domain_size/ndiv} [a]')
@@ -157,7 +159,7 @@ for step in range(nstep):
 # Save information to file
 # ========================
 tend = time.time()
-state_string = f'Time spent in time step loop: {tend-tstart:.3f} s'
+state_string = f'\nTime spent in time step loop: {tend-tstart:.3f} s'
 sim.append_to_info_file(state_string, output_path+output_file)
 
 # Print information to the console
