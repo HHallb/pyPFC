@@ -199,20 +199,8 @@ class setup_base(setup_grid):
             k2_d    k2=kx**2+ky**2 +kz**2,  [nx, ny, nz] (on the device)
 
         Last revision:
-        H. Hallberg 2025-09-30
+        H. Hallberg 2025-10-16
         '''
-
-        # kx = self.get_k(self._nx, self._dx)
-        # ky = self.get_k(self._ny, self._dy)
-        # kz = self.get_k(self._nz, self._dz)
-        # kx2 = kx[:, np.newaxis, np.newaxis] ** 2
-        # ky2 = ky[np.newaxis, :, np.newaxis] ** 2
-        # kz2 = kz[np.newaxis, np.newaxis, :] ** 2
-        # k2  = kx2 + ky2 + kz2
-        # k2_d = torch.from_numpy(k2[:,:,:self._nz_half]).to(self._device)
-        # k2_d = k2_d.to(dtype=self._dtype_gpu)
-        # k2_d = k2_d.contiguous()
-        # return k2_d
 
         kx    = 2 * torch.pi * torch.fft.fftfreq(self._nx, d=self._dx, device=self._device, dtype=self._dtype_gpu)
         ky    = 2 * torch.pi * torch.fft.fftfreq(self._ny, d=self._dy, device=self._device, dtype=self._dtype_gpu)
@@ -1069,9 +1057,9 @@ class setup_base(setup_grid):
         
         # Vectorized CSP calculation for all atoms at once
         # Create pairwise sums for all atoms simultaneously
-        neighbors_i = neighbors_rel[:, :, np.newaxis, :]  # Shape: (n_atoms, n_neighbors, 1, 3)
-        neighbors_j = neighbors_rel[:, np.newaxis, :, :]  # Shape: (n_atoms, 1, n_neighbors, 3)
-        pairwise_sums = neighbors_i + neighbors_j  # Shape: (n_atoms, n_neighbors, n_neighbors, 3)
+        neighbors_i   = neighbors_rel[:, :, np.newaxis, :]  # Shape: (n_atoms, n_neighbors, 1, 3)
+        neighbors_j   = neighbors_rel[:, np.newaxis, :, :]  # Shape: (n_atoms, 1, n_neighbors, 3)
+        pairwise_sums = neighbors_i + neighbors_j           # Shape: (n_atoms, n_neighbors, n_neighbors, 3)
         
         # Compute squared magnitudes for all pairs, all atoms
         pairwise_contributions = np.sum(pairwise_sums**2, axis=3)  # Shape: (n_atoms, n_neighbors, n_neighbors)

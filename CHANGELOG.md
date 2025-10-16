@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 - Function `get_xtal_nearest_neighbors()` in `pypfc_base` class to define the number of nearest neighbors and neighbor distances for different crystal structures
 - Function `get_csp()` in `pypfc_base` class for evaluation of the centro-symmetry parameter (CSP)
-- Function `do_ovito_csp()` in `pypfc_ovito` class for evaluation of the centro-symmetry parameter (CSP)
+- Function `do_ovito_csp()` in `pypfc_ovito` class for evaluation of the centro-symmetry parameter (CSP) using Ovito
 - Example `ex05_structure_analysis.py`, demonstrating the new `get_csp()` and `do_ovito_csp()` methods
 - Added check that all entries in ndiv are even numbers in `pypfc_grid`
 

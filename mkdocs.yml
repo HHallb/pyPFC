@@ -139,4 +139,4 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/HHallb/pyPFC
   version:
-    provider: mike
+    provider: H. Hallberg

@@ -206,7 +206,8 @@ class setup_simulation(setup_io):
 
     def set_density(self, density):
         self._den_d   = torch.from_numpy(density).to(self._device)
-        self._f_den_d = torch.fft.rfftn(self._den_d).to(self._f_den_d.dtype)  # Forward FFT of the density field
+        # Forward FFT of the density field
+        self._f_den_d = torch.fft.rfftn(self._den_d).to(self._f_den_d.dtype)
 
     def set_phase_field_kernel(self, H0=1.0, Rot=None):
         if Rot is None:

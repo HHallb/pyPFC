@@ -20,7 +20,7 @@ params = {
     'normalize_pf':           True,                                 # Normalize the phase fields to [0,1], or not
     'update_scheme':          '1st_order',                          # Time integration scheme
     'update_scheme_params':   [1.0, 1.0, 1.0, None, None, None],    # Parameters in the time integration scheme: g1, g2, g3, alpha, beta, gamma
-    'device_type':            'gpu',                                # PyTorch device (CPU or GPU)
+    'device_type':            'cpu',#'gpu',                                # PyTorch device (CPU or GPU)
     'device_number':          0,                                    # GPU device number (if multiple GPUs are available, defaults to 0)
     'dtype_cpu':              np.double,                            # Set precision of numpy arrays
     'dtype_gpu':              torch.float64,                        # Set precision of PyTorch tensors
@@ -38,9 +38,9 @@ params = {
 # ==============================
 nstep            = 8000                      # Number of simulation steps
 nout             = 500                       # Evaluate step data in every nout:h step
-n_save_step_data = 1000                      # Save step data in every n_save_step_data:th step
+n_save_step_data = 10*1000                      # Save step data in every n_save_step_data:th step
 nfill            = 7                         # Number of figures to use in filenames (pre-pad with zeroes if needed)
-output_path      = './examples/ex01_output/' # Output path
+output_path      = './examples/ex01_output_cpu_64x64x64_double_precision/' # Output path
 output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
@@ -87,8 +87,8 @@ natoms = atom_coord.shape[0]                                         # Retrieve 
 # ======================
 plotnr   = str(0).zfill(nfill)
 filename = output_path + 'pfc_data_' + plotnr
-sim.write_vtk_structured_grid(filename, [den], ['den'])                                                            # Save the continuous density field to structured grid VTK file
-sim.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf']) # Save the discrete density maxima (atoms) to VTK point file
+#sim.write_vtk_structured_grid(filename, [den], ['den'])                                                            # Save the continuous density field to structured grid VTK file
+#sim.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf']) # Save the discrete density maxima (atoms) to VTK point file
 
 # Prepare storage of state data and save the intial state
 # =======================================================
@@ -154,8 +154,15 @@ for step in range(nstep):
             sim.write_vtk_structured_grid(filename, [den], ['den'])
             sim.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf'])
 
+# Save information to file
+# ========================
 tend = time.time()
-print(f'Time spent in time step loop: {tend-tstart:.3f} s')
+state_string = f'Time spent in time step loop: {tend-tstart:.3f} s'
+sim.append_to_info_file(state_string, output_path+output_file)
+
+# Print information to the console
+# ================================
+print(state_string)
 
 # Do cleanup
 # ==========
