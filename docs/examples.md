@@ -62,7 +62,7 @@ python ex04_quick_start.py
 
 pyPFC works with different file formats for data I/O:
 
-| Extension | Description | Viewer 
+| Extension | Description | Viewer
 |-----------|-------------|--------
 | `.pickle` | Binary Python pickle format                 | Custom analysis using `pypfc.save_pickle()` and `pypfc.load_pickle()`
 | `.txt`    | Standard ASCII text files                   | Text editor
@@ -74,11 +74,11 @@ pyPFC works with different file formats for data I/O:
 
 ### Indicative GPU Memory Requirements
 
-| Grid Size | Memory (Single) | Memory (Double) |
-|-----------|-----------------|-----------------|
-| 64³ | ~1 GB | ~2 GB |
-| 128³ | ~8 GB | ~16 GB |
-| 256³ | ~64 GB | ~128 GB |
+| Grid Size | Memory (Single) | Memory (Double)
+|-----------|-----------------|-----------------
+| 64³ | ~1 GB | ~2 GB
+| 128³ | ~8 GB | ~16 GB
+| 256³ | ~64 GB | ~128 GB
 
 ### Recommended Configurations
 
