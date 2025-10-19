@@ -1,23 +1,36 @@
+![pyPFC logo](images/pyPFC_logo_transparent.png)
+
 # Installation Guide
 
-This guide will help you install pyPFC and its dependencies on your system.
+The following installation methods can be considered:
 
-## Prerequisites
+## Method 1: Local Installation
 
-Before installing pyPFC, ensure you have the following prerequisites:
+The simplest way to install pyPFC is via pip, which should ensure that the package dependencies are met automatically. Note, however, that **PyTorch is only installed with CPU support** since PyPI only provides the CPU version of torch. GPU support needs to be added manually.
 
-### Python Requirements
-- Python 3.8 or higher
-- pip package manager
+Install from PyPI using:
 
-### System Requirements
-- **Minimum**: 4 GB RAM, 2 GB disk space
-- **Recommended**: 16 GB RAM, GPU with CUDA support
-- **Operating Systems**: Linux, macOS, Windows
+```bash
+pip install pypfc
+```
 
-## Installation Methods
+or
 
-### Method 1: Development Installation (Recommended)
+```bash
+sudo pip install pypfc
+```
+
+Alternatively, install from source by:
+
+```bash
+git clone https://github.com/HHallb/pyPFC.git
+cd pyPFC
+pip install .
+```
+
+Import pyPFC into your Python code by `import pypfc` and, optionally, `import pypfc_ovito`. See the [Quick Start Tutorial](quick_start.md) or the examples provided in `./examples/`.
+
+## Method 2: Development Installation
 
 For development or if you want to modify the code:
 
@@ -30,32 +43,23 @@ cd pyPFC
 pip install -e .
 ```
 
-### Method 2: Direct Installation from GitHub
+## Method 3: Direct Installation from GitHub
 
 ```bash
 pip install git+https://github.com/HHallb/pyPFC.git
 ```
 
-### Method 3: Local Installation
-
-If you have downloaded the source code:
-
-```bash
-# Navigate to the pyPFC directory
-cd path/to/pyPFC
-
-# Install the package
-pip install .
-```
-
 ## Dependencies
 
-pyPFC automatically installs the following required dependencies:
+pyPFC automatically installs the following required packages:
 
-### Core Dependencies
-- **PyTorch** (≥1.9.0): GPU/CPU tensor operations and FFT
-- **NumPy** (≥1.20.0): Numerical computations
-- **SciPy** (≥1.7.0): Scientific computing utilities
+* numpy
+* scikit-image
+* scipy
+* torch
+* vtk
+
+Note that PyPI only installs torch with CPU support. To add GPU support, refer to [GPU support](#gpu-support).
 
 ### Optional Dependencies
 
@@ -63,7 +67,7 @@ For enhanced functionality, you may want to install:
 
 ```bash
 # For visualization and analysis
-pip install matplotlib vtk
+pip install matplotlib
 
 # For OVITO integration (optional)
 pip install ovito
@@ -88,6 +92,8 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 # For CPU-only (if no GPU available)
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 ```
+
+For other CUDA versions and further information, please refer to the official [PyTorch documentation](https://pytorch.org/get-started/locally/).
 
 ### Verify GPU Support
 
@@ -127,7 +133,7 @@ import torch
 import numpy as np
 
 # Test basic functionality
-pfc = pypfc.PyPFC()
+sim = pypfc.setup_simulation([2,2,2])
 print("pyPFC successfully imported!")
 
 # Check versions
@@ -136,99 +142,14 @@ print(f"NumPy version: {np.__version__}")
 print(f"CUDA available: {torch.cuda.is_available()}")
 ```
 
-## Troubleshooting
-
-### Common Issues
-
-#### ImportError: No module named 'pypfc'
-
-**Solution**: Make sure you're in the correct environment and pyPFC is installed:
-
-```bash
-pip list | grep pypfc
-```
-
-#### CUDA Out of Memory
-
-**Solution**: Reduce simulation size or use CPU:
-
-```python
-config = {'device_type': 'CPU'}
-pfc.setup_simulation(domain_size, ndiv, config)
-```
-
-#### FFT Errors
-
-**Solution**: Ensure grid dimensions are even numbers:
-
-```python
-# Good: even dimensions
-ndiv = [64, 64, 32]
-
-# Bad: odd dimensions
-ndiv = [63, 65, 31]
-```
-
-### Performance Issues
-
-#### Slow Simulations
-
-1. **Enable GPU**: Verify CUDA installation and GPU detection
-2. **Memory Layout**: Ensure tensors are contiguous
-3. **Grid Size**: Start with smaller grids for testing
-
-#### Memory Issues
-
-1. **Reduce Grid Size**: Use smaller `ndiv` values
-2. **Use Single Precision**: Set `dtype_gpu: 'single'`
-3. **Clear Cache**: Call `torch.cuda.empty_cache()`
-
-## Development Setup
-
-For contributing to pyPFC:
-
-```bash
-# Clone with development tools
-git clone https://github.com/HHallb/pyPFC.git
-cd pyPFC
-
-# Install development dependencies
-pip install -e ".[dev]"
-
-# Run tests
-python -m pytest tests/
-
-# Check code style
-flake8 src/
-```
-
-## Docker Installation
-
-For containerized deployment:
-
-```dockerfile
-FROM pytorch/pytorch:latest
-
-WORKDIR /app
-COPY . /app
-
-RUN pip install -e .
-
-CMD ["python", "-c", "import pypfc; print('pyPFC ready!')"]
-```
-
 ## Next Steps
 
 After successful installation:
 
 1. [Quick Start Guide](quick_start.md) - Run your first simulation
-2. [Examples](examples.md) - Explore example notebooks
+2. [Examples](examples.md) - Explore pyPFC example
 3. [API Documentation](api/core.md) - Learn the API
 
----
+## Need Help?
 
-**Need Help?** 
-
-- Check the [troubleshooting section](#troubleshooting)
-- Review [GitHub Issues](https://github.com/HHallb/pyPFC/issues)
-- Join the community discussions
+Check the [troubleshooting section](troubleshooting.md).

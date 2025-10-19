@@ -29,6 +29,26 @@ from pypfc_grid import setup_grid
 class setup_base(setup_grid):
 
     def __init__(self, domain_size, ndiv, config):
+        """
+        Initialize the base PFC setup with domain parameters and device configuration.
+        
+        Parameters
+        ----------
+        domain_size : ndarray of float, shape (3,)
+            Physical size of the simulation domain [Lx, Ly, Lz] in lattice parameter units.
+        ndiv : ndarray of int, shape (3,)
+            Number of grid divisions [nx, ny, nz]. Must be even numbers for FFT compatibility.
+        config : dict
+            Configuration parameters as key-value pairs.
+            See the [pyPFC overview](core.md) for a complete list of the configuration parameters.
+            
+        Raises
+        ------
+        ValueError
+            If dtype_gpu is not torch.float32 or torch.float64.
+        ValueError
+            If GPU is requested but no GPU is available.
+        """
 
         # Initiate the inherited grid class
         # =================================
@@ -101,78 +121,253 @@ class setup_base(setup_grid):
 # =====================================================================================
 
     def set_verbose(self, verbose):
+        """
+        Set verbose output mode for debugging and monitoring.
+        
+        Parameters
+        ----------
+        verbose : bool
+            If True, enables detailed timing and progress output.
+        """
         self._verbose = verbose
 
+# =====================================================================================
+
     def get_verbose(self):
+        """
+        Get the current verbose output setting.
+        
+        Returns
+        -------
+        bool
+            Current verbose mode setting.
+        """
         return self._verbose
 
+# =====================================================================================
+
     def set_dtype_cpu(self, dtype):
+        """
+        Set the CPU data type for numpy arrays.
+        
+        Parameters
+        ----------
+        dtype : numpy.dtype
+            NumPy data type for CPU computations (e.g., np.float32, np.float64).
+        """
         self._dtype_cpu = dtype
 
+# =====================================================================================
+
     def get_dtype_cpu(self):
+        """
+        Get the current CPU data type.
+        
+        Returns
+        -------
+        numpy.dtype
+            Current NumPy data type used for CPU arrays.
+        """
         return self._dtype_cpu
 
+# =====================================================================================
+
     def set_dtype_gpu(self, dtype):
+        """
+        Set the GPU data type for PyTorch tensors.
+        
+        Parameters
+        ----------
+        dtype : torch.dtype
+            PyTorch data type for GPU computations (e.g., torch.float32, torch.float64).
+        """
         self._dtype_gpu = dtype
 
+# =====================================================================================
+
     def get_dtype_gpu(self):
+        """
+        Get the current GPU data type.
+        
+        Returns
+        -------
+        torch.dtype
+            Current PyTorch data type used for GPU tensors.
+        """
         return self._dtype_gpu
-    
+
+# =====================================================================================
+#     
     def set_device_type(self, device_type):
+        """
+        Set the computation device type.
+        
+        Parameters
+        ----------
+        device_type : str
+            Device type for computations. Options: 'CPU', 'GPU'.
+        """
         self._device_type = device_type
 
+# =====================================================================================
+
     def get_device_type(self):
+        """
+        Get the current computation device type.
+        
+        Returns
+        -------
+        str
+            Current device type ('CPU' or 'GPU').
+        """
         return self._device_type
 
+# =====================================================================================
+
     def set_device_number(self, device_number):
+        """
+        Set the GPU device number for multi-GPU systems.
+        
+        Parameters
+        ----------
+        device_number : int
+            GPU device index (0, 1, 2, ...) for CUDA computations.
+        """
         self._device_number = device_number
 
+# =====================================================================================
+
     def get_device_number(self):
+        """
+        Get the current GPU device number.
+        
+        Returns
+        -------
+        int
+            Current GPU device index.
+        """
         return self._device_number
 
+# =====================================================================================
+
     def set_k2_d(self, k2_d):
+        """
+        Set the wave vector magnitude squared tensor.
+        
+        Parameters
+        ----------
+        k2_d : torch.Tensor
+            Wave vector magnitude squared (k²) tensor in Fourier space.
+            Used for FFT-based operations and differential operators.
+        """
         self._k2_d = k2_d
 
+# =====================================================================================
+
     def get_k2_d(self):
+        """
+        Get the wave vector magnitude squared tensor.
+        
+        Returns
+        -------
+        torch.Tensor
+            Wave vector magnitude squared (k²) tensor in Fourier space.
+        """
         return self._k2_d
 
+# =====================================================================================
+
     def get_torch_threads(self):
+        """
+        Get the current PyTorch thread configuration.
+        
+        Returns
+        -------
+        tuple of int
+            (num_threads, num_interop_threads) for PyTorch operations.
+        """
         return torch.get_num_threads(), torch.get_num_interop_threads()
-    
+
+# =====================================================================================
+#     
     def set_torch_threads(self, nthreads, nthreads_interop):
+        """
+        Set PyTorch thread configuration for CPU operations.
+        
+        Parameters
+        ----------
+        nthreads : int
+            Number of threads for intra-op parallelism.
+        nthreads_interop : int
+            Number of threads for inter-op parallelism.
+        """
         torch.set_num_threads(nthreads)
         torch.set_num_interop_threads(nthreads_interop)
         self._set_num_threads         = nthreads
         self._set_num_interop_threads = nthreads_interop
 
+# =====================================================================================
+
     def set_alpha(self, alpha):
+        """
+        Set the Gaussian peak widths for the two-point correlation function.
+        
+        Parameters
+        ----------
+        alpha : array_like of float
+            Gaussian peak widths (α_i) for each peak in the correlation function.
+        """
         self._alpha = alpha
 
+# =====================================================================================
+
     def get_alpha(self):
+        """
+        Get the Gaussian peak widths for the two-point correlation function.
+        
+        Returns
+        -------
+        alpha : ndarray of float
+            Gaussian peak widths (α_i) for each peak in the correlation function.
+        """
         return self._alpha
 
 # =====================================================================================
 
     def get_time_stamp(self):
+        """
+        Get current timestamp string.
+        
+        Returns
+        -------
+        timestamp : str
+            Current date and time in format: YYYY-MM-DD HH:MM.
+        """
         return datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
 
 # =====================================================================================
 
     def get_k(self, npoints, dspacing):
-        '''
-        PURPOSE
-            Define a 1D wave vector.
+        """
+        Define a 1D wave vector for Fourier space operations.
 
-        INPUT
-            npoints     Number of grid points
-            dspacing    Grid spacing
+        Parameters
+        ----------
+        npoints : int
+            Number of grid points. Must be even.
+        dspacing : float
+            Grid spacing in real space.
 
-        OUTPUT
-            k           Wave vector
-
-        Last revision:
-        H. Hallberg 2025-09-30
-        '''
+        Returns
+        -------
+        k : ndarray of float
+            1D wave vector array with proper frequency ordering for FFTs.
+            
+        Raises
+        ------
+        ValueError
+            If npoints is not an even number.
+        """
 
         # Check input
         if np.mod(npoints,2) != 0:
@@ -189,18 +384,19 @@ class setup_base(setup_grid):
     # =====================================================================================
 
     def evaluate_k2_d(self):
-        '''
-        PURPOSE
-            Evaluate the sum of the squared wave vectors.
-
-        INPUT
-
-        OUTPUT
-            k2_d    k2=kx**2+ky**2 +kz**2,  [nx, ny, nz] (on the device)
-
-        Last revision:
-        H. Hallberg 2025-10-16
-        '''
+        """
+        Evaluate the sum of squared wave vectors for FFT operations.
+        
+        Computes $k^2 = k_x^2 + k_y^2 + k_z^2$ on the computational device
+        using PyTorch FFT frequency grids. This is fundamental for Fourier-space
+        operations in PFC simulations.
+        
+        Returns
+        -------
+        k2_d : torch.Tensor, shape (nx, ny, nz_half)
+            Sum of squared wave vectors on the device. The z-dimension is 
+            reduced due to real FFT symmetry (nz_half = nz//2 + 1).
+        """
 
         kx    = 2 * torch.pi * torch.fft.fftfreq(self._nx, d=self._dx, device=self._device, dtype=self._dtype_gpu)
         ky    = 2 * torch.pi * torch.fft.fftfreq(self._ny, d=self._dy, device=self._device, dtype=self._dtype_gpu)
@@ -215,21 +411,24 @@ class setup_base(setup_grid):
     # =====================================================================================
 
     def get_integrated_field_in_volume(self, field, limits):
-        '''
-        PURPOSE
-            Integrate a field variable within a defined volume, defined on a fixed Cartesian 3D grid.
+        """
+        Integrate a field variable within a defined volume.
+        
+        Performs numerical integration of a field variable over a specified
+        3D volume on a Cartesian grid.
 
-        INPUT
-            field       Field to be integrated, [nx x ny x nz]
-            limits      Spatial integration limits, [6]:
-                            limits = [xmin xmax ymin ymax zmin zmax]
+        Parameters
+        ----------
+        field : ndarray of float, shape (nx, ny, nz)
+            Field to be integrated over the specified volume.
+        limits : array_like of float, length 6
+            Spatial integration limits: [xmin, xmax, ymin, ymax, zmin, zmax].
 
-        OUTPUT
-            result      Result of the integration
-
-        Last revision:
-        H. Hallberg 2024-09-16
-        '''
+        Returns
+        -------
+        result : float
+            Result of the volume integration.
+        """
 
         # Grid
         nx,ny,nz = self._ndiv
@@ -259,21 +458,30 @@ class setup_base(setup_grid):
 # =====================================================================================
 
     def get_field_average_along_axis(self, field, axis):
-        '''
-        PURPOSE
-            Evaluate the mean value of a field variable along a certain axis,
-            defined on a fixed Cartesian 3D grid.
+        """
+        Evaluate the mean value of a field variable along a specified axis.
+        
+        Computes the spatial average of a 3D field along one axis, 
+        reducing the dimensionality by averaging over the other two axes.
 
-        INPUT
-            field       Field to be integrated, [nx x ny x nz]
-            axis        Axis to integrate along: 'x', 'y' or 'z'
+        Parameters
+        ----------
+        field : ndarray of float, shape (nx, ny, nz)
+            3D field variable to be averaged.
+        axis : str
+            Axis to average along: x, y or z (case insensitive).
 
-        OUTPUT
-            result      Result of the integration
-
-        Last revision:
-        H. Hallberg 2024-09-17
-        '''
+        Returns
+        -------
+        result : ndarray of float
+            1D array containing mean values along the specified axis.
+            Shape depends on the axis: (nx,), (ny,), or (nz,).
+            
+        Raises
+        ------
+        ValueError
+            If axis is not x, y or z.
+        """
 
         # Evaluate the mean field value along the specified axis
         # ======================================================
@@ -291,20 +499,30 @@ class setup_base(setup_grid):
 # =====================================================================================
 
     def get_integrated_field_along_axis(self, field, axis):
-        '''
-        PURPOSE
-            Integrate a field variable along a certain axis, defined on a fixed Cartesian 3D grid.
+        """
+        Integrate a field variable along a specified axis.
+        
+        Performs numerical integration of a 3D field variable along one axis,
+        integrating over the two orthogonal directions.
 
-        INPUT
-            field       Field to be integrated, [nx x ny x nz]
-            axis        Axis to integrate along: 'x', 'y' or 'z'
+        Parameters
+        ----------
+        field : ndarray of float, shape (nx, ny, nz)
+            3D field variable to be integrated.
+        axis : str
+            Axis to integrate along: x, y or z (case insensitive).
 
-        OUTPUT
-            result      Result of the integration
-
-        Last revision:
-        H. Hallberg 2024-09-16
-        '''
+        Returns
+        -------
+        result : ndarray of float
+            1D array containing integrated values along the specified axis.
+            Shape depends on the axis: (nx,), (ny,), or (nz,).
+            
+        Raises
+        ------
+        ValueError
+            If axis is not x, y or z.
+        """
 
         # Grid
         # ====
@@ -328,33 +546,34 @@ class setup_base(setup_grid):
       
 # =====================================================================================
 
-    def interpolate_atoms(self, intrpPos, pos, values, num_nnb=8, power=2):
+    def interpolate_atoms(self, intrp_pos, pos, values, num_nnb=8, power=2):
         """
-        PURPOSE
-            Interpolate values at given positions in a 3D periodic domain using inverse distance weighting.
-            interpolated_value = Σ(wi x vi) / Σ(wi)
-            where wi = 1 / (di^power), di is the distance to the i-th nearest neighbor, and
-            vi is the value at that neighbor.
-
-        INPUT
-            intrpPos        Array of shape [n_intrp, 3] containing the
-                            3D coordinates of the particles to be interpolated
-            pos             Array of shape [n_particles, 3] containing the 3D coordinates of
-                            the particles among which to interpolate
-            values          Array of shape [n_particles] containing the values to be interpolated
-            num_nnb         Number of nearest neighbors to use for interpolation
-            power           Power for inverse distance weighting (default is 2)
-
-        OUTPUT
-            interpVal       Interpolated values at given positions in
-                            intrpPos [n_interp]
-
-        Last revision:
-            H. Hallberg 2025-08-03
+        Interpolate values at given positions using inverse distance weighting.
+        
+        Performs 3D interpolation in a periodic domain using inverse distance
+        weighting: interpolated_value = Σ(wi × vi) / Σ(wi), where wi = 1 / (di^power).
+        
+        Parameters
+        ----------
+        intrp_pos : ndarray of float, shape (n_intrp, 3)
+            3D coordinates of positions where values should be interpolated.
+        pos : ndarray of float, shape (n_particles, 3)
+            3D coordinates of particles with known values.
+        values : ndarray of float, shape (n_particles,)
+            Values at the particle positions to be interpolated.
+        num_nnb : int, optional
+            Number of nearest neighbors to use for interpolation.
+        power : float, optional
+            Power for inverse distance weighting.
+            
+        Returns
+        -------
+        interp_val : ndarray of float, shape (n_intrp,)
+            Interpolated values at the specified positions.
         """
 
-        n_interp = intrpPos.shape[0]
-        interpVal = np.zeros(n_interp, dtype=self._dtype_cpu)
+        n_interp   = intrp_pos.shape[0]
+        interp_val = np.zeros(n_interp, dtype=self._dtype_cpu)
 
         # Generate periodic images of the source positions
         images = np.vstack([pos + np.array([dx, dy, dz]) * self._domain_size
@@ -373,17 +592,17 @@ class setup_base(setup_grid):
         epsilon     = 1e-12  # Small value to avoid division by zero
         
         # Vectorized neighbor search for all interpolation points at once
-        distances, indices = tree.query(intrpPos, k=k_neighbors)
+        distances, indices = tree.query(intrp_pos, k=k_neighbors)
         
         # Handle exact matches (distance < epsilon)
         exact_matches = distances[:, 0] < epsilon
         
         # Initialize output array
-        interpVal = np.zeros(n_interp, dtype=self._dtype_cpu)
+        interp_val = np.zeros(n_interp, dtype=self._dtype_cpu)
         
         # For exact matches, use the nearest neighbor value directly
         if np.any(exact_matches):
-            interpVal[exact_matches] = values_periodic[indices[exact_matches, 0]]
+            interp_val[exact_matches] = values_periodic[indices[exact_matches, 0]]
         
         # For non-exact matches, use inverse distance weighting
         non_exact = ~exact_matches
@@ -403,36 +622,45 @@ class setup_base(setup_grid):
             total_weight = np.sum(weights, axis=1)
             
             # Store interpolated values
-            interpVal[non_exact] = weighted_sum / total_weight
+            interp_val[non_exact] = weighted_sum / total_weight
 
-        return interpVal
+        return interp_val
 
 # =====================================================================================
 
     def interpolate_density_maxima(self, den, ene=None, pf=None):
-        '''
-        PURPOSE
-            Find the coordinates of the maxima in the density field (='atom' positions)
-            The domain is assumed to be defined such that all maxima
-            have coordinates (x,y,z) >= (0,0,0).
-            The density and, optionally, the energy and the phase field value(s)
-            at the individual maxima are interpolated too.
-
-        INPUT
-            den                     Density field, [nx, ny, nz]
-            ene                     Energy field, [nx, ny, nz]
-            pf                      Optional list of phase fields, [nx, ny, nz]
-
-        OUTPUT
-            atom_coord              Coordinates of the density maxima, [nmaxima x 3]
-            atom_data               Interpolated field values at the density maxima,
-                                    [nmaxima x 2+nPhaseFields].
-                                    The columns hold point data in the order:
-                                    [den ene pf1 pf2 ... pfN]
-
-        Last revision:
-        H. Hallberg 2025-09-24
-        '''
+        """
+        Find density field maxima and interpolate atomic positions and properties.
+        
+        Identifies local maxima in the density field as atomic positions and performs
+        high-order interpolation to obtain sub-grid precision coordinates. Also 
+        interpolates associated field values (density, energy, phase fields) at
+        the atomic positions.
+        
+        Parameters
+        ----------
+        den : ndarray of float, shape (nx,ny,nz)
+            Density field from PFC simulation.
+        ene : ndarray of float, shape (nx,ny,nz), optional
+            Energy field for interpolation at atomic positions.
+        pf : list of ndarray, optional
+            List of phase fields for interpolation at atomic positions.
+            Each array should have shape (nx,ny,nz).
+            
+        Returns
+        -------
+        atom_coord : ndarray of float, shape (n_maxima,3)
+            Interpolated coordinates of density maxima (atomic positions).
+        atom_data : ndarray of float, shape (n_maxima, 2+n_phase_fields)
+            Interpolated field values at atomic positions.
+            Columns: [density, energy, pf1, pf2, ..., pfN]
+            
+        Notes
+        -----
+        The method uses scipy.ndimage for high-order interpolation and applies
+        density thresholding and merging of nearby maxima to remove spurious peaks.
+        The interpolation order is controlled by the `_density_interp_order` attribute.
+        """
 
         if self._verbose: tstart = time.time()
 
@@ -673,21 +901,28 @@ class setup_base(setup_grid):
 
     def get_phase_field_contour(self, pf, pf_zoom=1.0, evaluate_volume=True):
         """
-        PURPOSE
-            Find the iso-contour surface of a 3D phase field using marching cubes
+        Find the iso-contour surface of a 3D phase field using marching cubes.
         
-        INPUT
-            pf                  Phase field, [nx, ny, nz]
-            pf_zoom             Zoom factor for coarsening/refinement
-            evaluate_volume     If True, also evaluate the volume enclosed by the iso-surface
-
-        OUTPUT
-            verts               Vertices of the iso-surface triangulation
-            faces               Surface triangulation topology
-            volume              (optional) Volume enclosed by the iso-surface
-
-        Last revision:
-            H. Hallberg 2025-09-06
+        Extracts iso-surfaces from 3D phase field data using the marching cubes
+        algorithm, with optional volume calculation for enclosed regions.
+        
+        Parameters
+        ----------
+        pf : ndarray of float, shape (nx, ny, nz)
+            3D phase field data for iso-surface extraction.
+        pf_zoom : float, optional
+            Zoom factor for spatial coarsening/refinement.
+        evaluate_volume : bool, optional
+            If True, calculates the volume enclosed by the iso-surface.
+            
+        Returns
+        -------
+        verts : ndarray of float, shape (n_vertices, 3)
+            Vertices of the iso-surface triangulation.
+        faces : ndarray of int, shape (n_faces, 3)
+            Surface triangulation topology (vertex indices).
+        volume : float, optional
+            Volume enclosed by the iso-surface (only if evaluate_volume=True).
         """
 
         verts, faces, *_ = measure.marching_cubes(zoom(pf,pf_zoom), self._pf_iso_level, spacing=self._ddiv)
@@ -707,20 +942,29 @@ class setup_base(setup_grid):
 # =====================================================================================
 
     def get_rlv(self, struct, alat):
-        '''
-        PURPOSE
-            Get the reciprocal lattice vectors for a particular crystal structure.
-
-        INPUT
-            struct      Crystal structure: SC, BCC, FCC, DC
-            latticePar  Lattice parameter
-    
-        OUTPUT
-            RLV         Reciprocal lattice vectors, [nRLV x 3]
-
-        Last revision:
-        H. Hallberg 2025-08-27
-        '''
+        """
+        Get the reciprocal lattice vectors for a crystal structure.
+        
+        Computes reciprocal lattice vectors for common crystal structures
+        used in phase field crystal modeling.
+        
+        Parameters
+        ----------
+        struct : str
+            Crystal structure type. Options: 'SC', 'BCC', 'FCC', 'DC'.
+        alat : float
+            Lattice parameter.
+            
+        Returns
+        -------
+        rlv : ndarray of float, shape (nrlv, 3)
+            Reciprocal lattice vectors for the specified crystal structure.
+            
+        Raises
+        ------
+        ValueError
+            If the crystal structure is not supported.
+        """
 
         # Define reciprocal lattice vectors
         structures = {
@@ -757,35 +1001,38 @@ class setup_base(setup_grid):
 # =====================================================================================
 
     def evaluate_reciprocal_planes(self):
-        '''
-        PURPOSE
-            Establish the reciprocal vectors/planes for a particular crystal structure.
+        """
+        Establish reciprocal vectors/planes for a crystal structure.
+        
+        Computes reciprocal lattice plane spacing (d-spacing) and wave vectors
+        for crystallographic planes. For cubic systems: d = a / sqrt(h² + k² + l²)
+        where a is the lattice parameter, and reciprocal spacing is k = 2π/d.
+        
+        Returns
+        -------
+        k_plane : ndarray of float
+            Reciprocal lattice plane spacings (wave vector magnitudes).
+        n_plane : ndarray of int
+            Number of symmetrical planes in each family.
+        den_plane : ndarray of float
+            Atomic density within each plane family.
+            
+        Raises
+        ------
+        ValueError
+            If the crystal structure is not supported.
+        ValueError
+            If there are not enough peaks defined for the requested number of peaks.
+            
+        Notes
+        -----
+        For any family of lattice planes separated by distance d, there are
+        reciprocal lattice points at intervals of 2π/d in reciprocal space.
+        """
 
-        INPUT
-
-        OUTPUT
-            kPlane        Reciprocal lattice plane spacing (a.k.a. "d-spacing"). For cubic systems, the formulae
-                            is:
-                                    d = a / sqrt(h^2 + k^2 + l^2)
-
-                            where a is the lattice parameter. The reciprocal spacing is
-
-                                    kPlane = 2pi/d
-
-                            Theorem: For any family of lattice planes separated by distance d, there are 
-                                    reciprocal lattice vectors perpendicular to the planes, the shortest
-                                    being 2pi/d.
-
-            nPlane        Number of symmetrical planes of each family
-            denPlane      Atomic density within a plane (i.e. "planar density")
-
-        Last revision:
-        H. Hallberg 2025-08-26
-        '''
-
-        kPlane   = np.zeros(self._npeaks, dtype=self._dtype_cpu)
-        denPlane = np.zeros(self._npeaks, dtype=self._dtype_cpu)
-        nPlane   = np.zeros(self._npeaks, dtype=int)
+        k_plane   = np.zeros(self._npeaks, dtype=self._dtype_cpu)
+        den_plane = np.zeros(self._npeaks, dtype=self._dtype_cpu)
+        n_plane   = np.zeros(self._npeaks, dtype=int)
 
         # Define reciprocal vectors
         match self._struct.upper():
@@ -818,28 +1065,33 @@ class setup_base(setup_grid):
 
         # Retrieve output data
         if nvals>=self._npeaks:
-            kPlane   = kpl[0:self._npeaks]
-            nPlane   = pl[0:self._npeaks]
-            denPlane = denpl[0:self._npeaks]
+            k_plane   = kpl[0:self._npeaks]
+            n_plane   = pl[0:self._npeaks]
+            den_plane = denpl[0:self._npeaks]
         else:
             raise ValueError(f'Not enough peaks defined, npeaks={self._npeaks}')
 
-        return kPlane, nPlane, denPlane
+        return k_plane, n_plane, den_plane
 
 # =====================================================================================
 
     def evaluate_C2_d(self):
         """
-        PURPOSE
-            Establish the two-point correlation function for a particular crystal structure.
-
-        INPUT
-
-        OUTPUT
-            C2_d          Two-point pair correlation function [nx, ny, nz/2+1] (on the device)
-
-        Last revision:
-        H. Hallberg 2025-09-22
+        Establish the two-point correlation function for a crystal structure.
+        
+        Computes the two-point pair correlation function in Fourier space
+        for the specified crystal structure using Gaussian peaks at 
+        reciprocal lattice positions.
+        
+        Returns
+        -------
+        C2_d : torch.Tensor, shape (nx, ny, nz//2+1)
+            Two-point pair correlation function on the computational device.
+            
+        Raises
+        ------
+        ValueError
+            If C20_alpha is negative when C20_amplitude is non-zero.
         """
 
         # Get reciprocal planes
@@ -892,25 +1144,24 @@ class setup_base(setup_grid):
 # =====================================================================================
 
     def evaluate_directional_correlation_kernel(self, H0, Rot):
-        '''
-        PURPOSE
-            Establish the directional correlation kernel for a particular crystal structure.
-
-        INPUT
-            kx              Wave vector along the x-axis, [nx]
-            ky              Wave vector along the y-axis, [ny]
-            kz              Wave vector along the z-axis, [nz]
-            latticePar      Lattice parameter
-            struct          Crystal structure: SC, BCC, FCC, DC
-            H0              Constant modulation of the peak height
-            Rot             Lattice rotation matrix, [3, 3]
-    
-        OUTPUT
-            f_H             Directional correlation kernel, [nx, ny, nz/2+1]
-
-        Last revision:
-        H. Hallberg 2024-10-21
-        '''
+        """
+        Establish directional correlation kernel for a crystal structure.
+        
+        Computes directional correlation kernels used in extended PFC models
+        to introduce orientational dependence.
+        
+        Parameters
+        ----------
+        H0 : float
+            Constant modulation of the peak height.
+        Rot : ndarray of float, shape (3, 3) or None
+            Lattice rotation matrix. If None, uses identity matrix.
+            
+        Returns
+        -------
+        H_d : torch.Tensor, shape (nx, ny, nz//2+1)
+            Directional correlation kernel on the computational device.
+        """
 
         if self._verbose: tstart = time.time()
 
@@ -960,19 +1211,22 @@ class setup_base(setup_grid):
 
     def get_xtal_nearest_neighbors(self):
         """
-        PURPOSE
-            Get nearest neighbor information for different crystal structures.
-
-        INPUT
-            struct          Crystal structure: SC, BCC, FCC, DC
-            alat            Lattice parameter
-
-        OUTPUT
-            nnb             Number of nearest and next-nearest neighbors [nvals]
-            nnb_dist        Distances to the nearest and next-nearest neighbors [nvals]
-
-        Last revision:
-            H. Hallberg 2025-09-24
+        Get nearest neighbor information for crystal structures.
+        
+        Computes nearest neighbor distances and coordination numbers
+        for common crystal structures used in phase field crystal modeling.
+        
+        Returns
+        -------
+        nnb : ndarray of int
+            Number of nearest and next-nearest neighbors.
+        nnb_dist : ndarray of float
+            Distances to the nearest and next-nearest neighbors.
+            
+        Raises
+        ------
+        ValueError
+            If the crystal structure is not supported.
         """
 
         # Nearest and next nearest neighbor positions
@@ -1001,22 +1255,29 @@ class setup_base(setup_grid):
 
     def get_csp(self, pos, normalize_csp=False):
         """
-        PURPOSE
-            Calculate the centro-symmetry parameter (CSP) for a set of atoms in a 3D periodic domain.
-
-            Reference:
-                C.L. Kelchner, S.J. Plimpton and J.C. Hamilton, Dislocation nucleation and defect
-                structure during surface indentation, Phys. Rev. B, 58(17):11085-11088, 1998
-
-        INPUT
-            pos             Array of shape [natoms, 3] containing the 3D coordinates of the atoms
-            normalize_csp   If True, the CSP values are normalized to the range [0,1]
-
-        OUTPUT
-            csp             Array containing the CSP value for each atom [natoms]
-
-        Last revision:
-            H. Hallberg 2025-09-24
+        Calculate the centro-symmetry parameter (CSP) for atoms.
+        
+        Computes CSP values for atoms in a 3D periodic domain to identify
+        crystal defects and disorder. CSP quantifies deviation from
+        centro-symmetric local environments.
+        
+        Parameters
+        ----------
+        pos : ndarray of float, shape (natoms, 3)
+            3D coordinates of atoms.
+        normalize_csp : bool, optional
+            If True, normalizes CSP values to range [0,1].
+            
+        Returns
+        -------
+        csp : ndarray of float, shape (natoms,)
+            Centro-symmetry parameter for each atom.
+            
+        References
+        ----------
+        C.L. Kelchner, S.J. Plimpton and J.C. Hamilton, Dislocation nucleation and defect
+        structure during surface indentation, Phys. Rev. B, 58(17):11085-11088, 1998.
+        https://doi.org/10.1103/PhysRevB.58.11085
         """
 
         if self._verbose:

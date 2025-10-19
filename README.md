@@ -1,14 +1,17 @@
 ![PyPI](https://img.shields.io/pypi/v/pypfc)
 ![License](https://img.shields.io/github/license/HHallb/pyPFC)
 
-# pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
+![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/docs/images/pyPFC_logo_transparent.png)
+
+# A Python package for GPU-accelerated 3D Phase Field Crystal simulations
+
 A Python software package for setting up, running and processing Phase Field Crystal (PFC) simulations. The code uses PyTorch to allow execution on both CPUs and GPUs, depending on the available hardware. The PFC implementation in pyPFC relies on heavy use of FFTs and is set on a regular Cartesian 3D grid. Periodic boundary conditions are assumed along all coordinate axes. pyPFC evolves the density field in non-dimensional time and spatial dimensions are expressed in units of lattice parameters.
 
-![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/images/PFC_atoms.png)
+![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/docs/images/PFC_atoms.png)
 
 ## Table of Contents
-<!--ts-->
-- [pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations](#pypfc-an-open-source-python-package-for-phase-field-crystal-simulations)
+
+- [pyPFC: A Python package for GPU-accelerated 3D Phase Field Crystal simulations](#a-python-package-for-gpu-accelerated-3d-phase-field-crystal-simulations)
   - [Configuration Parameters](#configuration-parameters)
   - [Quick Start Example](#quick-start-example)
   - [Description of Source Files](#description-of-source-files)
@@ -21,14 +24,14 @@ A Python software package for setting up, running and processing Phase Field Cry
   - [Package Dependencies](#package-dependencies)  
   - [Installation and Usage](#installation-and-usage)
   - [Troubleshooting](#troubleshooting)
-  - [Licencing](#licensing)
+  - [Licensing](#licensing)
   - [References](#references)
-<!--te-->
 
 ## Configuration Parameters
+
 The general behavior of pyPFC is controlled by a set of configuration parameters, collected in a Python dictionary. The parameters are described in the table below.
 
-| Parameter name         | Defaults to                       | Description                                                                      
+| Parameter name         | Defaults to                       | Description
 | ---------------------- | --------------------------------- | ---------------------------------------------------------------------------------
 | alat                   | 1.0                               | Lattice parameter (non-dimensional)
 | alpha                  | [1, 1]                            | C2 Gaussian peak widths, excluding the zero-mode peak
@@ -56,6 +59,7 @@ The general behavior of pyPFC is controlled by a set of configuration parameters
 | verbose                | True                              | Verbose output (or not)
 
 ## Quick Start Example
+
 This is a quick start example for using the pyPFC package to perform a simple phase field crystal (PFC) simulation. The simulation traces the growth of a spherical crystal, centered in a 3D periodic domain. The example can be found as `./examples/ex04_quick_start.py`, where it is commented in more detail. The example demonstrates how to set up a simulation, generate an initial density field, evolve the density field over time and save the results to VTK files for visualization.
 
 It can be noted that the only strictly required input to pyPFC is `domain_size`, defining the size of the simulation domain in units of lattice parameters along each coordinate axis. All other [configuration parameters](#configuration-parameters) are set to default values, which can be adjusted as needed.
@@ -197,7 +201,7 @@ The class is initiated by supplying the arguments `domain_size=[Lx,Ly,Lz]` and `
 
 #### Class Methods and their Arguments
 
-| Method                                                                                       | Description                                   
+| Method                                                                                       | Description
 | -------------------------------------------------------------------------------------------- | ---------------------------------------------- 
 | `set_alat(alat)`                                                                             | Set lattice parameter (non-dimensional)
 | `get_alat`                                                                                   | Get lattice parameter (non-dimensional)
@@ -223,17 +227,19 @@ The class is initiated by supplying the arguments `domain_size=[Lx,Ly,Lz]` and `
 | `get_phase_field`                                                                            | Evaluate the phase field using wavelet filtering
 
 ### Class `pypfc_ovito`
+
 This class provides pyPFC interfaces to a limited subset of the functionalities in [OVITO](https://www.ovito.org/).
 
 #### Class Methods and their Arguments
 
-| Method                                                                                       | Description                                   
+| Method                                                                                       | Description
 | -------------------------------------------------------------------------------------------- | ---------------------------------------------- 
 | `do_ovito_csp(num_neighbors)`                                                                | Evaluate Centro-Symmetry Parameter (CSP) using OVITO's CentroSymmetryModifier
 | `do_ovito_dxa(rep, tol)`                                                                     | Perform dislocation analysis (DXA) using OVITO
 | `do_ovito_ptm(refRot, outputEulerAng, outputStrain)`                                         | Evaluate crystal structure, orientation and elastic Green-Lagrange strain using OVITO's Polyhedral Template Matching (PTM)
 
 ## Package Dependencies
+
 The following Python packages are required:
 
 * numpy
@@ -246,22 +252,29 @@ The following Python packages are required:
 Note that PyPI only installs torch with CPU support. To add GPU support, refer to [Installation and Usage](#installation-and-usage).
 
 ## Installation and Usage
+
 The simplest way to install pyPFC is via pip, which should ensure that [package dependencies](#package-dependencies) are met automatically. Note, however, that **PyTorch is only installed with CPU support** since PyPI only provides the CPU version of torch. For GPU support, see the tip a couple of lines down in this section.
 
 Install from PyPI using:
+
 ```bash
 pip install pypfc
 ```
+
 or
+
 ```bash
 sudo pip install pypfc
 ```
+
 Alternatively, install from source by:
+
 ```bash
 git clone https://github.com/HHallb/pyPFC.git
 cd pyPFC
 pip install .
 ```
+
 Import pyPFC into your Python code by `import pypfc` and, optionally, `import pypfc_ovito`. See the [quick start example](#quick-start-example) or the examples provided in `./examples/`.
 
 > [!IMPORTANT]
@@ -270,30 +283,38 @@ Import pyPFC into your Python code by `import pypfc` and, optionally, `import py
 ## Troubleshooting
 
 #### Q: I have a Nvidia GPU installed but pyPFC tells me I don't.
+
 **A:** Ensure that PyTorch is installed with CUDA enabled. To be sure, you can also check your setup by running:
+
 ```python
 import torch
 print(torch.cuda.is_available())
 print(torch.cuda.device_count())
 print(torch.version.cuda)
 ```
-If `is_available()` is `False` or `device_count()` is `0`, PyTorch cannot see your GPU. See [Installation and Usage](#installation-and-usage) on how to enable CUDA. 
+
+If `is_available()` is `False` or `device_count()` is `0`, PyTorch cannot see your GPU. See [Installation and Usage](#installation-and-usage) on how to enable CUDA.
 
 ---
+
 #### Q: The solid crystal phase fails to stabilize and/or appears to "melt" away.
+
 **A:** This is most likely due to `domain_size` not being set correctly to accommodate the current lattice periodicity.
 
 ---
 
 #### Q: The atom positions obtained by `interpolate_density_maxima` do not seem to coincide with the density field maxima.
+
 **A:** This is likely related to either insufficient grid resolution or too low interpolation order. The former issue is mitigated by reducing the values in `ddiv` and in the latter case `density_interp_order` should be increased. Usually `density_interp_order=2` is fine and increasing the number will also increase the time spent on interpolation.
 
 ---
 
-## Licencing
+## Licensing
+
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
 
 ## References
+
 Further details on PFC modeling and example applications can be found in:
 
 1. [K.H. Blixt and H. Hallberg, **Phase Field Crystal Modeling of Grain Boundary Migration: Mobility, Energy and Structural Variability**, *Acta Materialia*, 297:121318, 2025](https://doi.org/10.1016/j.actamat.2025.121318)

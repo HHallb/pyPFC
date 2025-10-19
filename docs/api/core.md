@@ -1,40 +1,53 @@
+![pyPFC logo](../images/pyPFC_logo_transparent.png)
+
 # Core Classes
 
-This section documents the core classes of the pyPFC framework.
+This section documents the core classes, the structure and the coding conventions of the pyPFC framework.
 
-## PyPFC Main Class
+## General Comments
 
-The main interface class for Phase Field Crystal simulations.
+- pyPFC runs simulations on a regular Cartesian 3D grid with periodic boundary conditions along all coordinate axes. This is due to that pyPFC employs spectral solution schemes with heavy use of FFTs and.
+- pyPFC evolves the density field in non-dimensional time and spatial dimensions are expressed in units of the lattice parameter.
 
-### Class Overview
+## Code Conventions
 
-```python
-class PyPFC:
-    """
-    Main class for Phase Field Crystal simulations using PyTorch.
-    
-    This class provides a high-level interface for setting up and running
-    PFC simulations on both CPU and GPU devices.
-    """
-    
-    def setup_simulation(self, domain_size, ndiv, config=None):
-        """Setup simulation domain and parameters."""
-        pass
-        
-    def do_single_crystal(self):
-        """Initialize single crystal structure."""
-        pass
-        
-    def do_step_update(self):
-        """Perform one time integration step."""
-        pass
-        
-    def get_energy(self):
-        """Calculate and return system free energy."""
-        pass
-```
+- A variable with a trailing `_d` indicates a quantity residing on the `device`, which can be either `cpu` or `gpu`.
+- A variable name with a leading `f_` indicates a complex-type quantity that is set in Fourier space.
+- Names of variables, functions and methods, etc., follow the snake case convention, with words in lower-case letters, separated by underscores. For example: `a_variable_name`
+- Floating point precision of variables is declared by the class variables `dtype_cpu` and `dtype_gpu` for quantities residing on the `cpu` and `gpu`, respectively. This permits easy control of the overall precision used in a pyPFC simulation.
 
-## Architecture Overview
+## Configuration Parameters
+
+The general behavior of pyPFC is controlled by a set of configuration parameters, collected in a Python dictionary. The parameters are described in the table below.
+
+| Parameter name         | Defaults to                       | Description
+| ---------------------- | --------------------------------- | ---------------------------------------------------------------------------------
+| alat                   | 1.0                               | Lattice parameter (non-dimensional)
+| alpha                  | [1, 1]                            | Gaussian peak widths in the pair correlation function $C_2$, excluding the zero-mode peak
+| C20_amplitude          | 0.0                               | Amplitude of the zero-mode Gaussian peak in $C_2$
+| C20_alpha              | 1.0                               | Width of the zero-mode Gaussian peak in $C_2$
+| density_interp_order   | 2                                 | Interpolation order for density maxima localization
+| density_merge_distance | 0.1                               | Distance for merging density maxima (in units of lattice parameters)
+| density_threshold      | 0.5                               | Threshold for density maxima detection
+| device_number          | 0                                 | GPU device number (if multiple GPUs are available)
+| device_type            | 'gpu'                             | PyTorch device ('cpu' or 'gpu')
+| dtime                  | 1.0e-3                            | Non-dimensional time increment $\Delta\tau$
+| dtype_cpu              | np.double                         | Floating-point precision of numpy arrays
+| dtype_gpu              | torch.float64                     | Floating-point precision of PyTorch tensors
+| evaluate_phase_field   | True                              | Evaluate phase field (or not)
+| normalize_pf           | True                              | Normalize the phase fields to [0,1], or not
+| npeaks                 | 2                                 | Number of Gaussian peaks, excluding the zero-mode peak, to use in $C_2$
+| pf_gauss_var           | 0.1                               | Variance of the Gaussian smoothing kernel used in phase field evaluations
+| pf_iso_level           | 0.5                               | Iso-level for phase field contouring
+| sigma                  | 0.0                               | Temperature-like parameter (non-dimensional)
+| struct                 | 'FCC'                             | Crystal structure
+| torch_threads          | 8                                 | Number of CPU threads to use if device_type is 'cpu'
+| torch_threads_interop  | 8                                 | Number of interop threads to use if device_type is 'cpu'
+| update_scheme          | '1st_order'                       | Time integration scheme ('1st_order', '2nd_order' or 'exponential')
+| update_scheme_params   | [1.0, 1.0, 1.0, None, None, None] | Parameters in the time integration scheme: $[g_1, g_2, g_3, \alpha, \beta, \gamma]$
+| verbose                | True                              | Verbose output (or not)
+
+## pyPFC Architecture Overview
 
 The pyPFC framework follows a strict inheritance hierarchy designed for modularity and extensibility:
 
@@ -45,237 +58,43 @@ graph TD
     C --> D[pypfc_io]
     D --> E[PyPFC]
     
-    A -.-> F[Grid Management<br/>• Domain discretization<br/>• Boundary conditions<br/>• Coordinate systems]
-    B -.-> G[Core Operations<br/>• Device management<br/>• FFT operations<br/>• Mathematical functions]
-    C -.-> H[Crystal Setup<br/>• Density field generation<br/>• Structure initialization<br/>• Phase field creation]
-    D -.-> I[Input/Output<br/>• VTK export<br/>• XYZ format<br/>• Pickle serialization]
-    E -.-> J[Main Interface<br/>• Simulation control<br/>• Time integration<br/>• Energy evaluation]
-```
-
-## Class Descriptions
-
-### Grid Management (pypfc_grid)
-
-Base class handling spatial discretization and domain setup.
-
-**Key Responsibilities:**
-- 3D Cartesian grid initialization
-- Periodic boundary condition setup
-- Coordinate system management
-- Grid validation (even number requirements)
-
-**Important Methods:**
-- `set_ndiv()` - Set grid divisions
-- `set_domain_size()` - Define physical domain
-- `get_grid_spacing()` - Calculate grid resolution
-
-### Base Operations (pypfc_base)
-
-Core mathematical and computational operations.
-
-**Key Responsibilities:**
-- Device management (CPU/GPU)
-- FFT operations and wave vector calculations
-- Tensor memory management
-- Precision control (single/double)
-
-**Important Methods:**
-- `set_device_type()` - Configure computation device
-- `setup_fft()` - Initialize Fourier transforms
-- `get_k2_field()` - Wave vector calculations
-
-### Crystal Preprocessing (pypfc_pre)
-
-Crystal structure generation and initialization.
-
-**Key Responsibilities:**
-- Density field creation
-- Crystal structure setup (BCC, FCC)
-- Polycrystal initialization
-- Phase field preparation
-
-**Important Methods:**
-- `setup_crystal_structure()` - Define crystal type
-- `generate_density_field()` - Create initial density
-- `apply_crystal_orientation()` - Set grain orientations
-
-### Input/Output (pypfc_io)
-
-Data persistence and visualization support.
-
-**Key Responsibilities:**
-- File format support (VTK, XYZ, pickle)
-- Atomic position export
-- Density field visualization
-- Simulation state serialization
-
-**Important Methods:**
-- `write_vtk_points()` - Export to ParaView format
-- `write_extended_xyz()` - Export for OVITO/VMD
-- `save_simulation_state()` - Checkpoint creation
-
-### Main Interface (PyPFC)
-
-High-level simulation control and user interface.
-
-**Key Responsibilities:**
-- Simulation setup and configuration
-- Time integration control
-- Energy evaluation and monitoring
-- Results analysis and extraction
-
-**Main Methods:**
-- `setup_simulation()` - Initialize complete simulation
-- `do_step_update()` - Advance time integration
-- `get_energy()` - Calculate free energy
-- `interpolate_density_maxima()` - Extract atomic positions
-
-## Usage Patterns
-
-### Basic Initialization
-
-```python
-import pypfc
-
-# Create simulation instance
-pfc = pypfc.PyPFC()
-
-# Setup simulation domain
-domain_size = [32.0, 32.0, 8.0]  # Physical size
-ndiv = [64, 64, 16]               # Grid divisions
-
-# Configuration
-config = {
-    'device_type': 'GPU',
-    'dtype_gpu': 'double',
-    'update_scheme': 'exponential'
-}
-
-# Initialize simulation
-pfc.setup_simulation(domain_size, ndiv, config)
-```
-
-### Advanced Configuration
-
-```python
-# Comprehensive configuration
-config = {
-    # Device settings
-    'device_type': 'GPU',           # 'CPU' or 'GPU'
-    'device_number': 0,             # GPU device index
-    'dtype_gpu': 'double',          # 'single' or 'double'
-    
-    # Simulation parameters
-    'update_scheme': 'exponential', # Time integration method
-    'update_scheme_params': [1.0, 0.01],  # [dt, tolerance]
-    'max_iterations': 1000,         # Maximum steps per update
-    
-    # Crystal structure
-    'crystal_structure': 'BCC',     # 'BCC', 'FCC', 'HCP'
-    'lattice_parameter': 1.0,       # Crystal lattice spacing
-    
-    # Density field
-    'density_amplitude': 1.0,       # Field amplitude
-    'density_threshold': 0.5,       # Atom detection threshold
-    'density_interp_order': 2,      # Interpolation accuracy
-    
-    # Polycrystal settings
-    'grain_seeds': [3, 3],          # Number of grains [nx, ny]
-    'grain_orientations': 'random', # Orientation distribution
-    'grain_boundary_width': 2.0,    # GB thickness
-    
-    # Output control
-    'output_frequency': 10,         # Steps between outputs
-    'output_format': 'vtk',         # Output file format
-    'output_precision': 'single'    # Output data precision
-}
-```
-
-## Error Handling
-
-### Common Exceptions
-
-```python
-try:
-    pfc.setup_simulation(domain_size, ndiv, config)
-except ValueError as e:
-    print(f"Configuration error: {e}")
-except RuntimeError as e:
-    print(f"GPU/memory error: {e}")
-except Exception as e:
-    print(f"Unexpected error: {e}")
-```
-
-### Validation Methods
-
-```python
-# Check configuration validity
-is_valid = pfc.validate_configuration(config)
-if not is_valid:
-    print("Configuration validation failed")
-
-# Check GPU availability
-if not pfc.check_gpu_available():
-    config['device_type'] = 'CPU'
-    print("GPU not available, using CPU")
-
-# Validate grid dimensions
-if not pfc.validate_grid_dimensions(ndiv):
-    print("Grid dimensions must be even numbers")
+    A -.-> F[**Grid Management**<br/>• Domain discretization<br/>]
+    B -.-> G[**Core Operations**<br/>• Device management<br/>• FFT operations<br/>• Auxiliary functions]
+    C -.-> H[**Pre-processing**<br/>• Density field generation<br/>• Structure initialization<br/>]
+    D -.-> I[**Input/Output**<br/>• VTK export<br/>• Extended XYZ I/O<br/>• Binary pickle file I/O<br/>• ASCII text file I/O]
+    E -.-> J[**Main Interface**<br/>• Simulation control<br/>• Time integration<br/>• Energy evaluation]
 ```
 
 ## Performance Considerations
 
 ### Memory Usage
 
-| Grid Size | Single Precision | Double Precision |
-|-----------|------------------|------------------|
-| 64³ | ~1 GB | ~2 GB |
-| 128³ | ~8 GB | ~16 GB |
-| 256³ | ~64 GB | ~128 GB |
+| Grid Size | Double Precision | Single Precision
+|-----------|------------------|-----------------
+| 256³      | ~2 GB            | ~1 GB
+| 512³      | ~14 GB           | ~7 GB
+| 768³      | ~45 GB           | ~23 GB
 
 ### Optimization Tips
 
 ```python
 # For maximum performance
-config_fast = {
-    'device_type': 'GPU',
-    'dtype_gpu': 'single',          # Faster computation
-    'update_scheme': 'exponential', # Efficient time stepping
-    'fft_backend': 'cufft',         # GPU-optimized FFT
-    'memory_pool': True,            # Reuse GPU memory
+params_fast = {
+    'device_type': 'GPU',       # Run on GPU
+    'dtype_cpu':  np.single,    # Floating point precision, CPU
+    'dtype_gpu': torch.float32, # Floating point precision, GPU
+    'density_interp_order': 1,  # Reduced interpolation accuracy
 }
 
 # For maximum accuracy
-config_precise = {
-    'device_type': 'GPU',
-    'dtype_gpu': 'double',          # Higher precision
-    'update_scheme': '2nd_order',   # More accurate integration
-    'convergence_tolerance': 1e-8,  # Stricter convergence
-    'density_interp_order': 3,      # Better interpolation
+params_precise = {
+    'device_type': 'GPU',       # Run on GPU 
+    'dtype_cpu': np.double,     # Floating point precision, GPU
+    'dtype_gpu': torch.float64, # Floating point precision, GPU
+    'density_interp_order': 3,  # Better interpolation accuracy
 }
 ```
 
-## Thread Safety
+## Usage Examples
 
-!!! warning "Thread Safety"
-    PyPFC instances are **not thread-safe**. For parallel simulations:
-    
-    - Use separate PyPFC instances per thread
-    - Ensure different GPU devices per instance
-    - Avoid shared state between instances
-
-```python
-# Correct: separate instances
-def run_simulation(config, thread_id):
-    pfc = pypfc.PyPFC()  # New instance per thread
-    config['device_number'] = thread_id % torch.cuda.device_count()
-    pfc.setup_simulation(domain_size, ndiv, config)
-    # ... run simulation
-```
-
-## Next Steps
-
-- [Grid Management API](grid.md) - Detailed grid operations
-- [I/O Operations API](io.md) - File handling and export
-- [Usage Examples](../usage/basic.md) - Practical applications
+Usage examples can be found on the [Examples pgase](../examples.md).

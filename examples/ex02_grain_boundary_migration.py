@@ -158,8 +158,8 @@ for step in range(nstep):
         # ===============
         if np.mod(step+1,n_save_step_data)==0:
 
-            # Integrate fields along x
-            # ========================
+            # Average field values along x
+            # ============================
             den_av = sim.get_field_average_along_axis(den, 'x')
             pf_av  = sim.get_field_average_along_axis(pf, 'x')
         

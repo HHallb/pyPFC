@@ -20,10 +20,22 @@ import numpy as np
 import time
 import torch
 from pypfc_base import setup_base
-
 class setup_pre(setup_base):
 
     def __init__(self, domain_size, ndiv, config):
+        """
+        Initialize the class.
+
+        Parameters
+        ----------
+        domain_size : array_like of int, shape (3,)
+            Number of grid divisions along each coordinate axis [nx, ny, nz].
+        ndiv : array_like of int, shape (3,)
+            Number of grid divisions along each coordinate axis [nx, ny, nz].
+        config : dict, optional
+            Configuration parameters as key-value pairs.
+            See the [pyPFC overview](core.md) for a complete list of the configuration parameters.
+        """
 
         # Initiate the inherited class
         # ============================
@@ -53,75 +65,213 @@ class setup_pre(setup_base):
 # =====================================================================================
 
     def set_struct(self, struct):
+        """
+        Set the crystal structure.
+        
+        Parameters
+        ----------
+        struct : {'FCC', 'BCC'}
+            Crystal structure type: `'FCC'`, `'BCC'`.
+        """
         self._struct = struct
 
+# =====================================================================================
+
     def get_struct(self):
+        """
+        Get the crystal structure.
+        
+        Returns
+        -------
+        struct : str
+            Crystal structure type: `'FCC'`, `'BCC'`.
+        """
         return self._struct
 
+# =====================================================================================
+
     def set_density(self, den):
+        """
+        Set the density field.
+        
+        Parameters
+        ----------
+        den : ndarray of float, shape (nx,ny,nz)
+            Density field.
+        """
         self._den = den
 
+# =====================================================================================
+
     def get_density(self):
+        """
+        Get the density field.
+        
+        Returns
+        -------
+        den : ndarray of float, shape (nx,ny,nz)
+            Density field.
+        """
         return self._den
 
+# =====================================================================================
+
     def set_energy(self, ene):
+        """
+        Set the PFC energy field.
+        
+        Parameters
+        ----------
+        ene : ndarray of float, shape (nx,ny,nz)
+            PFC energy field.
+        """
         self._ene = ene
 
-    def get_energy(self):
-        return self._ene
+# =====================================================================================
 
     def set_ampl(self, ampl):
+        """
+        Set the amplitudes in the density approximation.
+        
+        Parameters
+        ----------
+        ampl : array_like of float, shape (N,)
+            Amplitudes.
+        """
         ampl         = np.array(ampl, dtype=self._dtype_cpu)
         self._ampl   = ampl
         self._ampl_d = torch.from_numpy(ampl).to(self._device)
 
+# =====================================================================================
+
     def get_ampl(self):
+        """
+        Get the amplitudes in the density approximation.
+        
+        Returns
+        -------
+        ampl : ndarray of float, shape (N,)
+            Amplitudes.
+        """
         return self._ampl
 
+# =====================================================================================
+
     def set_nlns(self, nlns):
+        """
+        Set the liquid and solid phase densities.
+        
+        Parameters
+        ----------
+        nlns : array_like of float, shape (2,)
+            $[n_{l},n_{s}]$ where $n_{l}$ is liquid phase density 
+            and $n_{s}$ is solid phase density.
+        """
         nlns         = np.array(nlns, dtype=self._dtype_cpu)
         self._nlns   = nlns
         self._nlns_d = torch.from_numpy(nlns).to(self._device)
 
+# =====================================================================================
+
     def get_nlns(self):
+        """
+        Get the liquid and solid phase densities.
+        
+        Returns
+        -------
+        nlns : ndarray of float, shape (2,)
+            $[n_{l},n_{s}]$ where $n_{l}$ is liquid phase density 
+            and $n_{s}$ is solid phase density.
+        """
         return self._nlns
 
+# =====================================================================================
+
     def set_sigma(self, sigma):
+        """
+        Set the temperature-like parameter sigma.
+        
+        Parameters
+        ----------
+        sigma : float
+            Temperature-like parameter sigma.
+        """
         self._sigma = sigma
 
+# =====================================================================================
+
     def get_sigma(self):
+        """
+        Get the temperature-like parameter sigma.
+        
+        Returns
+        -------
+        sigma : float
+            Temperature-like parameter sigma
+        """
         return self._sigma
 
+# =====================================================================================
+
     def set_npeaks(self, npeaks):
+        """
+        Set the number of peaks in the density field approximation.
+        
+        Parameters
+        ----------
+        npeaks : int
+            Number of peaks in the density field approximation.
+        """
         self._npeaks = npeaks
 
+# =====================================================================================
+
     def get_npeaks(self):
+        """
+        Get the number of peaks in the density field approximation.
+        
+        Returns
+        -------
+        npeaks : int
+            Number of peaks in the density field approximation.
+        """
         return self._npeaks
 
 # =====================================================================================
 
-    def do_single_crystal(self, xtalRot=None, params=None, model=0):
-        '''
-        PURPOSE
-            Define a centered crystal in a periodic 3D domain.
-    
-        INPUT
-            xtalRot       Crystal orientation (rotation matrix): [3 x 3]
-            params        List containing parameters for the single crystal model
-            model         Density field layout:
-                            0 = Spherical crystal
-                            1 = A crystal extending throughout y and z, while only covering an interval in x
-    
-        OUTPUT
-            density       Density field, real rank-3 array of size [nx x ny x nz]
-
-        Last revision:
-        H. Hallberg 2025-09-20
-        '''
+    def do_single_crystal(self, xtal_rot=None, params=None, model=0):
+        """
+        Define a single crystal in a periodic 3D domain.
+        
+        Parameters
+        ----------
+        xtal_rot : ndarray of float, shape (3,3), optional
+            Crystal orientation (rotation matrix). Default is an identity matrix.
+        params : list, optional
+            List containing parameters for the single crystal model:
+            
+            - `model=0`: [radius] - spherical crystal radius
+            - `model=1`: [start_x, end_x] - crystal extent in x direction
+        model : int, optional  
+            Density field layout.
+            
+            - 0: Spherical crystal
+            - 1: Crystal extending throughout y and z, covering interval in x
+        
+        Returns
+        -------
+        density : ndarray of float, shape (nx,ny,nz)
+            Density field.
+            
+        Raises
+        ------
+        ValueError
+            If the value of `model` is not supported (should be 0 or 1).
+        """
 
         # Default orientation
-        if xtalRot is None:
-            xtalRot = np.eye(3, dtype=self._dtype_cpu)
+        if xtal_rot is None:
+            xtal_rot = np.eye(3, dtype=self._dtype_cpu)
 
         # Grid
         nx,ny,nz = self._ndiv
@@ -132,7 +282,7 @@ class setup_pre(setup_base):
         density = np.full((nx, ny, nz), self._nlns[1], dtype=self._dtype_cpu)
 
         # Crystal orientations (passive rotations)
-        Rot = xtalRot[:,:].T
+        Rot = xtal_rot[:,:].T
 
         xc = np.linspace(0, (nx-1)*dx, nx)
         yc = np.linspace(0, (ny-1)*dy, ny)
@@ -142,8 +292,8 @@ class setup_pre(setup_base):
         Xc, Yc, Zc = np.meshgrid(xc, yc, zc, indexing='ij')
         
         if model==0:
-            xtalRadius = params[0]
-            condition  = (np.sqrt((Xc-Lx/2)**2 + (Yc-Ly/2)**2 + (Zc-Lz/2)**2) <= xtalRadius)
+            xtal_radius = params[0]
+            condition  = (np.sqrt((Xc-Lx/2)**2 + (Yc-Ly/2)**2 + (Zc-Lz/2)**2) <= xtal_radius)
 
         elif model==1:
             start_x   = params[0]
@@ -151,7 +301,7 @@ class setup_pre(setup_base):
             condition = (Xc >= start_x) & (Xc <= end_x)
 
         else:
-            raise ValueError(f'Unsupported seed layout: model={model}')
+            raise ValueError(f'Unsupported value: model={model}')
 
         crd = np.array([Xc[condition], Yc[condition], Zc[condition]])
         density[condition] = self.generate_density_field(crd, Rot)
@@ -160,27 +310,35 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def do_bicrystal(self, xtalRot, params=None, liq_width=0.0, model=0):
-        '''
-        PURPOSE
-            Define a centered crystal, embedded inside a matrix crystal, in
-            a periodic 3D domain.
-    
-        INPUT
-            xtalRot       Crystal orientations (rotation matrices): [3 x 3 x 2]
-            params        List containing parameters for the bicrystal model
-            liq_width     Width of the liquid band along the GB
-            model         Density field layout:
-                            0 = Cylindrical crystal, extending through z
-                            1 = Spherical crystal
-                            2 = Bicrystal with two planar grain boundaries, normal to x
-    
-        OUTPUT
-            density       Density field, real rank-3 array of size [nx x ny x nz]
+    def do_bicrystal(self, xtal_rot, params=None, liq_width=0.0, model=0):
+        """
+        Define a bicrystal with two different crystal orientations.
+        
+        Parameters
+        ----------
+        xtal_rot : ndarray of float, shape (3,3,2)
+            Crystal orientations (rotation matrices) for the two grains.
+        params : list, optional
+            List containing parameters for the bicrystal model.
+        liq_width : float, optional
+            Width of the liquid band along the grain boundary.
+        model : int, optional
+            Density field layout.
+            
+            - 0: Cylindrical crystal, extending through z
+            - 1: Spherical crystal  
+            - 2: Bicrystal with two planar grain boundaries, normal to x
+        
+        Returns
+        -------
+        density : ndarray of float, shape (nx,ny,nz)
+            Density field.
 
-        Last revision:
-        H. Hallberg 2025-09-17
-        '''
+        Raises
+        ------
+        ValueError
+            If the value of `model` is not supported (should be 0, 1 or 2).
+        """
 
         # Grid
         nx,ny,nz = self._ndiv
@@ -191,8 +349,8 @@ class setup_pre(setup_base):
         density = np.full((nx, ny, nz), self._nlns[1], dtype=self._dtype_cpu)
 
         # Crystal orientations (passive rotations)
-        Rot0 = xtalRot[:,:,0].T
-        Rot1 = xtalRot[:,:,1].T
+        Rot0 = xtal_rot[:,:,0].T
+        Rot1 = xtal_rot[:,:,1].T
 
         xc = np.linspace(0, (nx-1)*dx, nx)
         yc = np.linspace(0, (ny-1)*dy, ny)
@@ -218,7 +376,7 @@ class setup_pre(setup_base):
             condition1 = (Xc >= (gb_x1+liq_width/2)) & (Xc <= (gb_x2-liq_width/2))
 
         else:
-            raise ValueError(f'Unsupported seed layout: model={model}')
+            raise ValueError(f'Unsupported value: model={model}')
 
         crd = np.array([Xc[condition0], Yc[condition0], Zc[condition0]])
         density[condition0] = self.generate_density_field(crd, Rot0)
@@ -229,24 +387,33 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def do_polycrystal(self, xtalRot, params=None, liq_width=0.0, model=0):
-        '''
-        PURPOSE
-            Define a polycrystal in a periodic 3D domain.
-    
-        INPUT
-            xtalRot       Crystal orientations (rotation matrices): [3 x 3 x n_xtal]
-            params        List containing parameters for the polycrystal model
-            liq_width     Width of the liquid band along the GB
-            model         Density field layout:
-                            0 = A row of cylindrical seeds along y, with the cylinders extending through z
-    
-        OUTPUT
-            density       Density field, real rank-3 array of size [nx x ny x nz]
-
-        Last revision:
-        H. Hallberg 2025-09-17
-        '''
+    def do_polycrystal(self, xtal_rot, params=None, liq_width=0.0, model=0):
+        """
+        Define a polycrystal in a periodic 3D domain.
+        
+        Parameters
+        ----------
+        xtal_rot : ndarray of float, shape (3,3,n_xtal)
+            Crystal orientations (rotation matrices) for n_xtal crystals.
+        params : list, optional
+            List containing parameters for the polycrystal model.
+        liq_width : float, optional
+            Width of the liquid band along the grain boundaries.
+        model : int, optional
+            Density field layout.
+            
+            - 0: A row of cylindrical seeds along y, with cylinders extending through z
+        
+        Returns
+        -------
+        density : ndarray of float, shape (nx,ny,nz)
+            Polycrystal density field.
+            
+        Raises
+        ------
+        ValueError
+            If the value of `model` is not supported (should be 0).
+        """
 
         # Grid
         nx,ny,nz = self._ndiv
@@ -257,7 +424,7 @@ class setup_pre(setup_base):
         density = np.full((nx, ny, nz), self._nlns[1], dtype=self._dtype_cpu)
         
         # Number of crystals
-        n_xtal = xtalRot.shape[2]
+        n_xtal = xtal_rot.shape[2]
 
         # Generate grid coordinates
         xc = np.linspace(0, (nx-1)*dx, nx)
@@ -267,41 +434,51 @@ class setup_pre(setup_base):
 
         # Generate polycrystal        
         if model==0:
-            xtalRadius = (Ly - n_xtal*liq_width) / n_xtal / 2
+            xtal_radius = (Ly - n_xtal*liq_width) / n_xtal / 2
             xcrd       = Lx / 2
             for i in range(n_xtal+1):
-                ycrd      = i*liq_width + i*2*xtalRadius
-                condition = (np.sqrt((Xc-xcrd)**2 + (Yc-ycrd)**2) <= xtalRadius)
+                ycrd      = i*liq_width + i*2*xtal_radius
+                condition = (np.sqrt((Xc-xcrd)**2 + (Yc-ycrd)**2) <= xtal_radius)
                 crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
                 if i<n_xtal:
-                    density[condition] = self.generate_density_field(crd, xtalRot[:,:,i].T)
+                    density[condition] = self.generate_density_field(crd, xtal_rot[:,:,i].T)
                 else:
-                    density[condition] = self.generate_density_field(crd, xtalRot[:,:,0].T)
+                    density[condition] = self.generate_density_field(crd, xtal_rot[:,:,0].T)
         else:
-            raise ValueError(f'Unsupported seed layout: model={model}')
+            raise ValueError(f'Unsupported value: model={model}')
 
         return density
 
 # =====================================================================================
 
     def generate_density_field(self, crd, g):
-        '''
-        PURPOSE
-            Define a 3D density field for (X)PFC modeling.
+        """
+        Define a 3D density field for (X)PFC modeling.
 
-        INPUT
-            crd           Point coordinates: [x,y,z]
-            struct        Crystal structure: SC, BCC, FCC, DC
-            ampl          Density field amplitudes: [nampl]
-            n0            Reference density
-            g             Rotation matrix
+        Parameters
+        ----------
+        crd : ndarray of float, shape (3,...)
+            Grid point coordinates [x,y,z].
+        g : ndarray of float, shape (3,3)
+            Rotation matrix for crystal orientation.
     
-        OUTPUT
-            density       Density field
-
-        Last revision:
-        H. Hallberg 2025-08-27
-        '''
+        Returns
+        -------
+        density : ndarray of float
+            Density field for the specified crystal structure with appropriate
+            Fourier modes and amplitudes.
+            
+        Raises
+        ------
+        ValueError
+            If `struct` is not one of the supported crystal structures 
+            ('SC', 'BCC', 'FCC', 'DC').
+            
+        Notes
+        -----
+        The density field is generated based on the current crystal structure 
+        (`struct`) and density field amplitudes (`ampl`) settings.
+        """
 
         q    = 2*np.pi
         nAmp = len(self._ampl) # Number of density field modes/amplitudes
@@ -344,25 +521,37 @@ class setup_pre(setup_base):
 # =====================================================================================
 
     def evaluate_ampl_dens(self):
-        '''
-        PURPOSE
-            Get the amplitudes and densities for different density field expansions.
-            For use in XPFC simulations.
+        """
+        Get density field amplitudes and phase densities for XPFC simulations.
 
-        INPUT
-            struct      Crystal structure: BCC, FCC
-            npeaks      Number of peaks to use in the two-point correlation function
-            sigma       Effective temperature in the Debye-Waller factor
-            device      Device to allocate the tensors on (CPU or GPU)
-
-        OUTPUT
-            ampl        Density field amplitudes, real rank-1 array of size, [npeaks]
-            nLnS        Densities in the liquid (nL) and solid (nS) phase, [2]
-
-
-        Last revision:
-        H. Hallberg 2025-09-19
-        '''
+        Returns
+        -------
+        ampl : ndarray of float, shape (npeaks,)
+            Density field amplitudes for the specified crystal structure and 
+            number of peaks.
+        nLnS : ndarray of float, shape (2,)
+            Densities in the liquid (nL) and solid (nS) phases.
+            
+        Raises
+        ------
+        ValueError
+            If `npeaks` is not supported for the current crystal structure.
+        ValueError
+            If `sigma` value is not supported for the current configuration.
+        ValueError
+            If `struct` is not 'BCC' or 'FCC', or if amplitudes and densities 
+            are not available for the specified structure.
+            
+        Notes
+        -----
+        This method provides pre-calculated density field amplitudes and phase
+        densities for different crystal structures (BCC, FCC) and numbers of 
+        Fourier peaks in the two-point correlation function. The values depend
+        on the effective temperature (sigma) in the Debye-Waller factor.
+        
+        The method uses lookup tables of pre-computed values for common 
+        parameter combinations used in (X)PFC modeling.
+        """
 
         if self._struct.upper()=='BCC':
             if self._sigma==0:

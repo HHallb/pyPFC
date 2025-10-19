@@ -20,10 +20,10 @@ params = {
     'normalize_pf':           True,                                 # Normalize the phase fields to [0,1], or not
     'update_scheme':          '1st_order',                          # Time integration scheme
     'update_scheme_params':   [1.0, 1.0, 1.0, None, None, None],    # Parameters in the time integration scheme: g1, g2, g3, alpha, beta, gamma
-    'device_type':            'cpu',#'gpu',                                # PyTorch device (CPU or GPU)
+    'device_type':            'gpu',                                # PyTorch device (CPU or GPU)
     'device_number':          0,                                    # GPU device number (if multiple GPUs are available, defaults to 0)
-    'dtype_cpu':              np.single, #np.double,                            # Set precision of numpy arrays
-    'dtype_gpu':              torch.float32, #torch.float64,                        # Set precision of PyTorch tensors
+    'dtype_cpu':              np.double,                            # Set precision of numpy arrays
+    'dtype_gpu':              torch.float64,                        # Set precision of PyTorch tensors
     'verbose':                True,                                 # Verbose output (or not)
     'evaluate_phase_field':   True,                                 # Evaluate phase field (or not)
     'density_threshold':      0.5,                                  # Threshold for density maxima detection
@@ -38,17 +38,15 @@ params = {
 # ==============================
 nstep            = 8000                      # Number of simulation steps
 nout             = 500                       # Evaluate step data in every nout:h step
-n_save_step_data = 10*1000                      # Save step data in every n_save_step_data:th step
+n_save_step_data = 1000                      # Save step data in every n_save_step_data:th step
 nfill            = 7                         # Number of figures to use in filenames (pre-pad with zeroes if needed)
-output_path      = './examples/ex01_output_cpu_32x32x32_single_precision/' # Output path
+output_path      = './examples/ex01_output'  # Output path
 output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
 # =============================
-#domain_size = params['alat'] * np.array([64, 64, 64]) # Domain size along the x, y and z axes
-#ndiv        = 8 * np.array([64, 64, 64])              # Number of grid divisions along the x, y and z axes       
-domain_size = params['alat'] * np.array([32, 32, 32]) # Domain size along the x, y and z axes
-ndiv        = 8 * np.array([32, 32, 32])              # Number of grid divisions along the x, y and z axes       
+domain_size = params['alat'] * np.array([64, 64, 64]) # Domain size along the x, y and z axes
+ndiv        = 8 * np.array([64, 64, 64])              # Number of grid divisions along the x, y and z axes       
 
 print(f'ndiv:        {ndiv}')
 print(f'ddiv:        {domain_size/ndiv} [a]')
@@ -89,8 +87,8 @@ natoms = atom_coord.shape[0]                                         # Retrieve 
 # ======================
 plotnr   = str(0).zfill(nfill)
 filename = output_path + 'pfc_data_' + plotnr
-#sim.write_vtk_structured_grid(filename, [den], ['den'])                                                            # Save the continuous density field to structured grid VTK file
-#sim.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf']) # Save the discrete density maxima (atoms) to VTK point file
+sim.write_vtk_structured_grid(filename, [den], ['den'])                                                            # Save the continuous density field to structured grid VTK file
+sim.write_vtk_points(filename, atom_coord, [atom_data[:,0], atom_data[:,1], atom_data[:,2]], ['den', 'ene', 'pf']) # Save the discrete density maxima (atoms) to VTK point file
 
 # Prepare storage of state data and save the intial state
 # =======================================================

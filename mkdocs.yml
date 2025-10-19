@@ -1,6 +1,6 @@
 # pyPFC Documentation Configuration
 site_name: pyPFC Documentation
-site_description: An Open-Source Python Package for GPU-accelerated Phase Field Crystal Simulations
+site_description: An Open-Source Python Package for GPU-accelerated 3D Phase Field Crystal Simulations
 site_author: H. Hallberg
 site_url: https://HHallb.github.io/pyPFC/docs/
 
@@ -8,6 +8,11 @@ site_url: https://HHallb.github.io/pyPFC/docs/
 repo_name: HHallb/pyPFC
 repo_url: https://github.com/HHallb/pyPFC
 edit_uri: edit/main/docs/
+
+# Watch configuration
+watch:
+  - src/
+  - /home/hlhh/Insync/OneDriveLTH/python/pyPFC/src/
 
 # Copyright
 copyright: Copyright &copy; 2025 H. Hallberg
@@ -42,12 +47,14 @@ theme:
     - search.highlight
     - search.share
     - toc.follow
+    - toc.integrate
     - content.code.copy
     - content.code.select
     - content.action.edit
     - content.action.view
   
   # Favicon and logo
+  favicon: images/pyPFC_favicon.png
   icon:
     repo: fontawesome/brands/github
     edit: material/pencil
@@ -104,9 +111,15 @@ plugins:
         python:
           options:
             docstring_style: numpy
-            show_source: true
+            show_source: false
             show_signature_annotations: true
             separate_signature: true
+            show_root_heading: false
+            show_root_toc_entry: false
+            heading_level: 2
+            members_order: alphabetical
+            group_by_category: true
+            show_category_heading: true
   - mkdocs-jupyter:
       execute: false
       include_source: true
@@ -124,15 +137,21 @@ extra_css:
 # Navigation structure
 nav:
   - Home: index.md
-  - Getting Started:
-    - Installation: installation.md
-    - Quick Start: quick_start.md
-    - Examples: examples.md
-  - API Reference:
-    - Core Classes: api/core.md
-  - About:
-    - License: LICENSE
-
+  - Installation: installation.md
+  - Quick Start: quick_start.md
+  - Examples: examples.md
+  - Troubleshooting: troubleshooting.md
+  - API Reference: 
+    - Overview: api/core.md
+    - Individual Classes:
+      - Class pypfc_grid: api/pypfc_grid.md
+      - Class pypfc_base: api/pypfc_base.md
+      - Class pypfc_pre: api/pypfc_pre.md
+      - Class pypfc_io: api/pypfc_io.md
+      - Class pypfc: api/pypfc.md
+      - Class pypfc_ovito: api/pypfc_ovito.md
+    - Complete API: api/complete_api.md
+  
 # Additional settings
 extra:
   social:

@@ -29,8 +29,45 @@ import os
 from vtk.util.numpy_support import numpy_to_vtk
 
 class setup_io(setup_pre):
+    """
+    I/O operations for Phase Field Crystal simulation data.
+    
+    This class provides comprehensive file I/O functionality for PFC simulations including:
+    
+    - Extended XYZ format for atomic positions and properties
+    - VTK output for visualization in ParaView/VisIt
+    - Binary pickle serialization for Python objects
+    - Structured grid data export for continuous fields
+    - Point data export for atomic/particle systems
+    - Simulation metadata and setup information files
+    
+    The class supports both text and binary formats, with optional compression
+    for large datasets. All methods are designed to handle typical PFC simulation
+    outputs including atomic positions, density fields, energy fields and
+    phase field data.
+        
+    Notes
+    -----
+    The extended XYZ format follows the convention used in molecular dynamics
+    and materials simulation communities, allowing storage of arbitrary per-atom
+    properties alongside coordinates. VTK output enables direct visualization
+    in scientific visualization software.
+    """
 
     def __init__(self, domain_size, ndiv, config):
+        """
+        Initialize I/O handler with domain parameters and device configuration.
+        
+        Parameters
+        ----------
+        domain_size : ndarray of float, shape (3,)
+            Physical size of the simulation domain [Lx, Ly, Lz] in lattice parameter units.
+        ndiv : ndarray of int, shape (3,)
+            Number of grid divisions [nx, ny, nz]. Must be even numbers for FFT compatibility.
+        config : dict
+            Configuration parameters as key-value pairs.
+            See the [pyPFC overview](core.md) for a complete list of the configuration parameters.
+        """
 
         # Initiate the inherited class
         # ============================
@@ -47,22 +84,41 @@ class setup_io(setup_pre):
 
     def write_extended_xyz(self, filename, coord, atom_data, atom_data_labels, simulation_time=0.0, gz=True):
         """
-        PURPOSE
-            Save PFC data in extended XYZ format.
-
-        INPUT
-            filename            Name of the output XYZ file
-            coord               Array of shape (natoms, 3) containing atom coordinates
-            atom_data           List of arrays, each of shape [natoms], containing per-atom data
-            atom_data_labels    List of strings, labels for each atom data array
-            simulation_time     Simulation time
-            gz                  If True, save the file as a gzip-compressed file
-
-        OUTPUT
-            Data is written to the file 'filename.xyz' or 'filename.xyz.gz' (if gzip=True)
-
-        Last revision:
-        H. Hallberg 2025-09-02
+        Save PFC atomic data in extended XYZ format.
+        
+        Writes atomic positions and associated properties to an extended XYZ file,
+        which is a standard format in molecular dynamics and materials simulation.
+        The format includes atomic coordinates plus arbitrary per-atom properties
+        such as density, energy, phase field values, etc.
+        
+        Parameters
+        ----------
+        filename : str
+            Base name of the output XYZ file (without extension).
+        coord : ndarray of float, shape (natoms, 3)
+            Atomic coordinates [x, y, z] for each atom.
+        atom_data : list of ndarray
+            List of arrays containing per-atom data. Each array must have
+            shape (natoms,) and represent a property for each atom.
+        atom_data_labels : list of str
+            Labels for each data array in `atom_data`. Must have same length
+            as `atom_data` list.
+        simulation_time : float, optional
+            Simulation time to include in file header.
+        gz : bool, optional
+            If `True`, compress output using gzip.
+            
+        Notes
+        -----
+        The output file will be named `filename.xyz` or `filename.xyz.gz` if
+        compression is enabled. The extended XYZ format includes a header with
+        the number of atoms, simulation time, and property labels, followed by
+        atomic coordinates and properties.
+        
+        Examples
+        --------
+        >>> write_extended_xyz('output', coord, [density, energy], 
+        ...                   ['density', 'energy'], simulation_time=100.0)
         """
 
         if self._verbose:
@@ -121,23 +177,33 @@ class setup_io(setup_pre):
 
     def read_extended_xyz(self, filename, nfields=0):
         """
-        PURPOSE
-            Read PFC data in extended XYZ format from file.
+        Read PFC data from extended XYZ format file.
         
-        INPUT
-            filename    Name of the input XYZ file (with or without .xyz/.xyz.gz extension)
-            nfields     Number of data fields per atom (beyond its coordinates [x,y,z])
-
-        OUTPUT
-            coord       Array of shape (natoms, 3) containing atom coordinates
-            domain_size Domain size: [Lx, Ly, Lz]
-            time        Simulation time
-            partDen     Particle PFC density, [natoms]
-            partEne     Particle PFC energy, [natoms]
-            partPf      Particle PFC phase field values, [natoms]
+        Reads atomic positions and associated properties from an extended XYZ
+        file, which may be compressed with gzip. Automatically detects file
+        format and handles both .xyz and .xyz.gz extensions.
         
-        Last revision:
-        H. Hallberg 2025-09-02
+        Parameters
+        ----------
+        filename : str
+            Name of input XYZ file (with or without .xyz/.xyz.gz extension).
+        nfields : int, optional
+            Number of data fields per atom beyond coordinates [x,y,z].
+            
+        Returns
+        -------
+        coord : ndarray of float, shape (natoms, 3)
+            Atomic coordinates.
+        domain_size : ndarray of float, shape (3,)
+            Domain size [Lx, Ly, Lz] from file header.
+        time : float
+            Simulation time from file header.
+        partDen : ndarray of float, shape (natoms,)
+            Particle density values (if available).
+        partEne : ndarray of float, shape (natoms,)
+            Particle energy values (if available).
+        partPf : ndarray of float, shape (natoms,)
+            Particle phase field values (if available).
         """
         
         if self._verbose:
@@ -221,37 +287,47 @@ class setup_io(setup_pre):
     
 # =====================================================================================
 
-    def write_vtk_points(self, filename, coord, scalarData, scalarDataName, vectorData=None, vectorDataName=None, tensorData=None, tensorDataName=None):
+    def write_vtk_points(self, filename, coord, scalar_data, scalar_data_name, vector_data=None, vector_data_name=None, tensor_data=None, tensor_data_name=None):
         """
-        PURPOSE
-            Save 3D point data into a VTK file.
-            The data is saved in binary XML format.
-
-        INPUT        
-            filename        Output file name
-            coord           Array of shape (natoms, 3) containing atom coordinates
-            scalarData      List of 3D numpy arrays with scala point data
-            scalarDataName  List of labels/names for the data arrays in 'scalarData'
-            vectorData      List of 3D numpy arrays, of size [3], with vector point data
-            vectorDataName  List of labels/names for the data arrays in 'vectorData'
-            tensorData      List of 3D numpy arrays, of size [3x3], with tensor point data
-                            3x3 tensors are reshaped according to: (3, 3, nPoints) -> (nPoints, 9) with
-
-                            T = [[T11, T12, T13],
-                                [T21, T22, T23],
-                                [T31, T32, T33]]
-
-                            becoming
-
-                            T = [T11, T12, T13, T21, T22, T23, T31, T32, T33]
-
-            tensorDataName  List of labels/names for the data arrays in 'tensorData'
-
-        OUTPUT
-            Data is written to the file 'filename.vts'
-
-        Last revision:
-        H. Hallberg 2025-02-04
+        Save 3D point data to VTK file for visualization.
+        
+        Exports atomic positions and associated scalar, vector and tensor data
+        to a VTK (Visualization Toolkit) file in binary XML format. This format
+        is compatible with ParaView, VisIt and other scientific visualization
+        software.
+        
+        Parameters
+        ----------
+        filename : str
+            Output file name (with or without .vtu extension).
+        coord : ndarray of float, shape (natoms, 3)
+            3D coordinates of points/atoms.
+        scalar_data : list of ndarray
+            List of scalar data arrays. Each array should have shape (natoms,).
+        scalar_data_name : list of str
+            Names/labels for each scalar data array. Must match length of `scalarData`.
+        vector_data : list of ndarray, optional
+            List of vector data arrays. Each array should have shape (natoms, 3).
+        vector_data_name : list of str, optional
+            Names/labels for each vector data array. Required if `vectorData` is provided.
+        tensor_data : list of ndarray, optional
+            List of tensor data arrays. Each array should have shape (natoms, 3, 3).
+            Tensors are automatically reshaped to VTK format (natoms, 9).
+        tensor_data_name : list of str, optional
+            Names/labels for each tensor data array. Required if `tensorData` is provided.
+            
+        Notes
+        -----
+        Tensor data is reshaped from (3,3) matrices to 9-component vectors following
+        VTK convention:
+        
+        $$T = \\begin{bmatrix} 
+        T_{11} & T_{12} & T_{13} \\\\
+        T_{21} & T_{22} & T_{23} \\\\
+        T_{31} & T_{32} & T_{33} 
+        \\end{bmatrix}$$
+        
+        becomes: $[T_{11}, T_{12}, T_{13}, T_{21}, T_{22}, T_{23}, T_{31}, T_{32}, T_{33}]$
         """
 
         if self._verbose:
@@ -274,27 +350,27 @@ class setup_io(setup_pre):
         poly_data.SetPoints(vtk_points)
 
         # Convert the scalar numpy array data to VTK arrays and add them to the polydata
-        for sd in range(len(scalarData)):
-            vtk_array = numpy_to_vtk(scalarData[sd], deep=True, array_type=vtk.VTK_FLOAT)
-            vtk_array.SetName(scalarDataName[sd])
+        for sd in range(len(scalar_data)):
+            vtk_array = numpy_to_vtk(scalar_data[sd], deep=True, array_type=vtk.VTK_FLOAT)
+            vtk_array.SetName(scalar_data_name[sd])
             poly_data.GetPointData().AddArray(vtk_array)
 
         # Convert the vector numpy array data to VTK arrays and add them to the polydata
-        if vectorData is not None and vectorDataName is not None:
-            for vd in range(len(vectorData)):
-                vtk_vector_array = numpy_to_vtk(vectorData[vd], deep=True, array_type=vtk.VTK_FLOAT)
+        if vector_data is not None and vector_data_name is not None:
+            for vd in range(len(vector_data)):
+                vtk_vector_array = numpy_to_vtk(vector_data[vd], deep=True, array_type=vtk.VTK_FLOAT)
                 vtk_vector_array.SetNumberOfComponents(3)  # Ensure the array has 3 components per tuple
-                vtk_vector_array.SetName(vectorDataName[vd])
+                vtk_vector_array.SetName(vector_data_name[vd])
                 poly_data.GetPointData().AddArray(vtk_vector_array)
 
         # Convert the tensor numpy array data to VTK arrays and add them to the polydata
-        if tensorData is not None and tensorDataName is not None:
-            for td in range(len(tensorData)):
+        if tensor_data is not None and tensor_data_name is not None:
+            for td in range(len(tensor_data)):
                 # Reshape each tensor from (3, 3, nPoints) to (nPoints, 9)
-                reshaped_tensor = tensorData[td].reshape(3, 3, -1).transpose(2, 0, 1).reshape(-1, 9)
+                reshaped_tensor = tensor_data[td].reshape(3, 3, -1).transpose(2, 0, 1).reshape(-1, 9)
                 vtk_tensor_array = numpy_to_vtk(reshaped_tensor, deep=True, array_type=vtk.VTK_FLOAT)
                 vtk_tensor_array.SetNumberOfComponents(9)  # Ensure the array has 9 components per tuple
-                vtk_tensor_array.SetName(tensorDataName[td])
+                vtk_tensor_array.SetName(tensor_data_name[td])
                 poly_data.GetPointData().AddArray(vtk_tensor_array)
 
         # Write the vtkPolyData to a file
@@ -310,24 +386,31 @@ class setup_io(setup_pre):
 
 # =====================================================================================
 
-    def write_vtk_structured_grid(self, filename, arrayData, arrayName):
+    def write_vtk_structured_grid(self, filename, array_data, array_name):
         """
-        PURPOSE
-            Save 3D field data to a VTK file.
-            The structured-grid data is saved in binary XML format.
-
-        INPUT        
-            filename    Output file name
-            ndiv        No of grid points along each dimension, [3]
-            ddiv        Grid spacing along each axis, [3]
-            arrayData   List of 3D numpy data arrays
-            arrayName   List oflabels/names for the data arrays in 'arrayData'
-
-        OUTPUT
-            Data is written to the file 'filename.vts'
-
-        Last revision:
-        H. Hallberg 2025-09-02
+        Save 3D field data to VTK structured grid file.
+        
+        Exports 3D field data (such as density, energy, or phase fields) to a 
+        VTK structured grid file in binary XML format. This format is ideal for
+        visualizing continuous field data in ParaView, VisIt and other 
+        scientific visualization software.
+        
+        Parameters
+        ----------
+        filename : str
+            Output file name (with or without .vts extension).
+        array_data : list of ndarray
+            List of 3D numpy arrays containing field data. Each array should
+            have shape (nx, ny, nz) matching the simulation grid.
+        array_name : list of str
+            Names/labels for each data array. Must match length of `arrayData`.
+            
+        Notes
+        -----
+        The output file will be named `filename.vts` and uses VTK's structured
+        grid format with binary encoding for efficient storage. The grid 
+        dimensions and spacing are automatically determined from the inherited
+        grid setup.
         """
 
         if self._verbose:
@@ -358,9 +441,9 @@ class setup_io(setup_pre):
         structured_grid.SetPoints(vtk_points)
 
         # Convert the numpy arrays to VTK arrays and set the scalar fields in the vtkStructuredGrid
-        for ad in range(len(arrayData)):
-            vtk_array = numpy_to_vtk(arrayData[ad].ravel(order='F'), deep=True, array_type=vtk.VTK_FLOAT)
-            vtk_array.SetName(arrayName[ad])
+        for ad in range(len(array_data)):
+            vtk_array = numpy_to_vtk(array_data[ad].ravel(order='F'), deep=True, array_type=vtk.VTK_FLOAT)
+            vtk_array.SetName(array_name[ad])
             structured_grid.GetPointData().AddArray(vtk_array)
 
         # Write the vtkStructuredGrid to a file
@@ -377,19 +460,29 @@ class setup_io(setup_pre):
 # =====================================================================================
 
     def save_pickle(self, filename, data):
-        """
-        PURPOSE
-            Save a list of data objects to a binary pickle file
-
-        INPUT
-            filename        Path to the binary file (without extension)
-            data            List of data objects to save
-
-        OUTPUT
-            Saves data to a file 'filename.pickle'
-
-        Last revision:
-        H. Hallberg 2025-09-02
+        """Save data objects to a binary pickle file.
+        
+        Serializes a list of Python objects to a binary pickle file for
+        efficient storage and later retrieval. This is useful for saving
+        simulation state, configuration parameters or processed results.
+        
+        Parameters
+        ----------
+        filename : str
+            Path to the output file (without .pickle extension).
+        data : list
+            List of Python objects to serialize and save.
+            
+        Notes
+        -----
+        The output file will be named `filename.pickle`. Pickle files are
+        Python-specific binary format that preserves object structure and
+        types.
+        
+        Warning
+        -------
+        Only load pickle files from trusted sources, as they can execute
+        arbitrary code during deserialization.
         """
 
         if self._verbose:
@@ -412,18 +505,27 @@ class setup_io(setup_pre):
 
     def load_pickle(self, filename, ndata):
         """
-        PURPOSE
-            Load data objetcs from a binary pickle file.
-
-        INPUT
-            filename        Path to the binary file (without extension)
-            ndata           Number of data objects to read
-
-        OUTPUT
-            data            List of data objects read from the file 'filename.pickle'
-
-        Last revision:
-        H. Hallberg 2025-09-02
+        Load data objects from a binary pickle file.
+        
+        Deserializes Python objects from a pickle file created with `save_pickle`.
+        Reads a specified number of objects from the binary file.
+        
+        Parameters
+        ----------
+        filename : str
+            Path to input pickle file (without .pickle extension).
+        ndata : int
+            Number of data objects to read from the file.
+            
+        Returns
+        -------
+        data : list
+            List of Python objects loaded from `filename.pickle`.
+            
+        Warning
+        -------
+        Only load pickle files from trusted sources, as they can execute
+        arbitrary code during deserialization.
         """
 
         if self._verbose:
@@ -447,19 +549,20 @@ class setup_io(setup_pre):
 # =====================================================================================
 
     def write_info_file(self, filename='pypfc_simulation.txt', output_path=None):
-        '''
-        PURPOSE
-            Write simulation setup information to a file.
-
-        INPUT
-            filename      Name of the output file
-            output_path   Path to the output file
-
-        OUTPUT
-
-        Last revision:
-        H. Hallberg 2025-09-15
-        '''
+        """
+        Write simulation setup information to a file.
+        
+        Creates a text file containing simulation parameters, grid configuration,
+        and other setup information for documentation and reproducibility.
+        
+        Parameters
+        ----------
+        filename : str, optional
+            Name of the output file.
+        output_path : str, optional
+            Path to the output directory. Uses the current working
+            directory as default.
+        """
 
         if output_path is None:
             output_path = os.path.join(os.getcwd(), filename)
@@ -532,21 +635,22 @@ class setup_io(setup_pre):
 # =====================================================================================
 
     def append_to_info_file(self, info, filename='pypfc_simulation.txt', output_path=None):
-        '''
-        PURPOSE
-            Append lines to a text file.
-
-        INPUT
-            info         String or list of strings to append
-            filename     Name of the output file
-            output_path  Path to the output file
-
-        OUTPUT
-            Appends info to the file
-
-        Last revision:
-        H. Hallberg 2025-09-15
-        '''
+        """
+        Append information to a text file.
+        
+        Adds new content to an existing text file, useful for logging simulation
+        progress or adding additional information to setup files.
+        
+        Parameters
+        ----------
+        info : str or list of str
+            String or list of strings to append to the file.
+        filename : str, optional
+            Name of the output file.
+        output_path : str, optional
+            Path to the output directory. Uses the current working
+            directory as default.
+        """
         if output_path is None:
             output_path = os.path.join(os.getcwd(), filename)
         try:
