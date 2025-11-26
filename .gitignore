@@ -45,3 +45,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# MkDocs build output
+site/

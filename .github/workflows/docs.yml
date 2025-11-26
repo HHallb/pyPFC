@@ -42,6 +42,10 @@ jobs:
         # Store the built site outside the repo directory
         cp -r site /tmp/built_site
         
+        # Clean up the site directory to avoid conflicts
+        rm -rf site
+        git clean -fd
+        
         # Switch to gh-pages branch
         git fetch origin gh-pages:gh-pages || git checkout --orphan gh-pages
         git checkout gh-pages
