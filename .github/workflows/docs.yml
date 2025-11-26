@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install mkdocs mkdocs-material mkdocs-jupyter pymdown-extensions mkdocstrings[python]
+        pip install mkdocs mkdocs-material mkdocs-jupyter pymdown-extensions mkdocstrings[python] black
         
     - name: Install pyPFC
       run: |
@@ -38,13 +38,20 @@ jobs:
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         mkdocs build
-        # Deploy to docs/ subdirectory to preserve existing homepage
+        
+        # Store the built site
+        mv site built_site
+        
+        # Switch to gh-pages branch
         git fetch origin gh-pages:gh-pages || git checkout --orphan gh-pages
         git checkout gh-pages
+        
+        # Clean and deploy to docs/ subdirectory
         rm -rf docs/ || true
         mkdir -p docs
-        cp -r site/* docs/
+        cp -r built_site/* docs/
+        
+        # Commit and push
         git add docs/
         git commit -m "Deploy MkDocs to docs/ subdirectory" || true
         git push origin gh-pages
-        git checkout main
