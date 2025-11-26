@@ -29,44 +29,9 @@ pyPFC is a high-performance simulation framework designed for modeling crystal s
 4. [API Reference](api/core.md) - Detailed class and method documentation
 5. [Troubleshooting](troubleshooting.md) - Q&A
 
-## Acknowledegment
-
-If you use pyPFC or any of its components for a publication or presentation you are kindly asked to include a reference to:
-
-[H. Hallberg and K.H. Blixt, **pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations**, *Modelling and Simulation in Materials Scinece and Engineering*, vol:pages, year](https://iopscience.iop.org/journal/0965-0393)
-
-BibTeX entry:
-
-```bibtex
-@Article{pypfc,
-   Author         = {H. Hallberg and K. H. Blixt},
-   Title          = {py{PFC}: {A}n {O}pen-{S}ource {P}ython {P}ackage for {P}hase {F}ield {C}rystal {S}imulations},
-   Journal        = {Modelling and Simulation in Materials Science and Engineering},
-   Year           = {YYYY},
-   Volume         = {VV},
-   Number         = {NN},
-   Month          = {MM},
-   Pages          = {1--PP},
-   DOI            = {},
-   Article-Number = {},
-   ISSN           = {0965-0393},
-   EISSN          = {1361-651X},
-}
-```
-
 ## Licencing
 
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
-
-## Funding and Support
-
-This project is/was partially funded and/or supported by:
-
-- [NVIDIA Corporation](https://www.nvidia.com/en-us/): Hardware grants
-- [The Swedish Research Council](https://www.vr.se/english.html): Grant 2019-03945
-- [The e-Science Collaboration](https://www.essenceofescience.se/w/es/en): Grant eSSENCE@LU 10:1
-- [LUNARC, The Center for Scientific and Technical Computing at Lund University](https://www.lunarc.lu.se/)
-- [LIGHTer, A strategic innovation program ran by the Swedish Innovation Agency](https://lighter.nu/en): Grant 2023-01937
 
 ## References
 
