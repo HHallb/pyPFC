@@ -46,12 +46,11 @@ jobs:
         git fetch origin gh-pages:gh-pages || git checkout --orphan gh-pages
         git checkout gh-pages
         
-        # Clean and deploy to docs/ subdirectory
-        rm -rf docs/ || true
-        mkdir -p docs
-        cp -r built_site/* docs/
+        # Clean and deploy to root
+        rm -rf * || true
+        cp -r built_site/* .
         
         # Commit and push
-        git add docs/
-        git commit -m "Deploy MkDocs to docs/ subdirectory" || true
+        git add .
+        git commit -m "Deploy MkDocs documentation" || true
         git push origin gh-pages
