@@ -12,7 +12,6 @@ edit_uri: edit/main/docs/
 # Watch configuration
 watch:
   - src/
-  - /home/hlhh/Insync/OneDriveLTH/python/pyPFC/src/
 
 # Copyright
 copyright: Copyright &copy; 2025 H. Hallberg
