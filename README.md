@@ -11,7 +11,7 @@
 
 pyPFC is a high-performance simulation framework designed for modeling crystal structures and their evolution using the Phase Field Crystal (PFC) method. The code uses PyTorch to allow execution on both CPUs and GPUs, providing efficient simulations on both CPU and GPU platforms. pyPFC is developed with a combined focus on computational efficiency, flexibility and accessibility, making it suitable for both research and educational purposes.  
 
-📚 Installation instructions, examples and api documentation can be found in the [pyPFC documentation](https://HHallb.github.io/pyPFC).
+Installation instructions, examples and api documentation can be found in the [pyPFC documentation](https://HHallb.github.io/pyPFC).
 
 ## Licencing
 
