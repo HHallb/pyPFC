@@ -1,8 +1,6 @@
 ![PyPI](https://img.shields.io/pypi/v/pypfc)
 ![License](https://img.shields.io/github/license/HHallb/pyPFC)
 
-📚 [Documentation](https://HHallb.github.io/pyPFC/docs/) | [GitHub](https://github.com/HHallb/pyPFC)
-
 ![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/docs/images/pyPFC_logo_transparent.png)
 
 # A Python package for GPU-accelerated 3D Phase Field Crystal simulations
@@ -13,30 +11,7 @@
 
 pyPFC is a high-performance simulation framework designed for modeling crystal structures and their evolution using the Phase Field Crystal (PFC) method. The code uses PyTorch to allow execution on both CPUs and GPUs, providing efficient simulations on both CPU and GPU platforms. pyPFC is developed with a combined focus on computational efficiency, flexibility and accessibility, making it suitable for both research and educational purposes.  
 
-Areas of application include:
-
-- **Materials Science**: Crystal growth and microstructure evolution
-- **Computational Physics**: Pattern formation, defect evolution and elastic interactions
-- **Metallurgy**: Grain boundary and dislocation mechanics
-
-## Key Features
-
-- **GPU Acceleration**: Full GPU support using PyTorch for large-scale simulations
-- **Adjustable Floating Point Precision**: Permits optimized use of GPU memory resources and execution efficiency
-- **Flexible I/O**: VTK, Extended XYZ and pickle format support for data exchange
-- **Advanced Data Processing**: Built-in functionalities as well as interfaces to [OVITO](https://www.ovito.org/) libraries (optional)
-- **Memory Optimization**: Efficient memory management for large 3D grids
-- **Density Field Evolution**: Multiple time integration schemes are available
-
-## Getting Started
-
-1. [Installation Guide](/docs/installation.md) - Setup instructions and dependencies
-2. [Quick Start Tutorial](/docs/quick_start.md) - Run a first pyPFC simulation
-3. [Examples](/docs/examples.md) - Comprehensive examples and use cases
-4. [API Reference](/docs/api/core.md) - Detailed class and method documentation
-5. [Troubleshooting](/docs/troubleshooting.md) - Q&A
-
-Much more information can be found in the [pyPFC documentation](/docs/index.md).
+📚 Examples, tutorials and full documentation can be found in the [pyPFC documentation](https://HHallb.github.io/pyPFC).
 
 ## Licencing
 
