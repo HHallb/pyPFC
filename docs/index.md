@@ -27,6 +27,7 @@ pyPFC is a high-performance simulation framework designed for modeling crystal s
 2. [Quick Start Tutorial](quick_start.md) - Run your first pyPFC simulation
 3. [Examples](examples.md) - Comprehensive examples and use cases
 4. [API Reference](api/core.md) - Detailed class and method documentation
+5. [Troubleshooting](troubleshooting.md) - Q&A
 
 ## Acknowledegment
 

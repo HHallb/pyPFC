@@ -70,7 +70,7 @@ class setup_simulation(setup_io):
         'torch_threads_interop':    os.cpu_count(),
     }
 
-    def __init__(self, domain_size, ndiv=None, config=None):
+    def __init__(self, domain_size, ndiv=None, config=None, **kwargs):
         """Initialize PFC simulation with domain parameters and configuration.
         
         Sets up the complete simulation environment including grid discretization,
@@ -88,6 +88,9 @@ class setup_simulation(setup_io):
         config : dict, optional
             Configuration parameters as key-value pairs.
             See the [pyPFC overview](core.md) for a complete list of the configuration parameters.
+        **kwargs : dict, optional
+            Individual configuration parameters passed as keyword arguments.
+            These will override any corresponding values in the config dictionary.
             
         Raises
         ------
@@ -99,19 +102,33 @@ class setup_simulation(setup_io):
         >>> # Basic simulation setup
         >>> sim = setup_simulation([10.0, 10.0, 10.0])
         
-        >>> # Custom grid and parameters
+        >>> # Custom grid and parameters using config dictionary
         >>> config = {'dtime': 5e-5, 'struct': 'BCC', 'verbose': True}
         >>> sim = setup_simulation([8.0, 8.0, 8.0], ndiv=[64, 64, 64], config=config)
+        
+        >>> # Using individual keyword arguments
+        >>> sim = setup_simulation([8.0, 8.0, 8.0], pf_iso_level=0.5, dtime=1e-4, verbose=True)
+        
+        >>> # Mixing config dictionary and keyword arguments (kwargs take precedence)
+        >>> sim = setup_simulation([8.0, 8.0, 8.0], config=config, pf_iso_level=0.3)
         """
 
         # Merge user parameters with defaults, but only use keys present in DEFAULTS
         # ==========================================================================
         cfg = dict(self.DEFAULTS)
         ignored = set()
+        
+        # First apply config dictionary if provided
         if config is not None:
             filtered_config = {k: v for k, v in config.items() if k in self.DEFAULTS}
             cfg.update(filtered_config)
-            ignored = set(config.keys()) - set(self.DEFAULTS.keys())
+            ignored.update(set(config.keys()) - set(self.DEFAULTS.keys()))
+        
+        # Then apply individual keyword arguments (these take precedence over config)
+        if kwargs:
+            filtered_kwargs = {k: v for k, v in kwargs.items() if k in self.DEFAULTS}
+            cfg.update(filtered_kwargs)
+            ignored.update(set(kwargs.keys()) - set(self.DEFAULTS.keys()))
         if ignored:
             print(f"Ignored config keys: {ignored}")
 

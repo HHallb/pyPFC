@@ -24,7 +24,7 @@ output_path = './examples/ex05_output/' # Output path
 # =============================
 domain_size = np.array([64, 64, 1])      # Domain size along the x, y and z axes
 ndiv        = 16 * np.array([64, 64, 1]) # Number of grid divisions along the x, y and z axes
-ddiv        = domain_size / ndiv          # Grid spacing along the x, y and z axes
+ddiv        = domain_size / ndiv         # Grid spacing along the x, y and z axes
 print(f'ndiv:        {ndiv}')
 print(f'ddiv:        {ddiv} [a]')
 print(f'domain_size: {domain_size} [a]')

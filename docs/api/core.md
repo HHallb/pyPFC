@@ -69,6 +69,8 @@ graph TD
 
 ### Memory Usage
 
+Note that the numbers below are only indicative. Adding additional field, such as extra phase fields, will significantly increase memory usage.
+
 | Grid Size | Double Precision | Single Precision
 |-----------|------------------|-----------------
 | 256³      | ~2 GB            | ~1 GB
@@ -97,4 +99,4 @@ params_precise = {
 
 ## Usage Examples
 
-Usage examples can be found on the [Examples pgase](../examples.md).
+Usage examples can be found on the [Examples pages](../examples.md).

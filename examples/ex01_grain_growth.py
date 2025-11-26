@@ -40,7 +40,7 @@ nstep            = 8000                      # Number of simulation steps
 nout             = 500                       # Evaluate step data in every nout:h step
 n_save_step_data = 1000                      # Save step data in every n_save_step_data:th step
 nfill            = 7                         # Number of figures to use in filenames (pre-pad with zeroes if needed)
-output_path      = './examples/ex01_output'  # Output path
+output_path      = './examples/ex01_output/' # Output path
 output_file      = 'pypfc_setup.txt'         # Output file name
 
 # Define the computational grid
