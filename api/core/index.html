@@ -6,32 +6,37 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="An Open-Source Python Package for GPU-accelerated Phase Field Crystal Simulations">
+        <meta name="description" content="An Open-Source Python Package for GPU-accelerated 3D Phase Field Crystal Simulations">
       
       
         <meta name="author" content="H. Hallberg">
       
       
-        <link rel="canonical" href="https://HHallb.github.io/pyPFC/api/core/">
+        <link rel="canonical" href="https://HHallb.github.io/pyPFC/docs/api/core/">
       
       
-        <link rel="prev" href="../../examples/">
+        <link rel="prev" href="../../troubleshooting/">
       
       
+        <link rel="next" href="../pypfc_grid/">
       
-      <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.21">
-    
-    
-      
-        <title>Core Classes - pyPFC Documentation</title>
-      
-    
-    
-      <link rel="stylesheet" href="../../assets/stylesheets/main.2a3383ac.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+      <link rel="icon" href="../../images/pyPFC_favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>Overview - pyPFC Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -58,7 +63,6 @@
     
       
 
-    
     
     
   </head>
@@ -120,7 +124,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Core Classes
+              Overview
             
           </span>
         </div>
@@ -208,7 +212,7 @@
         <a href="https://github.com/HHallb/pyPFC" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
   </div>
   <div class="md-source__repository">
     HHallb/pyPFC
@@ -248,18 +252,74 @@
   
   
   
-    
-    
-      <li class="md-tabs__item">
-        <a href="../../installation/" class="md-tabs__link">
-          
+    <li class="md-tabs__item">
+      <a href="../../installation/" class="md-tabs__link">
+        
   
   
-  Getting Started
+    
+  
+  Installation
 
-        </a>
-      </li>
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../quick_start/" class="md-tabs__link">
+        
+  
+  
     
+  
+  Quick Start
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../examples/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Examples
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../troubleshooting/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Troubleshooting
+
+      </a>
+    </li>
   
 
       
@@ -278,26 +338,6 @@
   
   
   API Reference
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
-        <a href="../../LICENSE" class="md-tabs__link">
-          
-  
-  
-  About
 
         </a>
       </li>
@@ -331,7 +371,9 @@
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href="../.." title="pyPFC Documentation" class="md-nav__button md-logo" aria-label="pyPFC Documentation" data-md-component="logo">
       
@@ -346,7 +388,7 @@
       <a href="https://github.com/HHallb/pyPFC" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
   </div>
   <div class="md-source__repository">
     HHallb/pyPFC
@@ -368,9 +410,14 @@
   
   
   <span class="md-ellipsis">
+    
+  
     Home
+  
+
     
   </span>
+  
   
 
       </a>
@@ -380,51 +427,6 @@
     
       
       
-  
-  
-  
-  
-    
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    Getting Started
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
-            <span class="md-nav__icon md-icon"></span>
-            Getting Started
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
   
   
   
@@ -435,19 +437,23 @@
   
   
   <span class="md-ellipsis">
+    
+  
     Installation
+  
+
     
   </span>
+  
   
 
       </a>
     </li>
   
 
-              
-            
-              
-                
+    
+      
+      
   
   
   
@@ -458,19 +464,23 @@
   
   
   <span class="md-ellipsis">
+    
+  
     Quick Start
+  
+
     
   </span>
+  
   
 
       </a>
     </li>
   
 
-              
-            
-              
-                
+    
+      
+      
   
   
   
@@ -481,20 +491,44 @@
   
   
   <span class="md-ellipsis">
+    
+  
     Examples
+  
+
     
   </span>
+  
   
 
       </a>
     </li>
   
 
-              
-            
-          </ul>
-        </nav>
+    
       
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -524,26 +558,35 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
+    
+  
     API Reference
+  
+
     
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
-            API Reference
+            
+  
+    API Reference
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -568,9 +611,14 @@
   
   
   <span class="md-ellipsis">
-    Core Classes
+    
+  
+    Overview
+  
+
     
   </span>
+  
   
 
           <span class="md-nav__icon md-icon"></span>
@@ -581,9 +629,14 @@
   
   
   <span class="md-ellipsis">
-    Core Classes
+    
+  
+    Overview
+  
+
     
   </span>
+  
   
 
       </a>
@@ -604,168 +657,55 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#pypfc-main-class" class="md-nav__link">
+  <a href="#general-comments" class="md-nav__link">
     <span class="md-ellipsis">
-      PyPFC Main Class
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="PyPFC Main Class">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#class-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Class Overview
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
-        <li class="md-nav__item">
-  <a href="#architecture-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Architecture Overview
+        General Comments
+      
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#class-descriptions" class="md-nav__link">
+  <a href="#code-conventions" class="md-nav__link">
     <span class="md-ellipsis">
-      Class Descriptions
+      
+        Code Conventions
+      
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Class Descriptions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#grid-management-pypfc_grid" class="md-nav__link">
-    <span class="md-ellipsis">
-      Grid Management (pypfc_grid)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#base-operations-pypfc_base" class="md-nav__link">
-    <span class="md-ellipsis">
-      Base Operations (pypfc_base)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#crystal-preprocessing-pypfc_pre" class="md-nav__link">
-    <span class="md-ellipsis">
-      Crystal Preprocessing (pypfc_pre)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#inputoutput-pypfc_io" class="md-nav__link">
-    <span class="md-ellipsis">
-      Input/Output (pypfc_io)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#main-interface-pypfc" class="md-nav__link">
-    <span class="md-ellipsis">
-      Main Interface (PyPFC)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage-patterns" class="md-nav__link">
+  <a href="#configuration-parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Usage Patterns
+      
+        Configuration Parameters
+      
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Usage Patterns">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-initialization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Basic Initialization
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#advanced-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced Configuration
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#error-handling" class="md-nav__link">
+  <a href="#pypfc-architecture-overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Error Handling
+      
+        pyPFC Architecture Overview
+      
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Error Handling">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#common-exceptions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Common Exceptions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#validation-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      Validation Methods
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#performance-considerations" class="md-nav__link">
     <span class="md-ellipsis">
-      Performance Considerations
+      
+        Performance Considerations
+      
     </span>
   </a>
   
@@ -775,7 +715,9 @@
           <li class="md-nav__item">
   <a href="#memory-usage" class="md-nav__link">
     <span class="md-ellipsis">
-      Memory Usage
+      
+        Memory Usage
+      
     </span>
   </a>
   
@@ -784,7 +726,9 @@
           <li class="md-nav__item">
   <a href="#optimization-tips" class="md-nav__link">
     <span class="md-ellipsis">
-      Optimization Tips
+      
+        Optimization Tips
+      
     </span>
   </a>
   
@@ -796,18 +740,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#thread-safety" class="md-nav__link">
+  <a href="#usage-examples" class="md-nav__link">
     <span class="md-ellipsis">
-      Thread Safety
-    </span>
-  </a>
-  
-</li>
       
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Next Steps
+        Usage Examples
+      
     </span>
   </a>
   
@@ -822,15 +759,8 @@
 
               
             
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
+              
+                
   
   
   
@@ -842,35 +772,47 @@
       
       
         
+          
+          
+        
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_2" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="">
             
   
   
   <span class="md-ellipsis">
-    About
+    
+  
+    Individual Classes
+  
+
     
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
             <span class="md-nav__icon md-icon"></span>
-            About
+            
+  
+    Individual Classes
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -881,14 +823,195 @@
   
   
     <li class="md-nav__item">
-      <a href="../../LICENSE" class="md-nav__link">
+      <a href="../pypfc_grid/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    License
+    
+  
+    Class pypfc_grid
+  
+
     
   </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pypfc_base/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Class pypfc_base
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pypfc_pre/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Class pypfc_pre
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pypfc_io/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Class pypfc_io
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pypfc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Class pypfc
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pypfc_ovito/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Class pypfc_ovito
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../complete_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Complete API
+  
+
+    
+  </span>
+  
   
 
       </a>
@@ -911,245 +1034,58 @@
               </div>
             
             
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#pypfc-main-class" class="md-nav__link">
-    <span class="md-ellipsis">
-      PyPFC Main Class
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="PyPFC Main Class">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#class-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Class Overview
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#architecture-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Architecture Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#class-descriptions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Class Descriptions
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Class Descriptions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#grid-management-pypfc_grid" class="md-nav__link">
-    <span class="md-ellipsis">
-      Grid Management (pypfc_grid)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#base-operations-pypfc_base" class="md-nav__link">
-    <span class="md-ellipsis">
-      Base Operations (pypfc_base)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#crystal-preprocessing-pypfc_pre" class="md-nav__link">
-    <span class="md-ellipsis">
-      Crystal Preprocessing (pypfc_pre)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#inputoutput-pypfc_io" class="md-nav__link">
-    <span class="md-ellipsis">
-      Input/Output (pypfc_io)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#main-interface-pypfc" class="md-nav__link">
-    <span class="md-ellipsis">
-      Main Interface (PyPFC)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-patterns" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Patterns
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Patterns">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-initialization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Basic Initialization
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#advanced-configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced Configuration
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#error-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Error Handling
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Error Handling">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#common-exceptions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Common Exceptions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#validation-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      Validation Methods
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#performance-considerations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Performance Considerations
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Performance Considerations">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#memory-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Memory Usage
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#optimization-tips" class="md-nav__link">
-    <span class="md-ellipsis">
-      Optimization Tips
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#thread-safety" class="md-nav__link">
-    <span class="md-ellipsis">
-      Thread Safety
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Next Steps
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
           
           
             <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+        
+  
+  
+    <li class="md-path__item">
+      <a href="../.." class="md-path__link">
+        
+  <span class="md-ellipsis">
+    Home
+  </span>
+
+      </a>
+    </li>
+  
+
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="./" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
               <article class="md-content__inner md-typeset">
                 
                   
@@ -1172,36 +1108,155 @@
   
 
 
+<p><img alt="pyPFC logo" src="../../images/pyPFC_logo_transparent.png" /></p>
 <h1 id="core-classes">Core Classes<a class="headerlink" href="#core-classes" title="Permanent link">&para;</a></h1>
-<p>This section documents the core classes of the pyPFC framework.</p>
-<h2 id="pypfc-main-class">PyPFC Main Class<a class="headerlink" href="#pypfc-main-class" title="Permanent link">&para;</a></h2>
-<p>The main interface class for Phase Field Crystal simulations.</p>
-<h3 id="class-overview">Class Overview<a class="headerlink" href="#class-overview" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">PyPFC</span><span class="p">:</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="sd">    Main class for Phase Field Crystal simulations using PyTorch.</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="sd">    This class provides a high-level interface for setting up and running</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="sd">    PFC simulations on both CPU and GPU devices.</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">setup_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">domain_size</span><span class="p">,</span> <span class="n">ndiv</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Setup simulation domain and parameters.&quot;&quot;&quot;</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        <span class="k">pass</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">do_single_crystal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize single crystal structure.&quot;&quot;&quot;</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>        <span class="k">pass</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">do_step_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform one time integration step.&quot;&quot;&quot;</span>
-</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        <span class="k">pass</span>
-</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
-</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate and return system free energy.&quot;&quot;&quot;</span>
-</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>        <span class="k">pass</span>
-</span></code></pre></div>
-<h2 id="architecture-overview">Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permanent link">&para;</a></h2>
+<p>This section documents the core classes, the structure and the coding conventions of the pyPFC framework.</p>
+<h2 id="general-comments">General Comments<a class="headerlink" href="#general-comments" title="Permanent link">&para;</a></h2>
+<ul>
+<li>pyPFC runs simulations on a regular Cartesian 3D grid with periodic boundary conditions along all coordinate axes. This is due to that pyPFC employs spectral solution schemes with heavy use of FFTs and.</li>
+<li>pyPFC evolves the density field in non-dimensional time and spatial dimensions are expressed in units of the lattice parameter.</li>
+</ul>
+<h2 id="code-conventions">Code Conventions<a class="headerlink" href="#code-conventions" title="Permanent link">&para;</a></h2>
+<ul>
+<li>A variable with a trailing <code>_d</code> indicates a quantity residing on the <code>device</code>, which can be either <code>cpu</code> or <code>gpu</code>.</li>
+<li>A variable name with a leading <code>f_</code> indicates a complex-type quantity that is set in Fourier space.</li>
+<li>Names of variables, functions and methods, etc., follow the snake case convention, with words in lower-case letters, separated by underscores. For example: <code>a_variable_name</code></li>
+<li>Floating point precision of variables is declared by the class variables <code>dtype_cpu</code> and <code>dtype_gpu</code> for quantities residing on the <code>cpu</code> and <code>gpu</code>, respectively. This permits easy control of the overall precision used in a pyPFC simulation.</li>
+</ul>
+<h2 id="configuration-parameters">Configuration Parameters<a class="headerlink" href="#configuration-parameters" title="Permanent link">&para;</a></h2>
+<p>The general behavior of pyPFC is controlled by a set of configuration parameters, collected in a Python dictionary. The parameters are described in the table below.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter name</th>
+<th>Defaults to</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>alat</td>
+<td>1.0</td>
+<td>Lattice parameter (non-dimensional)</td>
+</tr>
+<tr>
+<td>alpha</td>
+<td>[1, 1]</td>
+<td>Gaussian peak widths in the pair correlation function <span class="arithmatex">\(C_2\)</span>, excluding the zero-mode peak</td>
+</tr>
+<tr>
+<td>C20_amplitude</td>
+<td>0.0</td>
+<td>Amplitude of the zero-mode Gaussian peak in <span class="arithmatex">\(C_2\)</span></td>
+</tr>
+<tr>
+<td>C20_alpha</td>
+<td>1.0</td>
+<td>Width of the zero-mode Gaussian peak in <span class="arithmatex">\(C_2\)</span></td>
+</tr>
+<tr>
+<td>density_interp_order</td>
+<td>2</td>
+<td>Interpolation order for density maxima localization</td>
+</tr>
+<tr>
+<td>density_merge_distance</td>
+<td>0.1</td>
+<td>Distance for merging density maxima (in units of lattice parameters)</td>
+</tr>
+<tr>
+<td>density_threshold</td>
+<td>0.5</td>
+<td>Threshold for density maxima detection</td>
+</tr>
+<tr>
+<td>device_number</td>
+<td>0</td>
+<td>GPU device number (if multiple GPUs are available)</td>
+</tr>
+<tr>
+<td>device_type</td>
+<td>'gpu'</td>
+<td>PyTorch device ('cpu' or 'gpu')</td>
+</tr>
+<tr>
+<td>dtime</td>
+<td>1.0e-3</td>
+<td>Non-dimensional time increment <span class="arithmatex">\(\Delta\tau\)</span></td>
+</tr>
+<tr>
+<td>dtype_cpu</td>
+<td>np.double</td>
+<td>Floating-point precision of numpy arrays</td>
+</tr>
+<tr>
+<td>dtype_gpu</td>
+<td>torch.float64</td>
+<td>Floating-point precision of PyTorch tensors</td>
+</tr>
+<tr>
+<td>evaluate_phase_field</td>
+<td>True</td>
+<td>Evaluate phase field (or not)</td>
+</tr>
+<tr>
+<td>normalize_pf</td>
+<td>True</td>
+<td>Normalize the phase fields to [0,1], or not</td>
+</tr>
+<tr>
+<td>npeaks</td>
+<td>2</td>
+<td>Number of Gaussian peaks, excluding the zero-mode peak, to use in <span class="arithmatex">\(C_2\)</span></td>
+</tr>
+<tr>
+<td>pf_gauss_var</td>
+<td>0.1</td>
+<td>Variance of the Gaussian smoothing kernel used in phase field evaluations</td>
+</tr>
+<tr>
+<td>pf_iso_level</td>
+<td>0.5</td>
+<td>Iso-level for phase field contouring</td>
+</tr>
+<tr>
+<td>sigma</td>
+<td>0.0</td>
+<td>Temperature-like parameter (non-dimensional)</td>
+</tr>
+<tr>
+<td>struct</td>
+<td>'FCC'</td>
+<td>Crystal structure</td>
+</tr>
+<tr>
+<td>torch_threads</td>
+<td>8</td>
+<td>Number of CPU threads to use if device_type is 'cpu'</td>
+</tr>
+<tr>
+<td>torch_threads_interop</td>
+<td>8</td>
+<td>Number of interop threads to use if device_type is 'cpu'</td>
+</tr>
+<tr>
+<td>update_scheme</td>
+<td>'1st_order'</td>
+<td>Time integration scheme ('1st_order', '2nd_order' or 'exponential')</td>
+</tr>
+<tr>
+<td>update_scheme_params</td>
+<td>[1.0, 1.0, 1.0, None, None, None]</td>
+<td>Parameters in the time integration scheme: <span class="arithmatex">\([g_1, g_2, g_3, \alpha, \beta, \gamma]\)</span></td>
+</tr>
+<tr>
+<td>verbose</td>
+<td>True</td>
+<td>Verbose output (or not)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pypfc-architecture-overview">pyPFC Architecture Overview<a class="headerlink" href="#pypfc-architecture-overview" title="Permanent link">&para;</a></h2>
 <p>The pyPFC framework follows a strict inheritance hierarchy designed for modularity and extensibility:</p>
 <pre class="mermaid"><code>graph TD
     A[pypfc_grid] --&gt; B[pypfc_base]
@@ -1209,218 +1264,59 @@
     C --&gt; D[pypfc_io]
     D --&gt; E[PyPFC]
 
-    A -.-&gt; F[Grid Management&lt;br/&gt;• Domain discretization&lt;br/&gt;• Boundary conditions&lt;br/&gt;• Coordinate systems]
-    B -.-&gt; G[Core Operations&lt;br/&gt;• Device management&lt;br/&gt;• FFT operations&lt;br/&gt;• Mathematical functions]
-    C -.-&gt; H[Crystal Setup&lt;br/&gt;• Density field generation&lt;br/&gt;• Structure initialization&lt;br/&gt;• Phase field creation]
-    D -.-&gt; I[Input/Output&lt;br/&gt;• VTK export&lt;br/&gt;• XYZ format&lt;br/&gt;• Pickle serialization]
-    E -.-&gt; J[Main Interface&lt;br/&gt;• Simulation control&lt;br/&gt;• Time integration&lt;br/&gt;• Energy evaluation]</code></pre>
-<h2 id="class-descriptions">Class Descriptions<a class="headerlink" href="#class-descriptions" title="Permanent link">&para;</a></h2>
-<h3 id="grid-management-pypfc_grid">Grid Management (pypfc_grid)<a class="headerlink" href="#grid-management-pypfc_grid" title="Permanent link">&para;</a></h3>
-<p>Base class handling spatial discretization and domain setup.</p>
-<p><strong>Key Responsibilities:</strong>
-- 3D Cartesian grid initialization
-- Periodic boundary condition setup
-- Coordinate system management
-- Grid validation (even number requirements)</p>
-<p><strong>Important Methods:</strong>
-- <code>set_ndiv()</code> - Set grid divisions
-- <code>set_domain_size()</code> - Define physical domain
-- <code>get_grid_spacing()</code> - Calculate grid resolution</p>
-<h3 id="base-operations-pypfc_base">Base Operations (pypfc_base)<a class="headerlink" href="#base-operations-pypfc_base" title="Permanent link">&para;</a></h3>
-<p>Core mathematical and computational operations.</p>
-<p><strong>Key Responsibilities:</strong>
-- Device management (CPU/GPU)
-- FFT operations and wave vector calculations
-- Tensor memory management
-- Precision control (single/double)</p>
-<p><strong>Important Methods:</strong>
-- <code>set_device_type()</code> - Configure computation device
-- <code>setup_fft()</code> - Initialize Fourier transforms
-- <code>get_k2_field()</code> - Wave vector calculations</p>
-<h3 id="crystal-preprocessing-pypfc_pre">Crystal Preprocessing (pypfc_pre)<a class="headerlink" href="#crystal-preprocessing-pypfc_pre" title="Permanent link">&para;</a></h3>
-<p>Crystal structure generation and initialization.</p>
-<p><strong>Key Responsibilities:</strong>
-- Density field creation
-- Crystal structure setup (BCC, FCC)
-- Polycrystal initialization
-- Phase field preparation</p>
-<p><strong>Important Methods:</strong>
-- <code>setup_crystal_structure()</code> - Define crystal type
-- <code>generate_density_field()</code> - Create initial density
-- <code>apply_crystal_orientation()</code> - Set grain orientations</p>
-<h3 id="inputoutput-pypfc_io">Input/Output (pypfc_io)<a class="headerlink" href="#inputoutput-pypfc_io" title="Permanent link">&para;</a></h3>
-<p>Data persistence and visualization support.</p>
-<p><strong>Key Responsibilities:</strong>
-- File format support (VTK, XYZ, pickle)
-- Atomic position export
-- Density field visualization
-- Simulation state serialization</p>
-<p><strong>Important Methods:</strong>
-- <code>write_vtk_points()</code> - Export to ParaView format
-- <code>write_extended_xyz()</code> - Export for OVITO/VMD
-- <code>save_simulation_state()</code> - Checkpoint creation</p>
-<h3 id="main-interface-pypfc">Main Interface (PyPFC)<a class="headerlink" href="#main-interface-pypfc" title="Permanent link">&para;</a></h3>
-<p>High-level simulation control and user interface.</p>
-<p><strong>Key Responsibilities:</strong>
-- Simulation setup and configuration
-- Time integration control
-- Energy evaluation and monitoring
-- Results analysis and extraction</p>
-<p><strong>Main Methods:</strong>
-- <code>setup_simulation()</code> - Initialize complete simulation
-- <code>do_step_update()</code> - Advance time integration
-- <code>get_energy()</code> - Calculate free energy
-- <code>interpolate_density_maxima()</code> - Extract atomic positions</p>
-<h2 id="usage-patterns">Usage Patterns<a class="headerlink" href="#usage-patterns" title="Permanent link">&para;</a></h2>
-<h3 id="basic-initialization">Basic Initialization<a class="headerlink" href="#basic-initialization" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pypfc</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Create simulation instance</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">pfc</span> <span class="o">=</span> <span class="n">pypfc</span><span class="o">.</span><span class="n">PyPFC</span><span class="p">()</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Setup simulation domain</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">domain_size</span> <span class="o">=</span> <span class="p">[</span><span class="mf">32.0</span><span class="p">,</span> <span class="mf">32.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">]</span>  <span class="c1"># Physical size</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">ndiv</span> <span class="o">=</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>               <span class="c1"># Grid divisions</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># Configuration</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="s1">&#39;device_type&#39;</span><span class="p">:</span> <span class="s1">&#39;GPU&#39;</span><span class="p">,</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="s1">&#39;dtype_gpu&#39;</span><span class="p">:</span> <span class="s1">&#39;double&#39;</span><span class="p">,</span>
-</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="s1">&#39;update_scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;exponential&#39;</span>
-</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="p">}</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="c1"># Initialize simulation</span>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="n">pfc</span><span class="o">.</span><span class="n">setup_simulation</span><span class="p">(</span><span class="n">domain_size</span><span class="p">,</span> <span class="n">ndiv</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="advanced-configuration">Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Comprehensive configuration</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="c1"># Device settings</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="s1">&#39;device_type&#39;</span><span class="p">:</span> <span class="s1">&#39;GPU&#39;</span><span class="p">,</span>           <span class="c1"># &#39;CPU&#39; or &#39;GPU&#39;</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="s1">&#39;device_number&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>             <span class="c1"># GPU device index</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="s1">&#39;dtype_gpu&#39;</span><span class="p">:</span> <span class="s1">&#39;double&#39;</span><span class="p">,</span>          <span class="c1"># &#39;single&#39; or &#39;double&#39;</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="c1"># Simulation parameters</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="s1">&#39;update_scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;exponential&#39;</span><span class="p">,</span> <span class="c1"># Time integration method</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="s1">&#39;update_scheme_params&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">],</span>  <span class="c1"># [dt, tolerance]</span>
-</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="s1">&#39;max_iterations&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>         <span class="c1"># Maximum steps per update</span>
-</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="c1"># Crystal structure</span>
-</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="s1">&#39;crystal_structure&#39;</span><span class="p">:</span> <span class="s1">&#39;BCC&#39;</span><span class="p">,</span>     <span class="c1"># &#39;BCC&#39;, &#39;FCC&#39;, &#39;HCP&#39;</span>
-</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="s1">&#39;lattice_parameter&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>       <span class="c1"># Crystal lattice spacing</span>
-</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>
-</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="c1"># Density field</span>
-</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>    <span class="s1">&#39;density_amplitude&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>       <span class="c1"># Field amplitude</span>
-</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="s1">&#39;density_threshold&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>       <span class="c1"># Atom detection threshold</span>
-</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="s1">&#39;density_interp_order&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>      <span class="c1"># Interpolation accuracy</span>
-</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>
-</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>    <span class="c1"># Polycrystal settings</span>
-</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>    <span class="s1">&#39;grain_seeds&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>          <span class="c1"># Number of grains [nx, ny]</span>
-</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>    <span class="s1">&#39;grain_orientations&#39;</span><span class="p">:</span> <span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="c1"># Orientation distribution</span>
-</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>    <span class="s1">&#39;grain_boundary_width&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>    <span class="c1"># GB thickness</span>
-</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>
-</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>    <span class="c1"># Output control</span>
-</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>    <span class="s1">&#39;output_frequency&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>         <span class="c1"># Steps between outputs</span>
-</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>    <span class="s1">&#39;output_format&#39;</span><span class="p">:</span> <span class="s1">&#39;vtk&#39;</span><span class="p">,</span>         <span class="c1"># Output file format</span>
-</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>    <span class="s1">&#39;output_precision&#39;</span><span class="p">:</span> <span class="s1">&#39;single&#39;</span>    <span class="c1"># Output data precision</span>
-</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="p">}</span>
-</span></code></pre></div>
-<h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h2>
-<h3 id="common-exceptions">Common Exceptions<a class="headerlink" href="#common-exceptions" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">try</span><span class="p">:</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">pfc</span><span class="o">.</span><span class="n">setup_simulation</span><span class="p">(</span><span class="n">domain_size</span><span class="p">,</span> <span class="n">ndiv</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GPU/memory error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unexpected error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="validation-methods">Validation Methods<a class="headerlink" href="#validation-methods" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Check configuration validity</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">is_valid</span> <span class="o">=</span> <span class="n">pfc</span><span class="o">.</span><span class="n">validate_configuration</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid</span><span class="p">:</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Configuration validation failed&quot;</span><span class="p">)</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># Check GPU availability</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">pfc</span><span class="o">.</span><span class="n">check_gpu_available</span><span class="p">():</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">config</span><span class="p">[</span><span class="s1">&#39;device_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;CPU&#39;</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;GPU not available, using CPU&quot;</span><span class="p">)</span>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="c1"># Validate grid dimensions</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">pfc</span><span class="o">.</span><span class="n">validate_grid_dimensions</span><span class="p">(</span><span class="n">ndiv</span><span class="p">):</span>
-</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Grid dimensions must be even numbers&quot;</span><span class="p">)</span>
-</span></code></pre></div>
+    A -.-&gt; F[**Grid Management**&lt;br/&gt;• Domain discretization&lt;br/&gt;]
+    B -.-&gt; G[**Core Operations**&lt;br/&gt;• Device management&lt;br/&gt;• FFT operations&lt;br/&gt;• Auxiliary functions]
+    C -.-&gt; H[**Pre-processing**&lt;br/&gt;• Density field generation&lt;br/&gt;• Structure initialization&lt;br/&gt;]
+    D -.-&gt; I[**Input/Output**&lt;br/&gt;• VTK export&lt;br/&gt;• Extended XYZ I/O&lt;br/&gt;• Binary pickle file I/O&lt;br/&gt;• ASCII text file I/O]
+    E -.-&gt; J[**Main Interface**&lt;br/&gt;• Simulation control&lt;br/&gt;• Time integration&lt;br/&gt;• Energy evaluation]</code></pre>
 <h2 id="performance-considerations">Performance Considerations<a class="headerlink" href="#performance-considerations" title="Permanent link">&para;</a></h2>
 <h3 id="memory-usage">Memory Usage<a class="headerlink" href="#memory-usage" title="Permanent link">&para;</a></h3>
+<p>Note that the numbers below are only indicative. Adding additional field, such as extra phase fields, will significantly increase memory usage.</p>
 <table>
 <thead>
 <tr>
 <th>Grid Size</th>
-<th>Single Precision</th>
 <th>Double Precision</th>
+<th>Single Precision</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>64³</td>
-<td>~1 GB</td>
-<td>~2 GB</td>
-</tr>
-<tr>
-<td>128³</td>
-<td>~8 GB</td>
-<td>~16 GB</td>
-</tr>
-<tr>
 <td>256³</td>
-<td>~64 GB</td>
-<td>~128 GB</td>
+<td>~2 GB</td>
+<td>~1 GB</td>
+</tr>
+<tr>
+<td>512³</td>
+<td>~14 GB</td>
+<td>~7 GB</td>
+</tr>
+<tr>
+<td>768³</td>
+<td>~45 GB</td>
+<td>~23 GB</td>
 </tr>
 </tbody>
 </table>
 <h3 id="optimization-tips">Optimization Tips<a class="headerlink" href="#optimization-tips" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1"># For maximum performance</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">config_fast</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="s1">&#39;device_type&#39;</span><span class="p">:</span> <span class="s1">&#39;GPU&#39;</span><span class="p">,</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="s1">&#39;dtype_gpu&#39;</span><span class="p">:</span> <span class="s1">&#39;single&#39;</span><span class="p">,</span>          <span class="c1"># Faster computation</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="s1">&#39;update_scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;exponential&#39;</span><span class="p">,</span> <span class="c1"># Efficient time stepping</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="s1">&#39;fft_backend&#39;</span><span class="p">:</span> <span class="s1">&#39;cufft&#39;</span><span class="p">,</span>         <span class="c1"># GPU-optimized FFT</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="s1">&#39;memory_pool&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>            <span class="c1"># Reuse GPU memory</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">}</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="c1"># For maximum accuracy</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="n">config_precise</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>    <span class="s1">&#39;device_type&#39;</span><span class="p">:</span> <span class="s1">&#39;GPU&#39;</span><span class="p">,</span>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    <span class="s1">&#39;dtype_gpu&#39;</span><span class="p">:</span> <span class="s1">&#39;double&#39;</span><span class="p">,</span>          <span class="c1"># Higher precision</span>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="s1">&#39;update_scheme&#39;</span><span class="p">:</span> <span class="s1">&#39;2nd_order&#39;</span><span class="p">,</span>   <span class="c1"># More accurate integration</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="s1">&#39;convergence_tolerance&#39;</span><span class="p">:</span> <span class="mf">1e-8</span><span class="p">,</span>  <span class="c1"># Stricter convergence</span>
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="s1">&#39;density_interp_order&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>      <span class="c1"># Better interpolation</span>
-</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="p">}</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># For maximum performance</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">params_fast</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="s1">&#39;device_type&#39;</span><span class="p">:</span> <span class="s1">&#39;GPU&#39;</span><span class="p">,</span>       <span class="c1"># Run on GPU</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="s1">&#39;dtype_cpu&#39;</span><span class="p">:</span>  <span class="n">np</span><span class="o">.</span><span class="n">single</span><span class="p">,</span>    <span class="c1"># Floating point precision, CPU</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="s1">&#39;dtype_gpu&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="c1"># Floating point precision, GPU</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="s1">&#39;density_interp_order&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Reduced interpolation accuracy</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">}</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># For maximum accuracy</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">params_precise</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="s1">&#39;device_type&#39;</span><span class="p">:</span> <span class="s1">&#39;GPU&#39;</span><span class="p">,</span>       <span class="c1"># Run on GPU </span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="s1">&#39;dtype_cpu&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">,</span>     <span class="c1"># Floating point precision, GPU</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="s1">&#39;dtype_gpu&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="c1"># Floating point precision, GPU</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="s1">&#39;density_interp_order&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>  <span class="c1"># Better interpolation accuracy</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
 </span></code></pre></div>
-<h2 id="thread-safety">Thread Safety<a class="headerlink" href="#thread-safety" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Thread Safety</p>
-<p>PyPFC instances are <strong>not thread-safe</strong>. For parallel simulations:</p>
-<ul>
-<li>Use separate PyPFC instances per thread</li>
-<li>Ensure different GPU devices per instance</li>
-<li>Avoid shared state between instances</li>
-</ul>
-</div>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># Correct: separate instances</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_simulation</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">thread_id</span><span class="p">):</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">pfc</span> <span class="o">=</span> <span class="n">pypfc</span><span class="o">.</span><span class="n">PyPFC</span><span class="p">()</span>  <span class="c1"># New instance per thread</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">config</span><span class="p">[</span><span class="s1">&#39;device_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">thread_id</span> <span class="o">%</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">pfc</span><span class="o">.</span><span class="n">setup_simulation</span><span class="p">(</span><span class="n">domain_size</span><span class="p">,</span> <span class="n">ndiv</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="c1"># ... run simulation</span>
-</span></code></pre></div>
-<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
-<ul>
-<li><a href="grid.md">Grid Management API</a> - Detailed grid operations</li>
-<li><a href="io.md">I/O Operations API</a> - File handling and export</li>
-<li><a href="../usage/basic.md">Usage Examples</a> - Practical applications</li>
-</ul>
+<h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
+<p>Usage examples can be found on the <a href="../../examples/">Examples pages</a>.</p>
 
 
 
@@ -1478,7 +1374,7 @@
       
     
     <a href="https://github.com/HHallb/pyPFC" target="_blank" rel="noopener" title="github.com" class="md-social__link">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.0.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
     </a>
   
 </div>
@@ -1495,10 +1391,11 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.share", "toc.follow", "content.code.copy", "content.code.select", "content.action.edit", "content.action.view"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.share", "toc.follow", "toc.integrate", "content.code.copy", "content.code.select", "content.action.edit", "content.action.view"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "H. Hallberg"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
       
         <script src="../../javascripts/mathjax.js"></script>
       
