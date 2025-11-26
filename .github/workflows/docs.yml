@@ -39,8 +39,8 @@ jobs:
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         mkdocs build
         
-        # Store the built site
-        mv site built_site
+        # Store the built site outside the repo directory
+        cp -r site /tmp/built_site
         
         # Switch to gh-pages branch
         git fetch origin gh-pages:gh-pages || git checkout --orphan gh-pages
@@ -48,7 +48,7 @@ jobs:
         
         # Clean and deploy to root
         rm -rf * || true
-        cp -r built_site/* .
+        cp -r /tmp/built_site/* .
         
         # Commit and push
         git add .
