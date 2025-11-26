@@ -1,6 +1,8 @@
 ![PyPI](https://img.shields.io/pypi/v/pypfc)
 ![License](https://img.shields.io/github/license/HHallb/pyPFC)
 
+📚 [Documentation](https://HHallb.github.io/pyPFC/docs/) | [GitHub](https://github.com/HHallb/pyPFC)
+
 ![PFC atoms](https://github.com/HHallb/pyPFC/raw/main/docs/images/pyPFC_logo_transparent.png)
 
 # A Python package for GPU-accelerated 3D Phase Field Crystal simulations
@@ -34,7 +36,7 @@ Areas of application include:
 4. [API Reference](/docs/api/core.md) - Detailed class and method documentation
 5. [Troubleshooting](/docs/troubleshooting.md) - Q&A
 
-Much more information can be found in the [pyFC documentation](/docs/index.md).
+Much more information can be found in the [pyPFC documentation](/docs/index.md).
 
 ## Licencing
 
