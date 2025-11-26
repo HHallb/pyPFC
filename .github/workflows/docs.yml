@@ -1,10 +1,10 @@
 name: Build and Deploy MkDocs Documentation
 
 on:
-  # Uncomment when ready to auto-deploy
-  # push:
-  #   branches: [ main ]
-  workflow_dispatch:  # Manual trigger only
+  # Uncomment the following two lines when ready to auto-deploy
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: write
