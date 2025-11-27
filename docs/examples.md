@@ -5,7 +5,7 @@
 This page provides an overview of examples included with pyPFC. The examples demonstrates different aspects of the simulation framework. Additional useful information is also provided:
 
 - [File Formats](#file-formats)
-- [Indicative GPU Memory Requirements](#indicative-gpu-memory-requirements)
+- [Indicative GPU Memory Requirements](#indicative-gpu-memory-requirements-depending-on-floating-point-precision)
 - [Performance Notes](#performance-notes)
 - [Recommended Configurations](#recommended-configurations)
 - [Customization](#customization)
@@ -72,7 +72,7 @@ pyPFC works with different file formats for data I/O:
 
 ## Performance Notes
 
-### Indicative GPU Memory Requirements
+### Indicative GPU Memory Requirements Depending on Floating-Point Precision
 
 | Grid Size | Memory (Single) | Memory (Double)
 |-----------|-----------------|-----------------
