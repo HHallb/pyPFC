@@ -6,7 +6,7 @@
 
 ## Overview
 
-pyPFC is a high-performance simulation framework designed for modeling crystal structures and their evolution using the Phase Field Crystal (PFC) method. The code uses PyTorch to allow execution on both CPUs and GPUs, providing efficient simulations on both CPU and GPU platforms. pyPFC is developed with a combined focus on computational efficiency, flexibility and accessibility, making it suitable for both research and educational purposes. Areas of application include:
+pyPFC is a high-performance simulation framework designed for modeling crystal structures and their evolution using the Phase Field Crystal (PFC) method. The code uses PyTorch to allow execution on both CPUs and GPUs, with particularly efficiency gained on GPU platforms. pyPFC is developed with a combined focus on computational efficiency, flexibility and accessibility, making it suitable for both research and educational purposes. Areas of application include:
 
 - **Materials Science**: Crystal growth and microstructure evolution
 - **Computational Physics**: Pattern formation, defect evolution and elastic interactions
@@ -19,7 +19,7 @@ pyPFC is a high-performance simulation framework designed for modeling crystal s
 - **Flexible I/O**: VTK, Extended XYZ and pickle format support for data exchange
 - **Advanced Data Processing**: Built-in functionalities as well as interfaces to [OVITO](https://www.ovito.org/) libraries (optional)
 - **Memory Optimization**: Efficient memory management for large 3D grids
-- **Density Field Evolution**: Multiple time integration schemes are available
+- **Density Field Evolution**: Different time integration schemes are available
 
 ## Getting Started
 
