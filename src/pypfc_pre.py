@@ -257,7 +257,7 @@ class setup_pre(setup_base):
             
             - `model=0`: [r] - spherical crystal radius
             - `model=1`: [x1, x2] - crystal extent in x direction
-            - 'model=2': [r] - cylindrical crystal radius
+            - `model=2`: [r] - cylindrical crystal radius
 
         model : int, optional  
             Density field layout.
