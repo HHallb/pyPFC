@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - 2025-10-19
+## [Unreleased] - 2025-11-28
 
 ### Added
 
@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Function `do_ovito_csp()` in `pypfc_ovito` class for evaluation of the centro-symmetry parameter (CSP) using Ovito
 - Example `ex05_structure_analysis.py`, demonstrating the new `get_csp()` and `do_ovito_csp()` methods
 - Added check that all entries in ndiv are even numbers in `pypfc_grid`
+- Added the option of generating a cylindrical single crystal in `do_single_crystal()` in `pypfc_pre`.
 
 ### Changed
 

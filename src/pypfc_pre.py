@@ -257,12 +257,14 @@ class setup_pre(setup_base):
             
             - `model=0`: [r] - spherical crystal radius
             - `model=1`: [x1, x2] - crystal extent in x direction
+            - 'model=2': [r] - cylindrical crystal radius
 
         model : int, optional  
             Density field layout.
             
             - 0: Spherical crystal
             - 1: Crystal extending throughout y and z, covering interval in x
+            - 2: Cylindrical crystal, extending through z
         
         Returns
         -------
@@ -305,6 +307,10 @@ class setup_pre(setup_base):
             x1 = params[0]
             x2 = params[1]
             condition = (Xc >= x1) & (Xc <= x2)
+
+        elif model==2:
+            radius    = params[0]
+            condition = (np.sqrt((Xc-Lx/2)**2 + (Yc-Ly/2)**2) <= radius)
 
         else:
             raise ValueError(f'Unsupported value: model={model}')
