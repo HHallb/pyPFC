@@ -1,0 +1,110 @@
+# Contributing to pyPFC
+
+Thank you for your interest in contributing to pyPFC! This document provides guidelines for contributing to the project, including bug reports, feature requests, and code contributions.
+
+## Table of Contents
+
+- [Bug Reports](#bug-reports)
+- [Feature Requests](#feature-requests)
+- [Performance Issues](#performance-issues)
+- [Documentation Issues](#documentation-issues)
+- [Questions and Support](#questions-and-support)
+
+## Bug Reports
+
+**Use the GitHub Issue Templates**: When reporting bugs, please use our [Bug Report template](../../issues/new/choose) which will guide you through providing all necessary information.
+
+The bug report template will ask for:
+
+### Required Information
+
+1. **pyPFC version**: Use `pip show pypfc`
+2. **Operating System**: Windows, macOS, or Linux distribution
+3. **Python version**: Use `python --version`
+4. **PyTorch version**: Use `torch.__version__`
+5. **GPU information** (if applicable): GPU model and CUDA version
+
+### Bug Report Template
+
+```markdown
+**pyPFC Version:** 
+**OS:** 
+**Python Version:** 
+**PyTorch Version:** 
+**GPU/CUDA Version:** 
+
+**Description:**
+A clear and concise description of what the bug is.
+
+**To Reproduce:**
+Steps to reproduce the behavior:
+1. 
+2. 
+3. 
+
+**Expected Behavior:**
+A clear description of what you expected to happen.
+
+**Actual Behavior:**
+What actually happened, including any error messages.
+
+**Code Sample:**
+Please provide a minimal code example that reproduces the issue.
+
+**Additional Context:**
+Add any other context about the problem here.
+```
+
+## Feature Requests
+
+**Use the GitHub Issue Templates**: For feature requests, please use the [Feature Request template](../../issues/new/choose).
+
+The template will guide you to provide:
+
+1. **Clear description** of the proposed feature
+2. **Use case**: Why would this feature be useful?
+3. **Implementation ideas** (if you have any)
+4. **Examples** of how the feature would be used
+
+## Performance Issues
+
+For performance-related problems, use the [Performance Issue template](../../issues/new/choose) which collects:
+
+- Hardware specifications and benchmarking data
+- Simulation parameters and memory usage
+- Profiling information and optimization attempts
+
+## Documentation Issues
+
+To report documentation problems or suggest improvements, use the [Documentation template](../../issues/new/choose) for:
+
+- Missing or unclear documentation
+- API reference improvements
+- Tutorial and example requests
+- Website or README issues
+
+## Questions and Support
+
+### Before Asking for Help
+
+1. Check the [documentation](https://hhallb.github.io/pyPFC/)
+2. Try the examples in the `examples/` directory
+3. Check that your environment meets the requirements
+
+### When Asking Questions
+
+For questions, you can:
+
+- Create a [GitHub Issue](../../issues/new/choose) using the appropriate template
+- Use [GitHub Discussions](../../discussions) for general questions  
+- Check existing issues for similar problems
+
+When asking questions:
+
+- Provide a minimal code example
+- Include error messages and stack traces
+- Specify your environment (OS, Python version, etc.)
+- Describe what you expected vs. what happened
+
+Thank you for contributing to pyPFC! Your contributions help make this package better for the entire Phase Field Crystal simulation community.
+
