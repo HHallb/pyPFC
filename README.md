@@ -17,39 +17,6 @@ Installation instructions, examples and api documentation can be found in the [p
 
 This software is released under a [GNU GPLv3 license](https://www.gnu.org/licenses/).
 
-## Acknowledegment
-
-If you use pyPFC or any of its components for a publication or presentation you are kindly asked to include a reference to:
-
-[H. Hallberg and K.H. Blixt, **pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations**, *Modelling and Simulation in Materials Scinece and Engineering*, vol:pages, year](https://doi.org/10.1088/1361-651X/ae2599)
-
-BibTeX entry:
-
-```bibtex
-@Article{pypfc,
-   Author         = {H. Hallberg and K. H. Blixt},
-   Title          = {py{PFC}: {A}n {O}pen-{S}ource {P}ython {P}ackage for {P}hase {F}ield {C}rystal {S}imulations},
-   Journal        = {Modelling and Simulation in Materials Science and Engineering},
-   Year           = {2025},
-   Volume         = {VV},
-   Number         = {NN},
-   Month          = {MM},
-   Pages          = {1--PP},
-   DOI            = {10.1088/1361-651X/ae2599},
-   Article-Number = {},
-   ISSN           = {0965-0393},
-   EISSN          = {1361-651X},
-}
-```
-
-## Funding and Support
-
-This project is/was partially funded and/or supported by:
-
-- [NVIDIA Corporation](https://www.nvidia.com/en-us/): Hardware grants
-- [The Swedish Research Council](https://www.vr.se/english.html): Grant 2019-03945
-- [The e-Science Collaboration](https://www.essenceofescience.se/w/es/en): Grant eSSENCE@LU 10:1
-
 ## References
 
 Further details on PFC modeling and example applications can be found in:

@@ -7,8 +7,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- Added .yml templates for bug reporting, doucumentation requests, feature requests and for reporting performance issues
-- Added CONTRIBUTING.md with info on bug reporting and feature requests
 - Added SECURIY.md with info on security-related matters
 - Function `get_xtal_nearest_neighbors()` in `pypfc_base` class to define the number of nearest neighbors and neighbor distances for different crystal structures
 - Function `get_csp()` in `pypfc_base` class for evaluation of the centro-symmetry parameter (CSP)
