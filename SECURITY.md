@@ -82,13 +82,6 @@ Security updates will be:
 - Announced through GitHub releases
 - Tagged with appropriate version numbers
 
-## Contact
-
-For security-related questions or concerns that are not vulnerabilities, you can:
-
-- Check our documentation at [https://hhallb.github.io/pyPFC/](https://hhallb.github.io/pyPFC/)
-- Review this security policy for updates
-
 ---
 
 **Note**: This security policy may be updated from time to time. Please check back regularly for the most current version.

@@ -12,7 +12,7 @@ Thank you for your interest in contributing to pyPFC. This document provides gui
 
 ## Bug Reports
 
-**Use the GitHub Issue Templates**: When reporting bugs, please [create a new issue](https://github.com/HHallb/pyPFC/issues/new) and select the "Bug Report" template, which will guide you through providing all necessary information.
+**Use the GitHub Issue Templates**: When reporting bugs, please visit the [Issues page](https://github.com/HHallb/pyPFC/issues) and click "New issue" to see the available templates, including the "Bug Report" template which will guide you through providing all necessary information.
 
 The bug report template will ask for:
 
@@ -57,7 +57,7 @@ Add any other context about the problem here.
 
 ## Feature Requests
 
-**Use the GitHub Issue Templates**: For feature requests, please [create a new issue](https://github.com/HHallb/pyPFC/issues/new) and select the "Feature Request" template to explain your needs.
+**Use the GitHub Issue Templates**: For feature requests, please visit the [Issues page](https://github.com/HHallb/pyPFC/issues) and click "New issue" to select the "Feature Request" template.
 
 We welcome feature requests! The template will guide you to provide:
 
@@ -68,7 +68,7 @@ We welcome feature requests! The template will guide you to provide:
 
 ## Performance Issues
 
-For performance-related problems, [create a new issue](https://github.com/HHallb/pyPFC/issues/new) and select the "Performance Issue" template which collects:
+For performance-related problems, visit the [Issues page](https://github.com/HHallb/pyPFC/issues) and click "New issue" to select the "Performance Issue" template which collects:
 
 - Hardware specifications and benchmarking data
 - Simulation parameters and memory usage
@@ -76,7 +76,7 @@ For performance-related problems, [create a new issue](https://github.com/HHallb
 
 ## Documentation Issues
 
-To report documentation problems or suggest improvements, [create a new issue](https://github.com/HHallb/pyPFC/issues/new) and select the "Documentation Issue" template for:
+To report documentation problems or suggest improvements, visit the [Issues page](https://github.com/HHallb/pyPFC/issues) and click "New issue" to select the "Documentation Issue" template for:
 
 - Missing or unclear documentation
 - API reference improvements
@@ -101,7 +101,7 @@ To report documentation problems or suggest improvements, [create a new issue](h
 
 For questions, you can:
 
-- Create a [GitHub Issue](https://github.com/HHallb/pyPFC/issues/new/choose) using the appropriate template
+- Visit the [Issues page](https://github.com/HHallb/pyPFC/issues) and click "New issue" to select the appropriate template
 - Check existing issues for similar problems
 
 When asking questions:
