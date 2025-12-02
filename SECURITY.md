@@ -6,24 +6,11 @@ We take the security of pyPFC seriously. If you believe you have found a securit
 
 ### How to Report
 
-**Please do not report security vulnerabilities through public GitHub issues.**
-
-Instead, please use one of these private reporting methods:
-
-#### Option 1: GitHub Security Advisories (Recommended)
-
 Use GitHub's private vulnerability reporting feature:
 
 1. Go to the [Security tab](https://github.com/HHallb/pyPFC/security) of this repository
 2. Click "Report a vulnerability"
 3. Fill out the private security advisory form
-
-#### Option 2: Email Report
-
-Send an email to the project maintainer:
-
-- **Email**: hakan.hallberg@solid.lth.se
-- **Subject**: "Security vulnerability in pyPFC"
 
 ### What to Include
 
