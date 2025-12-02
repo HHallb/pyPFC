@@ -12,7 +12,7 @@ Thank you for your interest in contributing to pyPFC. This document provides gui
 
 ## Bug Reports
 
-**Use the GitHub Issue Templates**: When reporting bugs, please use our [Bug Report template](https://github.com/HHallb/pyPFC/issues/new/choose) which will guide you through providing all necessary information.
+**Use the GitHub Issue Templates**: When reporting bugs, please [create a new issue](https://github.com/HHallb/pyPFC/issues/new) and select the "Bug Report" template, which will guide you through providing all necessary information.
 
 The bug report template will ask for:
 
@@ -57,7 +57,7 @@ Add any other context about the problem here.
 
 ## Feature Requests
 
-**Use the GitHub Issue Templates**: For feature requests, please use our [Feature Request template](https://github.com/HHallb/pyPFC/issues/new/choose) to explain your needs.
+**Use the GitHub Issue Templates**: For feature requests, please [create a new issue](https://github.com/HHallb/pyPFC/issues/new) and select the "Feature Request" template to explain your needs.
 
 We welcome feature requests! The template will guide you to provide:
 
@@ -68,7 +68,7 @@ We welcome feature requests! The template will guide you to provide:
 
 ## Performance Issues
 
-For performance-related problems, use our [Performance Issue template](https://github.com/HHallb/pyPFC/issues/new/choose) which collects:
+For performance-related problems, [create a new issue](https://github.com/HHallb/pyPFC/issues/new) and select the "Performance Issue" template which collects:
 
 - Hardware specifications and benchmarking data
 - Simulation parameters and memory usage
@@ -76,7 +76,7 @@ For performance-related problems, use our [Performance Issue template](https://g
 
 ## Documentation Issues
 
-To report documentation problems or suggest improvements, use our [Documentation template](https://github.com/HHallb/pyPFC/issues/new/choose) for:
+To report documentation problems or suggest improvements, [create a new issue](https://github.com/HHallb/pyPFC/issues/new) and select the "Documentation Issue" template for:
 
 - Missing or unclear documentation
 - API reference improvements
