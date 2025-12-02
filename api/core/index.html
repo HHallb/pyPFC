@@ -657,17 +657,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#general-comments" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        General Comments
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#code-conventions" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -675,6 +664,139 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Code Conventions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Naming Conventions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-and-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory and Performance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-handling-and-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling and Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#physical-units-and-dimensionality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Physical Units and Dimensionality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#code-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Code Organization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-and-reproducibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Testing and Reproducibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scientific-computing-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scientific Computing Best Practices
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Documentation Conventions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Documentation Conventions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#function-docstring-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Function Docstring Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#class-docstring-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Class Docstring Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-mkdocs-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key MkDocs Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1111,17 +1233,117 @@
 <p><img alt="pyPFC logo" src="../../images/pyPFC_logo_transparent.png" /></p>
 <h1 id="core-classes">Core Classes<a class="headerlink" href="#core-classes" title="Permanent link">&para;</a></h1>
 <p>This section documents the core classes, the structure and the coding conventions of the pyPFC framework.</p>
-<h2 id="general-comments">General Comments<a class="headerlink" href="#general-comments" title="Permanent link">&para;</a></h2>
-<ul>
-<li>pyPFC runs simulations on a regular Cartesian 3D grid with periodic boundary conditions along all coordinate axes. This is due to that pyPFC employs spectral solution schemes with heavy use of FFTs and.</li>
-<li>pyPFC evolves the density field in non-dimensional time and spatial dimensions are expressed in units of the lattice parameter.</li>
-</ul>
 <h2 id="code-conventions">Code Conventions<a class="headerlink" href="#code-conventions" title="Permanent link">&para;</a></h2>
+<h3 id="naming-conventions">Naming Conventions<a class="headerlink" href="#naming-conventions" title="Permanent link">&para;</a></h3>
 <ul>
 <li>A variable with a trailing <code>_d</code> indicates a quantity residing on the <code>device</code>, which can be either <code>cpu</code> or <code>gpu</code>.</li>
 <li>A variable name with a leading <code>f_</code> indicates a complex-type quantity that is set in Fourier space.</li>
 <li>Names of variables, functions and methods, etc., follow the snake case convention, with words in lower-case letters, separated by underscores. For example: <code>a_variable_name</code></li>
+<li>Private methods and attributes should start with a single underscore: <code>_internal_method()</code></li>
+</ul>
+<h3 id="memory-and-performance">Memory and Performance<a class="headerlink" href="#memory-and-performance" title="Permanent link">&para;</a></h3>
+<ul>
 <li>Floating point precision of variables is declared by the class variables <code>dtype_cpu</code> and <code>dtype_gpu</code> for quantities residing on the <code>cpu</code> and <code>gpu</code>, respectively. This permits easy control of the overall precision used in a pyPFC simulation.</li>
+<li>Use in-place tensor operations when possible to minimize memory allocation: <code>tensor.add_(other)</code> instead of <code>tensor + other</code></li>
+<li>Ensure all PyTorch tensors are contiguous for optimal FFT performance: <code>tensor.contiguous()</code></li>
+<li>Free GPU memory explicitly in long-running simulations: <code>torch.cuda.empty_cache()</code></li>
+</ul>
+<h3 id="error-handling-and-validation">Error Handling and Validation<a class="headerlink" href="#error-handling-and-validation" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Input parameters should be validated (e.g., an even number of grid divisions)</li>
+<li>Use descriptive error messages that include context and suggested solutions</li>
+<li>Raise appropriate exception types: <code>ValueError</code> for invalid parameters, <code>RuntimeError</code> for computational failures</li>
+<li>Include parameter bounds checking for physical quantities (e.g., positive time steps, reasonable grid sizes)</li>
+</ul>
+<h3 id="physical-units-and-dimensionality">Physical Units and Dimensionality<a class="headerlink" href="#physical-units-and-dimensionality" title="Permanent link">&para;</a></h3>
+<ul>
+<li>All spatial dimensions are expressed in units of the lattice parameter (non-dimensional)</li>
+<li>Time evolution occurs in non-dimensional time units</li>
+<li>Document the physical interpretation of non-dimensional parameters in docstrings</li>
+<li>Use meaningful variable names that reflect physical quantities (e.g., <code>time_step</code>)</li>
+</ul>
+<h3 id="code-organization">Code Organization<a class="headerlink" href="#code-organization" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Keep functions focused on a single responsibility (single responsibility principle)</li>
+<li>Limit function length when possible for readability</li>
+<li>Group related functionality into logical class hierarchies following the inheritance chain</li>
+<li>Separate configuration parameters from computational code</li>
+<li>Use type hints for all function parameters and return values:</li>
+</ul>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">evolve_field</span><span class="p">(</span><span class="n">density</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+</span></code></pre></div>
+<h3 id="testing-and-reproducibility">Testing and Reproducibility<a class="headerlink" href="#testing-and-reproducibility" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Include assertions for critical computational assumptions</li>
+<li>Provide deterministic behavior when possible (set random seeds if using random numbers)</li>
+<li>Write functions that can be easily unit tested (avoid deep side effects)</li>
+<li>Include numerical tolerance checks for floating-point comparisons:</li>
+</ul>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>  <span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">expected</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="scientific-computing-best-practices">Scientific Computing Best Practices<a class="headerlink" href="#scientific-computing-best-practices" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Prefer vectorized operations over explicit loops</li>
+<li>Document the mathematical basis for numerical algorithms in docstrings</li>
+<li>Include references to relevant literature for implemented methods</li>
+<li>Validate numerical stability and convergence properties</li>
+<li>Provide performance characteristics (computational complexity) for expensive operations</li>
+</ul>
+<h2 id="documentation-conventions">Documentation Conventions<a class="headerlink" href="#documentation-conventions" title="Permanent link">&para;</a></h2>
+<p>When adding new functions or methods, docstrings must follow MkDocs-compatible format for proper API documentation generation:</p>
+<h3 id="function-docstring-format">Function Docstring Format<a class="headerlink" href="#function-docstring-format" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">example_function</span><span class="p">(</span><span class="n">param1</span><span class="p">,</span> <span class="n">param2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Brief description of the function.</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="sd">    Detailed description of what the function does, including any important</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="sd">    implementation details or usage notes.</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="sd">    Args:</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="sd">        param1 (type): Description of param1.</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="sd">        param2 (type, optional): Description of param2. Defaults to None.</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="sd">    Returns:</span>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="sd">        type: Description of return value.</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="sd">    Raises:</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="sd">        ValueError: If param1 is invalid.</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="sd">        RuntimeError: If computation fails.</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="sd">    Example:</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="sd">        ```python</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="sd">        result = example_function(&quot;test&quot;, param2=42)</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="sd">        print(result)</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="sd">        ```</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="sd">    Note:</span>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="sd">        Any additional notes about usage, performance, or limitations.</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span></code></pre></div>
+<h3 id="class-docstring-format">Class Docstring Format<a class="headerlink" href="#class-docstring-format" title="Permanent link">&para;</a></h3>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">ExampleClass</span><span class="p">:</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Brief description of the class.</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="sd">    Detailed description of the class purpose and functionality.</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="sd">    Attributes:</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="sd">        attr1 (type): Description of attribute.</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="sd">        attr2 (type): Description of attribute.</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="sd">    Example:</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="sd">        ```python</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="sd">        obj = ExampleClass()</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="sd">        obj.method_name()</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="sd">        ```</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="sd">    &quot;&quot;&quot;</span>
+</span></code></pre></div>
+<h3 id="key-mkdocs-requirements">Key MkDocs Requirements<a class="headerlink" href="#key-mkdocs-requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Use <strong>triple quotes</strong> for all docstrings</li>
+<li>Include <strong>Args</strong>, <strong>Returns</strong>, and <strong>Raises</strong> sections where applicable</li>
+<li>Use <strong>type hints</strong> in parentheses: <code>param (torch.Tensor):</code></li>
+<li>Provide <strong>code examples</strong> in fenced code blocks with <code>python</code> language tag</li>
+<li>Keep <strong>first line brief</strong> and follow with detailed description</li>
+<li>Use <strong>proper Markdown formatting</strong> within docstrings</li>
 </ul>
 <h2 id="configuration-parameters">Configuration Parameters<a class="headerlink" href="#configuration-parameters" title="Permanent link">&para;</a></h2>
 <p>The general behavior of pyPFC is controlled by a set of configuration parameters, collected in a Python dictionary. The parameters are described in the table below.</p>
@@ -1299,21 +1521,21 @@
 </tbody>
 </table>
 <h3 id="optimization-tips">Optimization Tips<a class="headerlink" href="#optimization-tips" title="Permanent link">&para;</a></h3>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># For maximum performance</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">params_fast</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="s1">&#39;device_type&#39;</span><span class="p">:</span> <span class="s1">&#39;GPU&#39;</span><span class="p">,</span>       <span class="c1"># Run on GPU</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="s1">&#39;dtype_cpu&#39;</span><span class="p">:</span>  <span class="n">np</span><span class="o">.</span><span class="n">single</span><span class="p">,</span>    <span class="c1"># Floating point precision, CPU</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="s1">&#39;dtype_gpu&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="c1"># Floating point precision, GPU</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="s1">&#39;density_interp_order&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Reduced interpolation accuracy</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">}</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># For maximum accuracy</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">params_precise</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="s1">&#39;device_type&#39;</span><span class="p">:</span> <span class="s1">&#39;GPU&#39;</span><span class="p">,</span>       <span class="c1"># Run on GPU </span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="s1">&#39;dtype_cpu&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">,</span>     <span class="c1"># Floating point precision, GPU</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="s1">&#39;dtype_gpu&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="c1"># Floating point precision, GPU</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="s1">&#39;density_interp_order&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>  <span class="c1"># Better interpolation accuracy</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># For maximum performance</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">params_fast</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="s1">&#39;device_type&#39;</span><span class="p">:</span> <span class="s1">&#39;GPU&#39;</span><span class="p">,</span>       <span class="c1"># Run on GPU</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="s1">&#39;dtype_cpu&#39;</span><span class="p">:</span>  <span class="n">np</span><span class="o">.</span><span class="n">single</span><span class="p">,</span>    <span class="c1"># Floating point precision, CPU</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="s1">&#39;dtype_gpu&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="c1"># Floating point precision, GPU</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="s1">&#39;density_interp_order&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># Reduced interpolation accuracy</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="p">}</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="c1"># For maximum accuracy</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">params_precise</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="s1">&#39;device_type&#39;</span><span class="p">:</span> <span class="s1">&#39;GPU&#39;</span><span class="p">,</span>       <span class="c1"># Run on GPU </span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="s1">&#39;dtype_cpu&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">,</span>     <span class="c1"># Floating point precision, GPU</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="s1">&#39;dtype_gpu&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="c1"># Floating point precision, GPU</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="s1">&#39;density_interp_order&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>  <span class="c1"># Better interpolation accuracy</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
 <p>Usage examples can be found on the <a href="../../examples/">Examples pages</a>.</p>
