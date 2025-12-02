@@ -1,26 +1,13 @@
-'''
-pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
-Copyright (C) 2025 Håkan Hallberg
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-'''
+# Copyright (C) 2025 Håkan Hallberg
+# SPDX-License-Identifier: GPL-3.0-or-later
+# See LICENSE file for full license text
 
 import numpy as np
+from typing import Union, List
 
 class setup_grid:
 
-    def __init__(self, domain_size, ndiv):
+    def __init__(self, domain_size: Union[List[float], np.ndarray], ndiv: Union[List[int], np.ndarray]) -> None:
         """
         Initialize the grid setup with domain size and grid divisions.
         
@@ -59,7 +46,7 @@ class setup_grid:
 
 # =====================================================================================
 
-    def set_ndiv(self, ndiv):
+    def set_ndiv(self, ndiv: Union[List[int], np.ndarray]) -> None:
         """
         Set the number of grid divisions in each direction.
         
@@ -87,7 +74,7 @@ class setup_grid:
 
 # =====================================================================================
 
-    def get_ndiv(self):
+    def get_ndiv(self) -> np.ndarray:
         """
         Get the number of grid divisions in each direction.
         
@@ -100,7 +87,7 @@ class setup_grid:
     
 # =====================================================================================
 
-    def set_ddiv(self, ddiv):
+    def set_ddiv(self, ddiv: Union[List[float], np.ndarray]) -> None:
         """
         Set the grid spacing in each direction.
         
@@ -116,7 +103,7 @@ class setup_grid:
 
 # =====================================================================================
 
-    def get_ddiv(self):
+    def get_ddiv(self) -> np.ndarray:
         """
         Get the grid spacing in each direction.
         
@@ -129,7 +116,7 @@ class setup_grid:
 
 # =====================================================================================
 
-    def get_domain_size(self):
+    def get_domain_size(self) -> np.ndarray:
         """
         Get the physical domain size in each direction.
         
@@ -142,7 +129,7 @@ class setup_grid:
 
 # =====================================================================================
 
-    def copy_from(self, grid):
+    def copy_from(self, grid: 'setup_grid') -> None:
         """
         Copy grid parameters from another grid object.
         

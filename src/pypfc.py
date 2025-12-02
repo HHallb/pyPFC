@@ -1,26 +1,13 @@
-'''
-pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
-Copyright (C) 2025 Håkan Hallberg
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-'''
+# Copyright (C) 2025 Håkan Hallberg
+# SPDX-License-Identifier: GPL-3.0-or-later
+# See LICENSE file for full license text
 
 import numpy as np
 import torch
 import time
 import os
 from pypfc_io import setup_io
+from typing import Union, List, Optional, Tuple, Dict, Any
 class setup_simulation(setup_io):
     """
     This is the primary class for conducting PFC simulations, providing complete
@@ -70,7 +57,7 @@ class setup_simulation(setup_io):
         'torch_threads_interop':    os.cpu_count(),
     }
 
-    def __init__(self, domain_size, ndiv=None, config=None, **kwargs):
+    def __init__(self, domain_size: Union[List[float], np.ndarray], ndiv: Optional[Union[List[int], np.ndarray]] = None, config: Optional[Dict[str, Any]] = None, **kwargs: Any) -> None:
         """Initialize PFC simulation with domain parameters and configuration.
         
         Sets up the complete simulation environment including grid discretization,
@@ -223,7 +210,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def set_alat(self, alat):
+    def set_alat(self, alat: float) -> None:
         """
         Set the lattice parameter.
         
@@ -236,7 +223,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def get_alat(self):
+    def get_alat(self) -> float:
         """
         Get the current lattice parameter.
         
@@ -249,7 +236,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def set_dtime(self, dtime):
+    def set_dtime(self, dtime: float) -> None:
         """
         Set the time step.
         
@@ -262,7 +249,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def get_dtime(self):
+    def get_dtime(self) -> float:
         """
         Get the current time step size.
         
@@ -275,7 +262,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def set_alpha(self, alpha):
+    def set_alpha(self, alpha: Union[List[float], np.ndarray]) -> None:
         """
         Set the alpha parameters, controlling the widths of the
         Gaussian peaks of the pair correlation function.
@@ -289,7 +276,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def get_alpha(self):
+    def get_alpha(self) -> np.ndarray:
         """
         Get the current alpha parameters.
         
@@ -302,7 +289,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def set_C2_d(self, C2_d):
+    def set_C2_d(self, C2_d: torch.Tensor) -> None:
         """
         Set the two-point correlation function in Fourier space.
         
@@ -316,7 +303,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def get_C2_d(self):
+    def get_C2_d(self) -> torch.Tensor:
         """
         Get the current two-point correlation function.
         
@@ -329,7 +316,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def set_H2(self, H0, Rot):
+    def set_H2(self, H0: float, Rot: np.ndarray) -> None:
         """
         Set the directional correlation kernel for extended PFC models.
         
@@ -351,7 +338,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def set_update_scheme(self, update_scheme):
+    def set_update_scheme(self, update_scheme: str) -> None:
         """
         Set the time integration scheme for density evolution.
         
@@ -366,7 +353,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def set_update_scheme_params(self, params):
+    def set_update_scheme_params(self, params: Union[List[float], np.ndarray]) -> None:
         """
         Set parameters for the time integration scheme.
         
@@ -381,7 +368,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def get_update_scheme_params(self):
+    def get_update_scheme_params(self) -> np.ndarray:
         """
         Get the current integration scheme parameters.
         
@@ -394,7 +381,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def get_energy(self):
+    def get_energy(self) -> np.ndarray:
         """
         Get the PFC energy field and its mean value.
         
@@ -413,7 +400,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def get_density(self):
+    def get_density(self) -> np.ndarray:
         """
         Get the PFC density field and its mean value.
         
@@ -433,7 +420,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def set_density(self, density):
+    def set_density(self, density: np.ndarray) -> None:
         """
         Set the PFC density field.
         
@@ -450,7 +437,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def set_phase_field_kernel(self, H0=1.0, Rot=None):
+    def set_phase_field_kernel(self, H0: float = 1.0, Rot: Optional[Union[np.ndarray, List[np.ndarray]]] = None) -> None:
         """
         Set phase field kernel for directional analysis.
         
@@ -474,7 +461,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def set_phase_field_smoothing_kernel(self, pf_gauss_var=None):
+    def set_phase_field_smoothing_kernel(self, pf_gauss_var: Optional[float] = None) -> None:
         """
         Set phase field smoothing kernel.
         
@@ -493,7 +480,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """
         Clean up allocated tensors and free device memory.
         
@@ -544,7 +531,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def get_update_scheme(self):
+    def get_update_scheme(self) -> str:
         """
         Establish the PFC time integration scheme and return method handle.
         
@@ -624,7 +611,7 @@ class setup_simulation(setup_io):
     
 # =====================================================================================
 
-    def do_step_update(self):
+    def do_step_update(self) -> None:
         """
         Update the PFC density field using the selected time integration scheme.
         
@@ -665,7 +652,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def _update_density_1(self, f_Lterm_d):
+    def _update_density_1(self, f_Lterm_d: torch.Tensor) -> None:
         """
         First-order time integration scheme.
         
@@ -703,7 +690,7 @@ class setup_simulation(setup_io):
     
 # =====================================================================================
 
-    def _update_density_2(self, f_Lterm0_d, f_Lterm1_d, f_Lterm2_d, f_Lterm3_d):
+    def _update_density_2(self, f_Lterm0_d: torch.Tensor, f_Lterm1_d: torch.Tensor, f_Lterm2_d: torch.Tensor, f_Lterm3_d: torch.Tensor) -> None:
         """
         Second-order time integration scheme.
         
@@ -755,7 +742,7 @@ class setup_simulation(setup_io):
     
 # =====================================================================================
 
-    def _update_density_exp(self, f_Lterm0_d, f_Lterm1_d):
+    def _update_density_exp(self, f_Lterm0_d: torch.Tensor, f_Lterm1_d: torch.Tensor) -> None:
         """
         Exponential time integration scheme.
         
@@ -799,7 +786,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def evaluate_energy(self):
+    def evaluate_energy(self) -> float:
         """
         Evaluate the PFC energy.
 
@@ -844,7 +831,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def get_phase_field(self):
+    def get_phase_field(self) -> Union[np.ndarray, List[np.ndarray]]:
         """
         Evaluate phase field using wavelet filtering.
         
@@ -866,7 +853,7 @@ class setup_simulation(setup_io):
 
         if self._verbose: tstart = time.time()
 
-        def compute_pf(f_wavelet_d):
+        def compute_pf(f_wavelet_d: torch.Tensor) -> np.ndarray:
         #def compute_pf(f_wavelet_d, k2_d, varGauss, f_den_d, normalizePF):
             # Perform the first convolution and retrieve the result to real space
             torch.fft.irfftn(self._f_den_d * f_wavelet_d, s=self._tmp_d.shape, out=self._tmp_d)

@@ -1,20 +1,6 @@
-'''
-pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
-Copyright (C) 2025 Håkan Hallberg
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-'''
+# Copyright (C) 2025 Håkan Hallberg
+# SPDX-License-Identifier: GPL-3.0-or-later
+# See LICENSE file for full license text
 
 from operator import pos
 import numpy as np
@@ -26,10 +12,11 @@ from ovito.modifiers import CentroSymmetryModifier
 from ovito.modifiers import DislocationAnalysisModifier, ReplicateModifier
 from pypfc_grid import setup_grid
 from scipy.spatial.transform import Rotation as scipyRot
+from typing import Union, List, Optional, Tuple, Any
 
 class setup(setup_grid):
 
-    def __init__(self, ndiv, ddiv, dtype_cpu=np.double, struct='FCC', pos=None, verbose=False):
+    def __init__(self, ndiv: Union[List[int], np.ndarray], ddiv: Union[List[float], np.ndarray], dtype_cpu: np.dtype = np.double, struct: str = 'FCC', pos: Optional[np.ndarray] = None, verbose: bool = False) -> None:
         """
         Initialize the pypfc_ovito setup with domain size and grid divisions.
         
@@ -70,7 +57,7 @@ class setup(setup_grid):
 
 # =====================================================================================
 
-    def set_coord(self, coord):
+    def set_coord(self, coord: np.ndarray) -> None:
         """
         Set atom coordinates.
         
@@ -83,7 +70,7 @@ class setup(setup_grid):
 
 # =====================================================================================
 
-    def get_coord(self):
+    def get_coord(self) -> np.ndarray:
         """
         Get atom coordinates.
         
@@ -96,7 +83,7 @@ class setup(setup_grid):
 
 # =====================================================================================
 
-    def set_verbose(self, verbose):
+    def set_verbose(self, verbose: bool) -> None:
         """
         Set verbose output mode.
         
@@ -109,7 +96,7 @@ class setup(setup_grid):
 
 # =====================================================================================
 
-    def set_struct(self, struct):
+    def set_struct(self, struct: str) -> None:
         """
         Set crystal structure type.
         
@@ -122,7 +109,7 @@ class setup(setup_grid):
 
 # =====================================================================================
 
-    def get_struct(self):
+    def get_struct(self) -> str:
         """
         Get crystal structure type.
         
@@ -135,7 +122,7 @@ class setup(setup_grid):
 
 # =====================================================================================
 
-    def do_ovito_ptm(self, ref_rot=None, output_euler_ang=False, output_strain=False):
+    def do_ovito_ptm(self, ref_rot: Optional[np.ndarray] = None, output_euler_ang: bool = False, output_strain: bool = False) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray]]:
         """
         Evaluate crystal structure, crystallographic orientation and elastic strain tensor using OVITO's Polyhedral Template Matching (PTM) algorithm.
         
@@ -331,7 +318,7 @@ class setup(setup_grid):
 
 # =====================================================================================
 
-    def do_ovito_dxa(self, rep=[1,1,1], tol=1.e-8):
+    def do_ovito_dxa(self, rep: Union[List[int], np.ndarray] = [1,1,1], tol: float = 1.e-8) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[np.ndarray]]:
         """
         Perform dislocation analysis using OVITO's Dislocation eXtraction Algorithm (DXA).
         
@@ -386,7 +373,7 @@ class setup(setup_grid):
 
         # Auxiliary function to identify Burgers vector type
         # ==================================================
-        def burgers_vector_type(bv, tol=tol):
+        def burgers_vector_type(bv: np.ndarray, tol: float = tol) -> Tuple[int, str]:
             # bv_type_id    bv_type     Description
             # 0             '1/1<100>'  Composite
             # 1             '1/2<110>'  Perfect edge
@@ -513,7 +500,7 @@ class setup(setup_grid):
     
 # =====================================================================================
 
-    def do_ovito_csp(self, num_neighbors=12):
+    def do_ovito_csp(self, num_neighbors: int = 12) -> np.ndarray:
         """
         Evaluate the Centro-Symmetry Parameter (CSP) for each atom using OVITO.
         

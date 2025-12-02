@@ -1,20 +1,6 @@
-'''
-pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
-Copyright (C) 2025 Håkan Hallberg
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-'''
+# Copyright (C) 2025 Håkan Hallberg
+# SPDX-License-Identifier: GPL-3.0-or-later
+# See LICENSE file for full license text
 
 import numpy as np
 import datetime
@@ -24,11 +10,12 @@ from scipy.spatial import cKDTree
 from scipy.ndimage import zoom
 from skimage import measure
 from scipy import ndimage as ndi
+from typing import Union, Tuple, Optional, Dict, Any, List
 from pypfc_grid import setup_grid
 
 class setup_base(setup_grid):
 
-    def __init__(self, domain_size, ndiv, config):
+    def __init__(self, domain_size: np.ndarray, ndiv: np.ndarray, config: Dict[str, Any]) -> None:
         """
         Initialize the base PFC setup with domain parameters and device configuration.
         
@@ -120,7 +107,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def set_verbose(self, verbose):
+    def set_verbose(self, verbose: bool) -> None:
         """
         Set verbose output mode for debugging and monitoring.
         
@@ -133,7 +120,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_verbose(self):
+    def get_verbose(self) -> bool:
         """
         Get the current verbose output setting.
         
@@ -146,7 +133,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def set_dtype_cpu(self, dtype):
+    def set_dtype_cpu(self, dtype: type) -> None:
         """
         Set the CPU data type for numpy arrays.
         
@@ -159,7 +146,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_dtype_cpu(self):
+    def get_dtype_cpu(self) -> type:
         """
         Get the current CPU data type.
         
@@ -172,7 +159,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def set_dtype_gpu(self, dtype):
+    def set_dtype_gpu(self, dtype: torch.dtype) -> None:
         """
         Set the GPU data type for PyTorch tensors.
         
@@ -185,7 +172,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_dtype_gpu(self):
+    def get_dtype_gpu(self) -> torch.dtype:
         """
         Get the current GPU data type.
         
@@ -198,7 +185,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 #     
-    def set_device_type(self, device_type):
+    def set_device_type(self, device_type: str) -> None:
         """
         Set the computation device type.
         
@@ -211,7 +198,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_device_type(self):
+    def get_device_type(self) -> str:
         """
         Get the current computation device type.
         
@@ -224,7 +211,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def set_device_number(self, device_number):
+    def set_device_number(self, device_number: int) -> None:
         """
         Set the GPU device number for multi-GPU systems.
         
@@ -237,7 +224,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_device_number(self):
+    def get_device_number(self) -> int:
         """
         Get the current GPU device number.
         
@@ -250,7 +237,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def set_k2_d(self, k2_d):
+    def set_k2_d(self, k2_d: torch.Tensor) -> None:
         """
         Set the wave vector magnitude squared tensor.
         
@@ -264,7 +251,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_k2_d(self):
+    def get_k2_d(self) -> torch.Tensor:
         """
         Get the wave vector magnitude squared tensor.
         
@@ -277,7 +264,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_torch_threads(self):
+    def get_torch_threads(self) -> Tuple[int, int]:
         """
         Get the current PyTorch thread configuration.
         
@@ -290,7 +277,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 #     
-    def set_torch_threads(self, nthreads, nthreads_interop):
+    def set_torch_threads(self, nthreads: int, nthreads_interop: int) -> None:
         """
         Set PyTorch thread configuration for CPU operations.
         
@@ -308,7 +295,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def set_alpha(self, alpha):
+    def set_alpha(self, alpha: Union[List[float], np.ndarray]) -> None:
         """
         Set the Gaussian peak widths for the two-point correlation function.
         
@@ -321,7 +308,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_alpha(self):
+    def get_alpha(self) -> np.ndarray:
         """
         Get the Gaussian peak widths for the two-point correlation function.
         
@@ -334,7 +321,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_time_stamp(self):
+    def get_time_stamp(self) -> str:
         """
         Get current timestamp string.
         
@@ -347,7 +334,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_k(self, npoints, dspacing):
+    def get_k(self, npoints: int, dspacing: float) -> np.ndarray:
         """
         Define a 1D wave vector for Fourier space operations.
 
@@ -383,7 +370,7 @@ class setup_base(setup_grid):
     
     # =====================================================================================
 
-    def evaluate_k2_d(self):
+    def evaluate_k2_d(self) -> torch.Tensor:
         """
         Evaluate the sum of squared wave vectors for FFT operations.
         
@@ -410,7 +397,7 @@ class setup_base(setup_grid):
     
     # =====================================================================================
 
-    def get_integrated_field_in_volume(self, field, limits):
+    def get_integrated_field_in_volume(self, field: np.ndarray, limits: Union[List[float], np.ndarray]) -> float:
         """
         Integrate a field variable within a defined volume.
         
@@ -457,7 +444,7 @@ class setup_base(setup_grid):
       
 # =====================================================================================
 
-    def get_field_average_along_axis(self, field, axis):
+    def get_field_average_along_axis(self, field: np.ndarray, axis: int) -> np.ndarray:
         """
         Evaluate the mean value of a field variable along a specified axis.
         
@@ -498,7 +485,7 @@ class setup_base(setup_grid):
       
 # =====================================================================================
 
-    def get_integrated_field_along_axis(self, field, axis):
+    def get_integrated_field_along_axis(self, field: np.ndarray, axis: int) -> np.ndarray:
         """
         Integrate a field variable along a specified axis.
         
@@ -546,7 +533,7 @@ class setup_base(setup_grid):
       
 # =====================================================================================
 
-    def interpolate_atoms(self, intrp_pos, pos, values, num_nnb=8, power=2):
+    def interpolate_atoms(self, intrp_pos: np.ndarray, pos: np.ndarray, values: np.ndarray, num_nnb: int = 8, power: int = 2) -> np.ndarray:
         """
         Interpolate values at given positions using inverse distance weighting.
         
@@ -628,7 +615,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def interpolate_density_maxima(self, den, ene=None, pf=None):
+    def interpolate_density_maxima(self, den: Union[np.ndarray, torch.Tensor], ene: Optional[Union[np.ndarray, torch.Tensor]] = None, pf: Optional[Union[np.ndarray, torch.Tensor]] = None) -> Tuple[np.ndarray, Optional[np.ndarray], Optional[np.ndarray]]:
         """
         Find density field maxima and interpolate atomic positions and properties.
         
@@ -899,7 +886,7 @@ class setup_base(setup_grid):
     
 # =====================================================================================
 
-    def get_phase_field_contour(self, pf, pf_zoom=1.0, evaluate_volume=True):
+    def get_phase_field_contour(self, pf: Union[np.ndarray, torch.Tensor], pf_zoom: float = 1.0, evaluate_volume: bool = True) -> Union[Tuple[np.ndarray, float], np.ndarray]:
         """
         Find the iso-contour surface of a 3D phase field using marching cubes.
         
@@ -941,7 +928,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_rlv(self, struct, alat):
+    def get_rlv(self, struct: str, alat: float) -> np.ndarray:
         """
         Get the reciprocal lattice vectors for a crystal structure.
         
@@ -1000,7 +987,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def evaluate_reciprocal_planes(self):
+    def evaluate_reciprocal_planes(self) -> torch.Tensor:
         """
         Establish reciprocal vectors/planes for a crystal structure.
         
@@ -1075,7 +1062,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def evaluate_C2_d(self):
+    def evaluate_C2_d(self) -> torch.Tensor:
         """
         Establish the two-point correlation function for a crystal structure.
         
@@ -1143,7 +1130,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def evaluate_directional_correlation_kernel(self, H0, Rot):
+    def evaluate_directional_correlation_kernel(self, H0: np.ndarray, Rot: np.ndarray) -> torch.Tensor:
         """
         Establish directional correlation kernel for a crystal structure.
         
@@ -1209,7 +1196,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_xtal_nearest_neighbors(self):
+    def get_xtal_nearest_neighbors(self) -> Tuple[np.ndarray, np.ndarray]:
         """
         Get nearest neighbor information for crystal structures.
         
@@ -1253,7 +1240,7 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def get_csp(self, pos, normalize_csp=False):
+    def get_csp(self, pos: np.ndarray, normalize_csp: bool = False) -> np.ndarray:
         """
         Calculate the centro-symmetry parameter (CSP) for atoms.
         

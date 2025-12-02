@@ -1,20 +1,6 @@
-'''
-pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
-Copyright (C) 2025 Håkan Hallberg
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-'''
+# Copyright (C) 2025 Håkan Hallberg
+# SPDX-License-Identifier: GPL-3.0-or-later
+# See LICENSE file for full license text
 
 import numpy as np
 import time
@@ -22,10 +8,11 @@ import torch
 import warnings
 import scipy.interpolate as spi
 from pypfc_base import setup_base
+from typing import Union, List, Optional, Tuple, Dict, Any
 
 class setup_pre(setup_base):
 
-    def __init__(self, domain_size, ndiv, config):
+    def __init__(self, domain_size: Union[List[float], np.ndarray], ndiv: Union[List[int], np.ndarray], config: Dict[str, Any]) -> None:
         """
         Initialize the class.
 
@@ -67,7 +54,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def set_struct(self, struct):
+    def set_struct(self, struct: str) -> None:
         """
         Set the crystal structure.
         
@@ -80,7 +67,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def get_struct(self):
+    def get_struct(self) -> str:
         """
         Get the crystal structure.
         
@@ -93,7 +80,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def set_density(self, den):
+    def set_density(self, den: np.ndarray) -> None:
         """
         Set the density field.
         
@@ -106,7 +93,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def get_density(self):
+    def get_density(self) -> np.ndarray:
         """
         Get the density field.
         
@@ -119,7 +106,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def set_energy(self, ene):
+    def set_energy(self, ene: np.ndarray) -> None:
         """
         Set the PFC energy field.
         
@@ -132,7 +119,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def set_ampl(self, ampl):
+    def set_ampl(self, ampl: Union[List[float], np.ndarray]) -> None:
         """
         Set the amplitudes in the density approximation.
         
@@ -147,7 +134,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def get_ampl(self):
+    def get_ampl(self) -> np.ndarray:
         """
         Get the amplitudes in the density approximation.
         
@@ -160,7 +147,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def set_nlns(self, nlns):
+    def set_nlns(self, nlns: Union[List[float], np.ndarray]) -> None:
         """
         Set the liquid and solid phase densities.
         
@@ -176,7 +163,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def get_nlns(self):
+    def get_nlns(self) -> np.ndarray:
         """
         Get the liquid and solid phase densities.
         
@@ -190,7 +177,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def set_sigma(self, sigma):
+    def set_sigma(self, sigma: float) -> None:
         """
         Set the temperature-like parameter sigma.
         
@@ -203,7 +190,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def get_sigma(self):
+    def get_sigma(self) -> float:
         """
         Get the temperature-like parameter sigma.
         
@@ -216,7 +203,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def set_npeaks(self, npeaks):
+    def set_npeaks(self, npeaks: int) -> None:
         """
         Set the number of peaks in the density field approximation.
         
@@ -229,7 +216,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def get_npeaks(self):
+    def get_npeaks(self) -> int:
         """
         Get the number of peaks in the density field approximation.
         
@@ -242,7 +229,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def do_single_crystal(self, xtal_rot=None, params=None, model=0):
+    def do_single_crystal(self, xtal_rot: Optional[np.ndarray] = None, params: Optional[List[float]] = None, model: int = 0) -> np.ndarray:
         """
         Define a single crystal in a periodic 3D domain.
         
@@ -322,7 +309,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def do_bicrystal(self, xtal_rot, params=None, liq_width=0.0, model=0):
+    def do_bicrystal(self, xtal_rot: np.ndarray, params: Optional[List[float]] = None, liq_width: float = 0.0, model: int = 0) -> np.ndarray:
         """
         Define a bicrystal with two different crystal orientations.
         
@@ -406,7 +393,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def do_polycrystal(self, xtal_rot, params=None, liq_width=0.0, model=0):
+    def do_polycrystal(self, xtal_rot: np.ndarray, params: Optional[List[float]] = None, liq_width: float = 0.0, model: int = 0) -> np.ndarray:
         """
         Define a polycrystal in a periodic 3D domain.
         
@@ -476,7 +463,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def generate_density_field(self, crd, g):
+    def generate_density_field(self, crd: np.ndarray, g: np.ndarray) -> np.ndarray:
         """
         Define a 3D density field for (X)PFC modeling.
 
@@ -620,7 +607,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def evaluate_ampl_dens(self):
+    def evaluate_ampl_dens(self) -> Tuple[np.ndarray, np.ndarray]:
         """
         Get density field amplitudes and phase densities for PFC simulations.
 

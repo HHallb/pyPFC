@@ -1,20 +1,6 @@
-'''
-pyPFC: An Open-Source Python Package for Phase Field Crystal Simulations
-Copyright (C) 2025 Håkan Hallberg
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
-'''
+# Copyright (C) 2025 Håkan Hallberg
+# SPDX-License-Identifier: GPL-3.0-or-later
+# See LICENSE file for full license text
 
 import numpy as np
 from pypfc_pre import setup_pre
@@ -27,6 +13,7 @@ import time
 import torch
 import os
 from vtk.util.numpy_support import numpy_to_vtk
+from typing import Union, List, Optional, Tuple, Dict, Any
 
 class setup_io(setup_pre):
     """
@@ -54,7 +41,7 @@ class setup_io(setup_pre):
     in scientific visualization software.
     """
 
-    def __init__(self, domain_size, ndiv, config):
+    def __init__(self, domain_size: Union[List[float], np.ndarray], ndiv: Union[List[int], np.ndarray], config: Dict[str, Any]) -> None:
         """
         Initialize I/O handler with domain parameters and device configuration.
         
@@ -82,7 +69,7 @@ class setup_io(setup_pre):
 
 # =====================================================================================
 
-    def write_extended_xyz(self, filename, coord, atom_data, atom_data_labels, simulation_time=0.0, gz=True):
+    def write_extended_xyz(self, filename: str, coord: np.ndarray, atom_data: List[np.ndarray], atom_data_labels: List[str], simulation_time: float = 0.0, gz: bool = True) -> None:
         """
         Save PFC atomic data in extended XYZ format.
         
@@ -175,7 +162,7 @@ class setup_io(setup_pre):
 
 # =====================================================================================
 
-    def read_extended_xyz(self, filename, nfields=0):
+    def read_extended_xyz(self, filename: str, nfields: int = 0) -> Tuple[np.ndarray, List[float], float, List[np.ndarray]]:
         """
         Read PFC data from extended XYZ format file.
         
@@ -287,7 +274,7 @@ class setup_io(setup_pre):
     
 # =====================================================================================
 
-    def write_vtk_points(self, filename, coord, scalar_data, scalar_data_name, vector_data=None, vector_data_name=None, tensor_data=None, tensor_data_name=None):
+    def write_vtk_points(self, filename: str, coord: np.ndarray, scalar_data: List[np.ndarray], scalar_data_name: List[str], vector_data: Optional[List[np.ndarray]] = None, vector_data_name: Optional[List[str]] = None, tensor_data: Optional[List[np.ndarray]] = None, tensor_data_name: Optional[List[str]] = None) -> None:
         """
         Save 3D point data to VTK file for visualization.
         
@@ -386,7 +373,7 @@ class setup_io(setup_pre):
 
 # =====================================================================================
 
-    def write_vtk_structured_grid(self, filename, array_data, array_name):
+    def write_vtk_structured_grid(self, filename: str, array_data: List[np.ndarray], array_name: List[str]) -> None:
         """
         Save 3D field data to VTK structured grid file.
         
@@ -459,7 +446,7 @@ class setup_io(setup_pre):
 
 # =====================================================================================
 
-    def save_pickle(self, filename, data):
+    def save_pickle(self, filename: str, data: List[Any]) -> None:
         """Save data objects to a binary pickle file.
         
         Serializes a list of Python objects to a binary pickle file for
@@ -503,7 +490,7 @@ class setup_io(setup_pre):
 
 # =====================================================================================
 
-    def load_pickle(self, filename, ndata):
+    def load_pickle(self, filename: str, ndata: int) -> List[Any]:
         """
         Load data objects from a binary pickle file.
         
@@ -548,7 +535,7 @@ class setup_io(setup_pre):
 
 # =====================================================================================
 
-    def write_info_file(self, filename='pypfc_simulation.txt', output_path=None):
+    def write_info_file(self, filename: str = 'pypfc_simulation.txt', output_path: Optional[str] = None) -> None:
         """
         Write simulation setup information to a file.
         
@@ -634,7 +621,7 @@ class setup_io(setup_pre):
 
 # =====================================================================================
 
-    def append_to_info_file(self, info, filename='pypfc_simulation.txt', output_path=None):
+    def append_to_info_file(self, info: Union[str, List[str]], filename: str = 'pypfc_simulation.txt', output_path: Optional[str] = None) -> None:
         """
         Append information to a text file.
         
