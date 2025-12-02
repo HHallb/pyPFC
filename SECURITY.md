@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-We take the security of pyPFC seriously. If you believe you have found a security vulnerability in pyPFC, please report it to us as described below.
+If you believe you have found a security vulnerability in pyPFC, please report it as described below.
 
 ### How to Report
 
