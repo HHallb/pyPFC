@@ -88,8 +88,6 @@ pyPFC works with different file formats for data I/O:
 config = {
     'device_type': 'GPU',
     'dtype_gpu': 'single',
-    'update_scheme': 'exponential',
-    'update_scheme_params': [2.0, 0.1]
 }
 ```
 
@@ -99,8 +97,6 @@ config = {
 config = {
     'device_type': 'GPU',
     'dtype_gpu': 'double',
-    'update_scheme': '2nd_order',
-    'update_scheme_params': [0.5, 0.001]
 }
 ```
 
