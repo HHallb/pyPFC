@@ -563,7 +563,7 @@ class setup_pre(setup_base):
         # Grid
         nx,ny,nz = self._ndiv
         dx,dy,dz = self._ddiv
-        Lx,Ly,Lz = self._ndiv*self._ddiv
+        #Lx,Ly,Lz = self._ndiv*self._ddiv
 
         # Allocate output array
         scalar_field = np.zeros((nx, ny, nz), dtype=self._dtype_cpu)
@@ -593,6 +593,79 @@ class setup_pre(setup_base):
 
         return scalar_field
 
+# =====================================================================================
+
+    def get_external_deformation_field(self, den: np.ndarray, xtalRot: np.ndarray, disp: List[float]) -> np.ndarray:
+        """
+        Evaluate deformation field due to an imposed external deformation.
+        
+        Parameters
+        ----------
+        ref_rot : array_like of float, shape (3,3), optional
+            Reference rotation matrix.
+        output_euler_ang : bool, optional
+            Format of output orientation representation:
+            
+            - `True`: Euler angles (ZXZ convention).
+            - `False`: Quaternions. This is the default.
+        output_strain : bool, optional
+            Whether to evaluate the local elastic Green-Lagrange strain tensors:
+            
+            - `True`: Compute strain tensors for each atom.
+            - `False`: Skip strain calculation.
+        
+        Returns
+        -------
+        deformation_field : ndarray of float, shape (nx, ny, nz)
+            Deformation field.
+
+        References
+        ----------
+        P. Stefanovic et al. (2009), Phase field crystal study of deformation and plasticity in
+        nanocrystalline materials, Phys. Rev. E 80:046107.
+        https://doi.org/10.1103/PhysRevE.80.046107
+        """
+
+        # Grid
+        nx,ny,nz = self._ndiv
+        dx,dy,dz = self._ddiv
+        Lx,Ly,Lz = self._ndiv*self._ddiv
+
+        # Allocate output array
+        #deformation_field = np.zeros((nx, ny, nz), dtype=self._dtype_cpu)
+        
+        # Generate grid coordinates
+        xc = np.linspace(0, (nx-1)*dx, nx)
+        yc = np.linspace(0, (ny-1)*dy, ny)
+        zc = np.linspace(0, (nz-1)*dz, nz)
+        Xc, Yc, Zc = np.meshgrid(xc, yc, zc, indexing='ij')
+
+        pos_1  = 0.2 * Lx
+        pos_2  = 0.8 * Lx
+
+        # Set modulated value of the force field
+        sig       = 1.0
+        modulation_function_1 = np.exp(-(Xc-pos_1)**2/(2*sig**2)) #/sqrt(2*np.pi*sig**2)
+        modulation_function_2 = np.exp(-(Xc-pos_2)**2/(2*sig**2)) #/sqrt(2*np.pi*sig**2)
+        xcd       = [xc+disp[0], xc-disp[0]]
+        ycd       = [yc+disp[1], yc-disp[1]]
+        zcd       = [zc+disp[2], zc-disp[2]]
+        rho0      = den
+
+        condition = (np.sqrt((Xc-xcrd)**2 + (Yc-ycrd)**2) <= xtal_radius)
+        crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
+
+        #call setDensity_xpfc_gpu(r1, xcd(1), ycd(1), zcd(1), struct, Amp, n0)
+        #call setDensity_xpfc_gpu(r2, xcd(2), ycd(2), zcd(2), struct, Amp, n0)
+        self.generate_density_field(crd, xtal_rot.T)
+
+        r1 = rho0 - r1
+        r2 = rho0 - r2
+
+        deformation_field = 2.0 * (modulation_function_1*r1 + modulation_function_2*r2)
+
+        return deformation_field
+    
 # =====================================================================================
 
     # def evaluate_ampl_dens(self):
