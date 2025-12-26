@@ -532,6 +532,69 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
+    def do_scalar_field(self, params: Optional[List[float]] = None, model: int = 0) -> np.ndarray:
+        """
+        Define a scalar field in a periodic 3D domain. This function can be used
+        to, for example, generate initial conditions for concentration fields.
+        
+        Parameters
+        ----------
+        params : list, optional
+            List containing parameters for the scalar field.
+            
+            - `model=0`: [a1, a2, wfac, axis] - a1 and a2 are zero crossings along the specified axis for the scalar field. wfac is the width factor controlling the steepness of the transitions.
+
+        model : int, optional
+            Scalar field layout.
+            
+            - 0: A scalar field that varies between [0,1] along the x axis
+        
+        Returns
+        -------
+        scalar_field : ndarray of float, shape (nx,ny,nz)
+            Scalar field.
+            
+        Raises
+        ------
+        ValueError
+            If the value of `model` is not supported (should be 0).
+        """
+
+        # Grid
+        nx,ny,nz = self._ndiv
+        dx,dy,dz = self._ddiv
+        Lx,Ly,Lz = self._ndiv*self._ddiv
+
+        # Allocate output array
+        scalar_field = np.zeros((nx, ny, nz), dtype=self._dtype_cpu)
+        
+        # Generate grid coordinates
+        xc = np.linspace(0, (nx-1)*dx, nx)
+        yc = np.linspace(0, (ny-1)*dy, ny)
+        zc = np.linspace(0, (nz-1)*dz, nz)
+        Xc, Yc, Zc = np.meshgrid(xc, yc, zc, indexing='ij')
+
+        # Generate the scalar field
+        if model==0:
+            a1   = params[0]
+            a2   = params[1]
+            wfac = params[2]
+            axis = params[3]
+            if axis==0:
+                scalar_field = 1 - ( 0.5*(1 - np.tanh(wfac*(Xc-a1))) + 0.5*(1 + np.tanh(wfac*(Xc-a2))) )
+            elif axis==1:
+                scalar_field = 1 - ( 0.5*(1 - np.tanh(wfac*(Yc-a1))) + 0.5*(1 + np.tanh(wfac*(Yc-a2))) )
+            elif axis==2:
+                scalar_field = 1 - ( 0.5*(1 - np.tanh(wfac*(Zc-a1))) + 0.5*(1 + np.tanh(wfac*(Zc-a2))) )
+            else:
+                raise ValueError(f'Unsupported value of axis: {axis}')
+        else:
+            raise ValueError(f'Unsupported value: model={model}')
+
+        return scalar_field
+
+# =====================================================================================
+
     # def evaluate_ampl_dens(self):
     #     """
     #     Get density field amplitudes and phase densities for PFC simulations.

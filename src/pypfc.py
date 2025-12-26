@@ -43,6 +43,7 @@ class setup_simulation(setup_io):
         'normalize_pf':             True,
         'update_scheme':            '1st_order',
         'update_scheme_params':     [1.0, 1.0, 1.0, None, None, None],
+        'use_concentration':        False,
         'device_type':              'gpu',
         'device_number':            0,
         'dtype_cpu':                np.double,
@@ -145,6 +146,7 @@ class setup_simulation(setup_io):
         self._dtime                = cfg['dtime']
         self._update_scheme        = cfg['update_scheme']
         self._update_scheme_params = cfg['update_scheme_params']
+        self._use_concentration    = cfg['use_concentration']
         self._alat                 = cfg['alat']
         self._alpha                = cfg['alpha']
         self._pf_gauss_var         = cfg['pf_gauss_var']
@@ -185,6 +187,10 @@ class setup_simulation(setup_io):
         if self._verbose:
             tend = time.time()
             print(f'Time to allocate tensors: {tend-tstart:.3f} s')
+
+        if self._use_concentration:
+            self._conc_d = torch.zeros((self._nx, self._ny, self._nz), dtype=self._dtype_gpu, device=self._device)
+            self._conc_d = self._conc_d.contiguous()
 
         # Get two-point pair correlation function
         # =======================================
@@ -437,6 +443,38 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
+    def get_concentration(self) -> np.ndarray:
+        """
+        Get the concentration field.
+        
+        Returns the concentration field, transferring
+        data from GPU to CPU if necessary.
+        
+        Returns
+        -------
+        conc : ndarray of float, shape (nx,ny,nz)
+            Concentration field on CPU.
+        """
+        conc      = self._conc_d.detach().cpu().numpy()
+        return conc
+
+# =====================================================================================
+
+    def set_concentration(self, concentration: np.ndarray) -> None:
+        """
+        Set the concentration field.
+        
+        Updates the concentration field.
+        
+        Parameters
+        ----------
+        concentration : ndarray of float, shape (nx,ny,nz)
+            New concentration field configuration.
+        """
+        self._conc_d   = torch.from_numpy(concentration).to(self._device)
+
+# =====================================================================================
+
     def set_phase_field_kernel(self, H0: float = 1.0, Rot: Optional[Union[np.ndarray, List[np.ndarray]]] = None) -> None:
         """
         Set phase field kernel for directional analysis.
@@ -518,6 +556,9 @@ class setup_simulation(setup_io):
 
         if self._use_H2:
             del self._f_H_d
+
+        if self._use_concentration:
+            del self._conc_d
 
         torch.cuda.empty_cache()  # Frees up unused GPU memory
 
