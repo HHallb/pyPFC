@@ -22,7 +22,7 @@ This software is released under a [GNU GPLv3 license](https://www.gnu.org/licens
 Further details on PFC modeling and example applications can be found in:
 
 - [H. Hallberg and K.H. Blixt, **Grain rotation during grain growth: A 3D phase field crystal study**, *IOP Conference Series: Materials Science and Engineering*, 1350:012027, 2026](https://doi.org/10.1088/1757-899X/1350/1/012027)
-- [H. Hallberg, D. Juul Jensen and T. Yu, **Phase Field Crystal Modeling of Subgrain Coarsening**, *Acta Materialia*, 320:122685, 2026](https://10.1016/j.actamat.2026.122685)
+- [H. Hallberg, D. Juul Jensen and T. Yu, **Phase Field Crystal Modeling of Subgrain Coarsening**, *Acta Materialia*, 320:122685, 2026](https://doi.org/10.1016/j.actamat.2026.122685)
 - [K.H. Blixt and H. Hallberg, **Inclination-dependent shear-coupling and energy anisotropy in FCC tilt grain boundaries**, *Acta Materialia*, 315:122379, 2026](https://doi.org/10.1016/j.actamat.2026.122379)
 - [H. Hallberg and K.H. Blixt, **pyPFC: an open-source Python package for phase field crystal simulations**, *Modelling and Simulation in Materials Science and Engineering*, 34(1):015004, 2026](https://doi.org/10.1088/1361-651X/ae2599)
 - [K.H. Blixt and H. Hallberg, **Phase Field Crystal Modeling of Grain Boundary Migration: Mobility, Energy and Structural Variability**, *Acta Materialia*, 297:121318, 2025](https://doi.org/10.1016/j.actamat.2025.121318)
