@@ -421,8 +421,7 @@ class setup_simulation(setup_io):
         chem_pot_av : float
             Spatially averaged chemical potential.
         """
-        chem_pot, chem_pot_av = self.evaluate_chemical_potential()
-        return chem_pot, chem_pot_av
+        return self.evaluate_chemical_potential()
 
 # =====================================================================================
 
