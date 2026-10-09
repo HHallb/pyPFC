@@ -149,6 +149,7 @@ nav:
       - Class pypfc: api/pypfc.md
       - Class pypfc_ovito: api/pypfc_ovito.md
     - Complete API: api/complete_api.md
+  - pyPFC GUI: pypfc_gui.md
   
 # Additional settings
 extra:
