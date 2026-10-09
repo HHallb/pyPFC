@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Added a placeholder for a documentation page on the pyPFC GUI.
 - Added a primitive pyPFC GUI in `pypfc_gui.py` to inspect and work on data files saved in the new HDF5-based file format.
 - Added the total, integrated, energy as an optional output from `evaluate_energy()` and `get_energy()` in `pypfc` class
 - Added `evaluate_grand_potential_energy()` and `get_grand_potential_energy()` in `pypfc` class to evaluate and retrieve the grand potential energy density
