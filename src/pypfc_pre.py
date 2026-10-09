@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Håkan Hallberg
+# Copyright (C) 2026 Håkan Hallberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 # See LICENSE file for full license text
 
@@ -393,7 +393,7 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def do_polycrystal(self, xtal_rot: np.ndarray, params: Optional[List[float]] = None, liq_width: float = 0.0, model: int = 0) -> np.ndarray:
+    def do_polycrystal(self, xtal_rot: np.ndarray, params: Optional[List[float]] = None, xtal_strain: np.ndarray = None, strain_frame: str = 'lab', liq_width: float = 0.0, model: int = 0) -> np.ndarray:
         """
         Define a polycrystal in a periodic 3D domain.
         
@@ -408,6 +408,16 @@ class setup_pre(setup_base):
             
             - `model=0`: No parameter needed. The number of crystal seeds is determined
               from the number of provided orientations.
+            - `model=1`: [ctrl_points] - A 6x2 array of control points for the
+              grain boundary configuration
+            - `model=2`: [h1,w1,w3,w4] - geometry control parameters
+        xtal_strain : ndarray of float, shape (n_xtal ,6), optional
+            Small-strain tensor components for each crystal [exx, eyy, ezz, exy, exz, eyz]
+            (tensor shear components, i.e. exy = gamma_xy/2). Positive normal
+            components stretch the lattice. None or all zeros gives the
+            unstrained field.
+        strain_frame : {'lab', 'crystal'}, optional
+            Frame in which `strain` is expressed. Default 'lab'.
 
         liq_width : float, optional
             Width of the liquid band along the grain boundaries.
@@ -415,6 +425,8 @@ class setup_pre(setup_base):
             Density field layout.
             
             - 0: A row of cylindrical seeds along y, with cylinders extending through z
+            - 1: A five-grain structure forming two triple junctions, columnar through z
+            - 2: A four-grain grain structure, columnar through z
         
         Returns
         -------
@@ -424,8 +436,26 @@ class setup_pre(setup_base):
         Raises
         ------
         ValueError
-            If the value of `model` is not supported (should be 0).
+            If the value of `model` is not supported (should be 0, 1 or 2).
         """
+        # Helper function to check if grid points are inside a polygon
+        def points_inside_polygon(x, y, points):
+            points = np.asarray(points, dtype=float)
+            inside = np.zeros(x.shape, dtype=bool)
+            on_edge = np.zeros(x.shape, dtype=bool)
+            for (x1, y1), (x2, y2) in zip(points, np.roll(points, -1, axis=0)):
+                cross = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1)
+                on_edge |= (
+                    np.isclose(cross, 0.0)
+                    & (x >= min(x1, x2)) & (x <= max(x1, x2))
+                    & (y >= min(y1, y2)) & (y <= max(y1, y2))
+                )
+                if y1 != y2:
+                    crosses_ray = ((y1 > y) != (y2 > y)) & (
+                        x < x1 + (y - y1) * (x2 - x1) / (y2 - y1)
+                    )
+                    inside ^= crosses_ray
+            return inside | on_edge
 
         # Grid
         nx,ny,nz = self._ndiv
@@ -447,7 +477,7 @@ class setup_pre(setup_base):
         # Generate polycrystal        
         if model==0:
             xtal_radius = (Ly - n_xtal*liq_width) / n_xtal / 2
-            xcrd       = Lx / 2
+            xcrd        = Lx / 2
             for i in range(n_xtal+1):
                 ycrd      = i*liq_width + i*2*xtal_radius
                 condition = (np.sqrt((Xc-xcrd)**2 + (Yc-ycrd)**2) <= xtal_radius)
@@ -456,6 +486,98 @@ class setup_pre(setup_base):
                     density[condition] = self.generate_density_field(crd, xtal_rot[:,:,i].T)
                 else:
                     density[condition] = self.generate_density_field(crd, xtal_rot[:,:,0].T)
+
+        elif model==1:
+            points = params
+
+            # Crystal 5
+            condition = points_inside_polygon(Xc, Yc, ((0,0), (0,Ly), (Lx,Ly), (Lx,0)))
+            crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
+            density[condition] = self.generate_density_field(crd, xtal_rot[:,:,4].T)
+
+            # Crystal 1
+            condition = points_inside_polygon(Xc, Yc, (points[0,:], points[2,:], points[3,:], points[1,:]))
+            crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
+            density[condition] = self.generate_density_field(crd, xtal_rot[:,:,0].T)
+
+            # Crystal 2
+            condition = points_inside_polygon(Xc, Yc, (points[0,:], points[1,:], points[4,:], points[5,:]))
+            crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
+            density[condition] = self.generate_density_field(crd, xtal_rot[:,:,1].T)
+
+            # Crystal 3
+            condition = points_inside_polygon(Xc, Yc, (points[0,:], points[2,:], points[5,:]))
+            crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
+            density[condition] = self.generate_density_field(crd, xtal_rot[:,:,2].T)
+
+            # Crystal 4
+            condition = points_inside_polygon(Xc, Yc, (points[1,:], points[3,:], points[4,:]))
+            crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
+            density[condition] = self.generate_density_field(crd, xtal_rot[:,:,3].T)
+
+        elif model==2:
+            h1 = params[0]
+            w1 = params[1]
+            w3 = params[2]
+            w4 = params[3]
+
+            Fy = (Ly - h1)/2
+            Fx = (Lx - w1 - w3 - w4)/2
+            Ex = Fx
+            Ey = Fy + h1
+            Ax = Ex + w3
+            Ay = Ey
+            Bx = Ax + w1
+            By = Ay
+            Cx = Fx + w3
+            Cy = Fy
+            Dx = Cx + w1
+            Dy = Cy
+            Gx = Bx + w4
+            Gy = By
+            Hx = Dx + w4
+            Hy = Dy
+
+            A = (Ax,Ay)
+            B = (Bx,By)
+            C = (Cx,Cy)
+            D = (Dx,Dy)
+            E = (Ex,Ey)
+            F = (Fx,Fy)
+            G = (Gx,Gy)
+            H = (Hx,Hy)
+
+            lh = liq_width / 2
+
+            # Crystal 1
+            condition1 = points_inside_polygon(Xc, Yc, ((Ax+lh,Ay-lh),(Bx-lh,By-lh),(Dx-lh,Dy+lh),(Cx+lh,Cy+lh)))
+            condition2 = points_inside_polygon(Xc, Yc, ((0.0,Ey-lh),(Ex-lh,Ey-lh),(Fx-lh,Fy+lh),(0.0,Fy+lh)))
+            condition3 = points_inside_polygon(Xc, Yc, ((Gx+lh,Gy-lh),(Lx,Gy-lh),(Lx,Hy+lh),(Hx+lh,Hy+lh)))
+            condition  = condition1 | condition2 | condition3
+            crd        = np.array([Xc[condition], Yc[condition], Zc[condition]])
+            density[condition] = self.generate_density_field(crd, xtal_rot[:,:,0].T, strain=xtal_strain[0,:])
+
+            # Crystal 2
+            condition1 = points_inside_polygon(Xc, Yc, ((Cx+lh,Cy-lh), (Dx-lh,Dy-lh), (Dx-lh,0.0), (Cx+lh,0.0)))
+            condition2 = points_inside_polygon(Xc, Yc, ((Ax+lh,Ly),(Bx-lh,Ly),(Bx-lh,By+lh),(Ax+lh,Ay+lh)))
+            condition3 = points_inside_polygon(Xc, Yc, ((Ex-lh,Ey+lh), (0.0,Ey+lh), (0.0,Ly), (Ex-lh,Ly)))
+            condition4 = points_inside_polygon(Xc, Yc, ((Fx-lh,Fy-lh), (Fx-lh,0.0), (0.0,0.0), (0.0,Fy-lh)))
+            condition5 = points_inside_polygon(Xc, Yc, ((Gx+lh,Gy+lh), (Gx+lh,Ly), (Lx,Ly), (Lx,Gy+lh)))
+            condition6 = points_inside_polygon(Xc, Yc, ((Hx+lh,Hy-lh), (Lx,Hy-lh), (Lx,0.0), (Hx+lh,0.0)))
+            condition  = condition1 | condition2 | condition3 | condition4 | condition5 | condition6
+            crd        = np.array([Xc[condition], Yc[condition], Zc[condition]])
+            density[condition] = self.generate_density_field(crd, xtal_rot[:,:,1].T, strain=xtal_strain[1,:])
+
+            # Crystal 3
+            condition = (Xc >= Ex+lh) & (Xc <= Ax-lh)
+            crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
+            density[condition] = self.generate_density_field(crd, xtal_rot[:,:,2].T, strain=xtal_strain[2,:])
+
+            # Crystal 4
+            condition = (Xc >= Bx+lh) & (Xc <= Gx-lh)
+            crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
+            density[condition] = self.generate_density_field(crd, xtal_rot[:,:,3].T, strain=xtal_strain[3,:])
+
         else:
             raise ValueError(f'Unsupported value: model={model}')
 
@@ -463,7 +585,8 @@ class setup_pre(setup_base):
 
 # =====================================================================================
 
-    def generate_density_field(self, crd: np.ndarray, g: np.ndarray) -> np.ndarray:
+    def generate_density_field(self, crd: np.ndarray, g: np.ndarray,
+                               strain=None, strain_frame: str = 'lab') -> np.ndarray:
         """
         Define a 3D density field for (X)PFC modeling.
 
@@ -472,8 +595,15 @@ class setup_pre(setup_base):
         crd : ndarray of float, shape (3,...)
             Grid point coordinates [x,y,z].
         g : ndarray of float, shape (3,3)
-            Rotation matrix for crystal orientation.
-    
+            Rotation matrix for crystal orientation (maps lab to crystal coordinates).
+        strain : sequence of 6 floats or None, optional
+            Small-strain tensor components [exx, eyy, ezz, exy, exz, eyz]
+            (tensor shear components, i.e. exy = gamma_xy/2). Positive normal
+            components stretch the lattice. None or all zeros gives the
+            unstrained field.
+        strain_frame : {'lab', 'crystal'}, optional
+            Frame in which `strain` is expressed. Default 'lab'.
+
         Returns
         -------
         density : ndarray of float
@@ -496,7 +626,23 @@ class setup_pre(setup_base):
         nAmp = len(self._ampl) # Number of density field modes/amplitudes
         n0   = self._nlns[1]   # Reference density (liquid)
 
-        crdRot   = np.dot(g,crd)
+        # Combined map from lab coordinates to (strained) crystal coordinates
+        T = np.asarray(g, dtype=float)
+        if strain is not None and np.any(np.asarray(strain, dtype=float) != 0.0):
+            exx, eyy, ezz, exy, exz, eyz = np.asarray(strain, dtype=float)
+            eps = np.array([[exx, exy, exz],
+                            [exy, eyy, eyz],
+                            [exz, eyz, ezz]])
+            Finv = np.linalg.inv(np.eye(3) + eps)
+            match strain_frame.lower():
+                case 'lab':
+                    T = T @ Finv     # xc = g F^-1 r
+                case 'crystal':
+                    T = Finv @ T     # xc = F^-1 g r
+                case _:
+                    raise ValueError(f'Unsupported value of strain_frame: {strain_frame}')
+
+        crdRot   = np.tensordot(T, crd, axes=(1, 0))
         xc,yc,zc = crdRot
 
         match self._struct.upper():
@@ -529,6 +675,77 @@ class setup_pre(setup_base):
                 raise ValueError(f'Unsupported value of struct: {self._struct.upper()}')
 
         return density
+
+# =====================================================================================
+
+    # WORKIN BACKUP OF generate_density_field() 2026-09-29
+
+    # def generate_density_field(self, crd: np.ndarray, g: np.ndarray) -> np.ndarray:
+    #     """
+    #     Define a 3D density field for (X)PFC modeling.
+
+    #     Parameters
+    #     ----------
+    #     crd : ndarray of float, shape (3,...)
+    #         Grid point coordinates [x,y,z].
+    #     g : ndarray of float, shape (3,3)
+    #         Rotation matrix for crystal orientation.
+    
+    #     Returns
+    #     -------
+    #     density : ndarray of float
+    #         Density field for the specified crystal structure with appropriate
+    #         Fourier modes and amplitudes.
+            
+    #     Raises
+    #     ------
+    #     ValueError
+    #         If `struct` is not one of the supported crystal structures 
+    #         ('SC', 'BCC', 'FCC', 'DC').
+            
+    #     Notes
+    #     -----
+    #     The density field is generated based on the current crystal structure 
+    #     (`struct`) and density field amplitudes (`ampl`) settings.
+    #     """
+
+    #     q    = 2*np.pi
+    #     nAmp = len(self._ampl) # Number of density field modes/amplitudes
+    #     n0   = self._nlns[1]   # Reference density (liquid)
+
+    #     crdRot   = np.dot(g,crd)
+    #     xc,yc,zc = crdRot
+
+    #     match self._struct.upper():
+    #         case 'SC':
+    #             nA = self._ampl[0]*(np.cos(q*xc)*np.cos(q*yc)+np.cos(q*xc)*np.cos(q*zc)+np.cos(q*yc)*np.cos(q*zc))
+    #             density = n0 + nA
+    #         case 'BCC':
+    #             nA = 4*self._ampl[0]*(np.cos(q*xc)*np.cos(q*yc)+np.cos(q*xc)*np.cos(q*zc)+np.cos(q*yc)*np.cos(q*zc)) # [110]
+    #             nB = 2*self._ampl[1]*(np.cos(2*q*xc)+np.cos(2*q*yc)+np.cos(2*q*zc))                                  # [200]
+    #             density = n0 + nA + nB
+    #         case 'FCC':
+    #             nA = 8*self._ampl[0]*(np.cos(q*xc)*np.cos(q*yc)*np.cos(q*zc))                                        # [111]
+    #             nB = 2*self._ampl[1]*(np.cos(2*q*xc)+np.cos(2*q*yc)+np.cos(2*q*zc))                                  # [200]
+    #             if nAmp==3:
+    #                 nC = 4*self._ampl[2]*(np.cos(2*q*xc)*np.cos(2*q*zc) + np.cos(2*q*yc)*np.cos(2*q*zc) + np.cos(2*q*xc)*np.cos(2*q*yc))
+    #             else:
+    #                 nC = 0
+    #             density = n0 + nA + nB + nC
+    #         case 'DC': # Defined by two superposed FCC lattices, shifted with respect to each other
+    #             nA = self._ampl[0]*8*(np.cos(q*xc)*np.cos(q*yc)*np.cos(q*zc) - np.sin(q*xc)*np.sin(q*yc)*np.sin(q*zc))
+    #             nB = self._ampl[1]*8*(np.cos(2*q*xc)*np.cos(2*q*yc) + np.cos(2*q*xc)*np.cos(2*q*zc) + np.cos(2*q*yc)*np.cos(2*q*zc))
+    #             if nAmp==3:
+    #                 nC = self._ampl[2]*8*(np.cos(q*xc)*np.cos(q*yc)*np.cos(3*q*zc) + np.cos(q*xc)*np.cos(3*q*yc)*np.cos(q*zc) +
+    #                             np.cos(3*q*xc)*np.cos(q*yc)*np.cos(q*zc) + np.sin(q*xc)*np.sin(q*yc)*np.sin(3*q*zc) +
+    #                             np.sin(q*xc)*np.sin(3*q*yc)*np.sin(q*zc) + np.sin(3*q*xc)*np.sin(q*yc)*np.sin(q*zc))
+    #             else:
+    #                 nC = 0
+    #             density = n0 + nA + nB + nC
+    #         case _:
+    #             raise ValueError(f'Unsupported value of struct: {self._struct.upper()}')
+
+    #     return density
 
 # =====================================================================================
 

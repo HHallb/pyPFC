@@ -66,6 +66,9 @@ Note that PyPI only installs torch with CPU support. To add GPU support, refer t
 For enhanced functionality, you may want to install:
 
 ```bash
+# For the PySide6 graphical interface and PyQtGraph plots
+pip install "pypfc[gui]"
+
 # For visualization and analysis
 pip install matplotlib
 

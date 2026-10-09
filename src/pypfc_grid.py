@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Håkan Hallberg
+# Copyright (C) 2026 Håkan Hallberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 # See LICENSE file for full license text
 

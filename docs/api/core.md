@@ -174,7 +174,7 @@ graph TD
     A -.-> F[**Grid Management**<br/>• Domain discretization<br/>]
     B -.-> G[**Core Operations**<br/>• Device management<br/>• FFT operations<br/>• Auxiliary functions]
     C -.-> H[**Pre-processing**<br/>• Density field generation<br/>• Structure initialization<br/>]
-    D -.-> I[**Input/Output**<br/>• VTK export<br/>• Extended XYZ I/O<br/>• Binary pickle file I/O<br/>• ASCII text file I/O]
+    D -.-> I[**Input/Output**<br/>• VTK export<br/>• Extended XYZ I/O<br/>• Binary pickle file I/O<br/>• ASCII text file I/O• HDF5 file I/O]
     E -.-> J[**Main Interface**<br/>• Simulation control<br/>• Time integration<br/>• Energy evaluation]
 ```
 

@@ -32,6 +32,12 @@ dependencies = [
     #"ovito"
 ]
 
+[project.optional-dependencies]
+gui = [
+    "pyqtgraph",
+    "PySide6",
+]
+
 [project.urls]
 Homepage = "https://github.com/HHallb/pyPFC"
 Repository = "https://github.com/HHallb/pyPFC"

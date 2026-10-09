@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Håkan Hallberg
+# Copyright (C) 2026 Håkan Hallberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 # See LICENSE file for full license text
 
@@ -7,7 +7,7 @@ import torch
 import time
 import os
 from pypfc_io import setup_io
-from typing import Union, List, Optional, Tuple, Dict, Any
+from typing import Union, List, Optional, Tuple, Dict, Any, Literal, overload
 class setup_simulation(setup_io):
     """
     This is the primary class for conducting PFC simulations, providing complete
@@ -381,22 +381,65 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def get_energy(self) -> np.ndarray:
+    def get_energy(self, include_total: bool = False) -> Union[Tuple[np.ndarray, float], Tuple[np.ndarray, float, float]]:
         """
-        Get the PFC energy field and its mean value.
+        Get the PFC energy density and its mean value, optionally including total energy.
         
         Computes the local energy density field and its spatial average using
         the current density field configuration.
+
+        Parameters
+        ----------
+        include_total : bool, optional
+            If True, include the integrated total energy as a third return
+            value. Defaults to False for compatibility with legacy callers.
         
         Returns
         -------
         ene : ndarray of float, shape (nx,ny,nz)
             Local energy density field on CPU.
-        mean_ene : float
+        ene_av : float
             Spatially averaged energy density.
+        ene_tot : float, optional
+            Integrated total energy, returned only when ``include_total=True``.
         """
-        ene, mean_ene = self.evaluate_energy()
-        return ene, mean_ene
+        return self.evaluate_energy(include_total=include_total)
+
+# =====================================================================================
+
+    def get_chemical_potential(self) -> Tuple[np.ndarray, float]:
+        """
+        Get the PFC chemical potential field and its mean value.
+        
+        Computes the local chemical potential field and its spatial average using
+        the current density field configuration.
+        
+        Returns
+        -------
+        chem_pot : ndarray of float, shape (nx,ny,nz)
+            Local chemical potential field on CPU.
+        chem_pot_av : float
+            Spatially averaged chemical potential.
+        """
+        chem_pot, chem_pot_av = self.evaluate_chemical_potential()
+        return chem_pot, chem_pot_av
+
+# =====================================================================================
+
+    def get_grand_potential_energy(self) -> Tuple[np.ndarray, float]:
+        """
+        Get the grand potential energy density field and its mean value.
+        
+        Computes the grand potential energy density field and its spatial average.
+        
+        Returns
+        -------
+        grand_potential_energy : ndarray of float, shape (nx,ny,nz)
+            Local grand potential energy density field on CPU.
+        grand_potential_energy_av : float
+            Spatially averaged grand potential energy density.
+        """
+        return self.evaluate_grand_potential_energy()
 
 # =====================================================================================
 
@@ -411,12 +454,12 @@ class setup_simulation(setup_io):
         -------
         den : ndarray of float, shape (nx,ny,nz)
             Density field on CPU.
-        mean_den : float
+        den_av : float
             Spatially averaged density.
         """
         den      = self._den_d.detach().cpu().numpy()
-        mean_den = torch.mean(self._den_d).detach().cpu().numpy()
-        return den, mean_den
+        den_av = torch.mean(self._den_d).detach().cpu().numpy()
+        return den, den_av
 
 # =====================================================================================
 
@@ -786,20 +829,28 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def evaluate_energy(self) -> float:
+    def evaluate_energy(self, include_total: bool = False) -> Union[Tuple[np.ndarray, float], Tuple[np.ndarray, float, float]]:
         """
         Evaluate the PFC energy.
 
-        Computes the total free energy of the system using the phase field
+        Computes the free energy density of the system using the phase field
         crystal energy functional.
+
+        Parameters
+        ----------
+        include_total : bool, optional
+            If True, include the integrated total energy as a third return
+            value. Defaults to False to preserve the legacy two-value return.
 
         Returns
         -------
-        ene : torch.Tensor
-            Energy field with shape [nx, ny, nz].
-        eneAv : float
+        ene : ndarray
+            Energy-density field on CPU with shape [nx, ny, nz].
+        ene_av : float
             Average free energy density.
-            
+        ene_tot : float, optional
+            Integrated total energy, returned only when ``include_total=True``.
+
         Notes
         -----
         Energy is computed in Fourier space for efficiency and transformed
@@ -811,14 +862,20 @@ class setup_simulation(setup_io):
         # Grid
         nx,ny,nz = self._ndiv
 
+        # Parameters
+        g1, g2, g3, *_ = self._update_scheme_params
+        if self._verbose: print(f"Evaluating energy with parameters: g1={g1}, g2={g2}, g3={g3}")
+
         # Evaluate convolution in Fourier space and retrieve the result back to real space
         self._tmp_d = torch.fft.irfftn(self._f_den_d*self._C2_d, s=self._tmp_d.shape)
         
         # Evaluate free energy (on device)
-        self._tmp_d = self._den_d.pow(2)/2 - self._den_d.pow(3)/6 + self._den_d.pow(4)/12 - 0.5*self._den_d.mul(self._tmp_d)
+        self._tmp_d = g1*self._den_d.pow(2)/2 - g2*self._den_d.pow(3)/6 + g3*self._den_d.pow(4)/12 - 0.5*self._den_d.mul(self._tmp_d)
 
-        # Evaluate the average free energy
-        eneAv = torch.sum(self._tmp_d) / (nx * ny * nz)
+        # Share the reduction used for the average and, optionally, total energy
+        ene_sum       = torch.sum(self._tmp_d)
+        ene_sum_value = ene_sum.item()
+        ene_av        = ene_sum_value / (nx * ny * nz)
 
         # Copy the resulting energy back to host
         ene = self._tmp_d.detach().cpu().numpy()
@@ -827,7 +884,111 @@ class setup_simulation(setup_io):
             tend = time.time()
             print(f'Time to evaluate energy: {tend-tstart:.3f} s')
 
-        return ene, eneAv.item() # .item() converts eneAv to a Python scalar
+        if include_total:
+            ene_tot = ene_sum_value * np.prod(self._ddiv)
+            return ene, ene_av, float(ene_tot)
+        return ene, ene_av
+
+# =====================================================================================
+
+    def evaluate_chemical_potential(self) -> float:
+        """
+        Evaluate the chemical potential.
+
+        Computes the chemical potential of the system using the phase field
+        crystal energy functional.
+
+        Returns
+        -------
+        chem_pot : torch.Tensor
+            Chemical potential field with shape [nx, ny, nz].
+        chem_pot_av : float
+            Average chemical potential.
+            
+        Notes
+        -----
+        """
+
+        if self._verbose: tstart = time.time()
+
+        # Grid
+        nx,ny,nz = self._ndiv
+
+        # Parameters
+        g1, g2, g3, *_ = self._update_scheme_params
+        if self._verbose: print(f"Evaluating chemical potential with parameters: g1={g1}, g2={g2}, g3={g3}")
+
+        # Evaluate convolution in Fourier space and retrieve the result back to real space
+        self._tmp_d = torch.fft.irfftn(self._f_den_d*self._C2_d, s=self._tmp_d.shape)
+        
+        # Evaluate chemical potential (on device)
+        self._tmp_d = g1*self._den_d - g2*self._den_d.pow(2)/2 + g3*self._den_d.pow(3)/3 - self._den_d.mul(self._tmp_d)
+
+        # Evaluate the average chemical potential
+        chem_pot_av = torch.sum(self._tmp_d) / (nx * ny * nz)
+
+        # Copy the resulting chemical potential back to host
+        chem_pot = self._tmp_d.detach().cpu().numpy()
+
+        if self._verbose:
+            tend = time.time()
+            print(f'Time to evaluate chemical potential: {tend-tstart:.3f} s')
+
+        return chem_pot, chem_pot_av.item()
+
+# =====================================================================================
+
+    def evaluate_grand_potential_energy(self, density: Optional[np.ndarray] = None, energy: Optional[np.ndarray] = None, chemical_potential: Optional[np.ndarray] = None, chemical_potential_av: Optional[float] = None) -> Tuple[np.ndarray, float]:
+        """
+        Evaluate the grand potential PFC energy density.
+
+        Computes the grand potential energy density of the system using the PFC
+        energy functional, the density field and the chemical potential.
+
+        Parameters
+        ----------
+        density : ndarray of float, shape (nx,ny,nz), optional
+            Density field.
+        energy : ndarray of float, shape (nx,ny,nz), optional
+            Free energy density.
+        chemical_potential : ndarray of float, shape (nx,ny,nz), optional
+            Chemical potential field.
+        chemical_potential_av : float, optional
+            Average chemical potential. If `None`, computed from `chemical_potential`.
+
+        Returns
+        -------
+        grand_potential_energy : torch.Tensor
+            Grand potential energy density field with shape [nx, ny, nz].
+        grand_potential_energy_av : float
+            Average grand potential energy density.
+
+        Notes
+        -----
+        """
+
+        if self._verbose: tstart = time.time()
+
+        if density is None:
+            density, _ = self.get_density()
+        if energy is None:
+            energy, _ = self.get_energy()
+        if chemical_potential is None:
+            chemical_potential, _ = self.get_chemical_potential()
+        if chemical_potential_av is None:
+            chemical_potential_av = np.mean(chemical_potential)  # Average chemical potential
+
+        # Evaluate the grand potential energy
+        grand_potential_energy = energy - chemical_potential_av * density
+
+        # Evaluate the average of the grand potential energy
+        grand_potential_energy_av = np.mean(grand_potential_energy)
+
+        if self._verbose:
+            tend = time.time()
+            print(f'Time to evaluate energy: {tend-tstart:.3f} s')
+
+        return grand_potential_energy, grand_potential_energy_av.item()
 
 # =====================================================================================
 

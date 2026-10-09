@@ -56,6 +56,14 @@ python ex04_quick_start.py
 
 **Description**: This is an example to illustrate the use of structure analysis by the centro-symmetry parameter (CSP) method in the pyPFC package and use of the class `pypfc_ovito`. The example demonstrates how to set up a simulation, generate an initial density field, evolve the density field over time, and perform structure analysis to identify defects in the crystal structure. The results are saved to VTK files for visualization.
 
+## Example 6
+
+**Source code**: [ex06_hdf5_file_io.py](https://github.com/HHallb/pyPFC/blob/main/examples/ex06_hdf5_file_io.py)
+
+**Description**: Demonstrates HDF5 file I/O with `pypfc.save_hdf5()` and `pypfc.load_hdf5()`. The example shows how to map a typical legacy pickle-style payload list to the newer HDF5 group structure.
+
+Field arrays are supplied as a label-to-array mapping and stored in `/fields/field_data` with matching `/fields/field_labels`. Discrete data is supplied through one `atoms` mapping containing `coords`, `atom_data`, and `atom_data_labels`, stored under `/atoms`.
+
 ---
 
 ## File Formats
@@ -64,6 +72,7 @@ pyPFC works with different file formats for data I/O:
 
 | Extension | Description | Viewer
 |-----------|-------------|--------
+| `.h5`     | Binary HDF5 format                          | Custom analysis using `pypfc.save_hdf5()` and `pypfc.load_hdf5()`
 | `.pickle` | Binary Python pickle format                 | Custom analysis using `pypfc.save_pickle()` and `pypfc.load_pickle()`
 | `.txt`    | Standard ASCII text files                   | Text editor
 | `.vtp`    | VTK point data, binary XML format           | Can be opened in, for example, [ParaView](https://www.paraview.org/)

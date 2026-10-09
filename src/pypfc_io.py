@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Håkan Hallberg
+# Copyright (C) 2026 Håkan Hallberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 # See LICENSE file for full license text
 
@@ -59,6 +59,8 @@ class setup_io(setup_pre):
         # Initiate the inherited class
         # ============================
         super().__init__(domain_size, ndiv, config=config)
+
+        self._simulation_config = dict(config)
 
         # Set the data types
         self._dtype_cpu     = config['dtype_cpu']
@@ -649,5 +651,497 @@ class setup_io(setup_pre):
                     f.write(f"{info}\n")
         except Exception as e:
             print(f"Error appending to setup file: {e}")
+
+# =====================================================================================
+
+    def save_hdf5(self,
+                  filename: str,
+                  meta: Optional[Dict[str, Any]] = None,
+                  simulation: Optional[Dict[str, Any]] = None,
+                  grid: Optional[Dict[str, Any]] = None,
+                  fields: Optional[Dict[str, Any]] = None,
+                  atoms: Optional[Dict[str, Any]] = None,
+                  diagnostics: Optional[Dict[str, Any]] = None,
+                  user_data: Optional[Dict[str, Any]] = None,
+                  compression: Optional[str] = 'gzip',
+                  compression_level: int = 4,
+                  schema_version: str = '1.0.0') -> None:
+        """
+        Save pyPFC data to a single HDF5 file.
+
+        The file uses a structured layout with top-level groups:
+        ``meta``, ``simulation``, ``grid``, ``fields``, ``atoms``,
+        ``diagnostics`` and ``user``.
+
+        Parameters
+        ----------
+        filename : str
+            Output filename with or without .h5 extension.
+        meta : dict, optional
+            Metadata dictionary stored under ``/meta``.
+        simulation : dict, optional
+            Simulation parameters stored under ``/simulation``. Defaults to
+            the configuration used to initialize this simulation.
+        grid : dict, optional
+            Grid data stored under ``/grid``. If None, defaults to
+            current ``domain_size``, ``ndiv`` and ``ddiv``.
+        fields : dict, optional
+            Mapping of field labels to equally shaped arrays. The arrays are
+            stacked along a leading axis and stored as ``/fields/field_data``;
+            labels are stored in matching order as ``/fields/field_labels``.
+        atoms : dict, optional
+            Discrete atom data. Recognized keys are ``coords`` with shape
+            ``(n_atoms, 3)``, ``atom_data`` with shape
+            ``(n_atoms, n_features)``, and ``atom_data_labels`` with length
+            ``n_features``. These are stored under ``/atoms`` using the same
+            dataset names.
+        diagnostics : dict, optional
+            Diagnostics stored under ``/diagnostics``.
+        user_data : dict, optional
+            User-defined data stored under ``/user``.
+        compression : {'gzip', 'lzf', None}, optional
+            Dataset compression algorithm for non-scalar arrays.
+        compression_level : int, optional
+            Compression level for gzip (0-9).
+        schema_version : str, optional
+            HDF5 schema version written as root attribute.
+
+        Python ``None`` values and list/tuple/dtype types in dictionary data
+        are recorded with pyPFC metadata so ``load_hdf5`` can restore them.
+        """
+
+        if self._verbose:
+            tstart = time.time()
+
+        if simulation is None:
+            simulation = self._simulation_config
+
+        try:
+            import h5py
+        except ImportError as e:
+            raise ImportError("h5py is required for save_hdf5. Install with 'pip install h5py'.") from e
+
+        if filename.endswith('.h5') or filename.endswith('.hdf5'):
+            full_filename = filename
+        else:
+            full_filename = filename + '.h5'
+
+        out_dir = os.path.dirname(full_filename)
+        if out_dir and not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+
+        if compression not in ('gzip', 'lzf', None):
+            raise ValueError("compression must be one of 'gzip', 'lzf', or None")
+        if compression == 'gzip' and (compression_level < 0 or compression_level > 9):
+            raise ValueError(f"compression_level must be in [0, 9], got {compression_level}")
+
+        str_dtype = h5py.string_dtype(encoding='utf-8')
+
+        def _tag_dataset(dataset: Any, type_marker: Optional[str],
+                         none_indices: Optional[List[int]] = None) -> None:
+            if type_marker is not None:
+                dataset.attrs['_pypfc_type'] = type_marker
+            if none_indices:
+                dataset.attrs['_pypfc_none_indices'] = none_indices
+
+        def _prepare_value(value: Any) -> Any:
+            if torch.is_tensor(value):
+                return value.detach().cpu().numpy()
+            if isinstance(value, torch.dtype):
+                return str(value).split('.', 1)[-1]
+            if isinstance(value, np.dtype):
+                return value.name
+            if isinstance(value, type) and issubclass(value, np.generic):
+                return np.dtype(value).name
+            if isinstance(value, np.ndarray):
+                return value
+            if isinstance(value, (list, tuple)):
+                arr = np.asarray(value)
+                if arr.dtype == object:
+                    if all(item is None or isinstance(item, (bool, int, float, np.number)) for item in value):
+                        return np.asarray([np.nan if item is None else item for item in value], dtype=float)
+                    return list(value)
+                return arr
+            if isinstance(value, (np.generic, int, float, bool, str, bytes)):
+                return value
+            return value
+
+        def _create_dataset(group: Any, name: str, value: Any) -> None:
+            if value is None:
+                none_group = group.create_group(name)
+                none_group.attrs['_pypfc_type'] = 'none'
+                return
+
+            type_marker: Optional[str] = None
+            none_indices: Optional[List[int]] = None
+            if group.name == '/simulation' or group.name.startswith('/simulation/'):
+                if isinstance(value, torch.dtype):
+                    type_marker = 'torch_dtype'
+                elif isinstance(value, np.dtype):
+                    type_marker = 'numpy_dtype'
+                elif isinstance(value, type) and issubclass(value, np.generic):
+                    type_marker = 'numpy_scalar_type'
+                elif isinstance(value, (list, tuple)):
+                    type_marker = 'tuple' if isinstance(value, tuple) else 'list'
+                    if any(item is None for item in value):
+                        none_indices = [i for i, item in enumerate(value) if item is None]
+
+            value = _prepare_value(value)
+
+            if isinstance(value, str):
+                dataset = group.create_dataset(name, data=value, dtype=str_dtype)
+                _tag_dataset(dataset, type_marker, none_indices)
+                return
+
+            if isinstance(value, bytes):
+                dataset = group.create_dataset(name, data=np.void(value))
+                _tag_dataset(dataset, type_marker, none_indices)
+                return
+
+            if isinstance(value, np.ndarray):
+                if value.dtype.kind in ('U', 'S'):
+                    dataset = group.create_dataset(name, data=value.astype(object), dtype=str_dtype)
+                    _tag_dataset(dataset, type_marker, none_indices)
+                    return
+                if value.dtype == object:
+                    raise TypeError(
+                        f"Cannot save object-dtype array at '{group.name}/{name}'. "
+                        "Use numeric/string arrays or nested dictionaries."
+                    )
+                kwargs: Dict[str, Any] = {}
+                if value.ndim > 0 and compression is not None:
+                    kwargs['compression'] = compression
+                    if compression == 'gzip':
+                        kwargs['compression_opts'] = compression_level
+                    kwargs['shuffle'] = True
+                dataset = group.create_dataset(name, data=value, **kwargs)
+                _tag_dataset(dataset, type_marker, none_indices)
+                return
+
+            if isinstance(value, (np.generic, int, float, bool)):
+                dataset = group.create_dataset(name, data=value)
+                _tag_dataset(dataset, type_marker, none_indices)
+                return
+
+            if isinstance(value, dict):
+                subgroup = group.create_group(name)
+                for key, val in value.items():
+                    _write_value(subgroup, str(key), val)
+                return
+
+            if isinstance(value, list):
+                if all(isinstance(v, str) for v in value):
+                    group.create_dataset(name, data=np.asarray(value, dtype=object), dtype=str_dtype)
+                    return
+                raise TypeError(
+                    f"Unsupported list type at '{group.name}/{name}'. "
+                    "Use numpy arrays for numeric lists or list[str] for labels."
+                )
+
+            raise TypeError(f"Unsupported data type at '{group.name}/{name}': {type(value)}")
+
+        def _write_value(group: Any, key: str, value: Any) -> None:
+            _create_dataset(group, key, value)
+
+        if grid is None:
+            grid = {
+                'domain_size': np.asarray(self._domain_size, dtype=self._dtype_cpu),
+                'ndiv': np.asarray(self._ndiv, dtype=int),
+                'ddiv': np.asarray(self._ddiv, dtype=self._dtype_cpu),
+            }
+
+        atom_datasets: Dict[str, Any] = {}
+        if atoms is not None:
+            if not isinstance(atoms, dict):
+                raise ValueError("atoms must be a dictionary")
+            allowed_atom_keys = {'coords', 'atom_data', 'atom_data_labels'}
+            unknown_atom_keys = set(atoms) - allowed_atom_keys
+            if unknown_atom_keys:
+                raise ValueError(f"Unknown atoms keys: {sorted(unknown_atom_keys)}")
+
+            if 'coords' in atoms:
+                coords = np.asarray(atoms['coords'], dtype=self._dtype_cpu)
+                if coords.ndim != 2 or coords.shape[1] != 3:
+                    raise ValueError(f"coords must have shape (n_atoms, 3), got {coords.shape}")
+                atom_datasets['coords'] = coords
+
+            if 'atom_data' in atoms:
+                atom_data = np.asarray(atoms['atom_data'], dtype=self._dtype_cpu)
+                if atom_data.ndim != 2:
+                    raise ValueError(
+                        f"atom_data must have shape (n_atoms, n_features), got {atom_data.shape}"
+                    )
+                atom_datasets['atom_data'] = atom_data
+
+            if 'atom_data_labels' in atoms:
+                atom_data_labels = atoms['atom_data_labels']
+                if not isinstance(atom_data_labels, list) or not all(
+                    isinstance(label, str) for label in atom_data_labels
+                ):
+                    raise ValueError("atom_data_labels must be a list of strings")
+                atom_datasets['atom_data_labels'] = atom_data_labels
+
+            if 'coords' in atom_datasets and 'atom_data' in atom_datasets:
+                if atom_datasets['coords'].shape[0] != atom_datasets['atom_data'].shape[0]:
+                    raise ValueError(
+                        "coords and atom_data must have the same number of atoms, "
+                        f"got {atom_datasets['coords'].shape[0]} and "
+                        f"{atom_datasets['atom_data'].shape[0]}"
+                    )
+
+            if 'atom_data' in atom_datasets and 'atom_data_labels' in atom_datasets:
+                if atom_datasets['atom_data'].shape[1] != len(atom_datasets['atom_data_labels']):
+                    raise ValueError(
+                        "atom_data_labels length must match atom_data feature count, "
+                        f"got {len(atom_datasets['atom_data_labels'])} and "
+                        f"{atom_datasets['atom_data'].shape[1]}"
+                    )
+
+        field_data: Optional[np.ndarray] = None
+        field_labels: Optional[List[str]] = None
+        if fields is not None:
+            if not all(isinstance(label, str) for label in fields):
+                raise ValueError("Field labels must be strings")
+
+            field_labels = list(fields)
+            field_arrays = []
+            for label, value in fields.items():
+                array = np.asarray(_prepare_value(value))
+                if array.ndim == 0:
+                    raise ValueError(f"Field '{label}' must be an array, not a scalar")
+                if array.dtype == object:
+                    raise ValueError(f"Field '{label}' must not have object dtype")
+                field_arrays.append(array)
+
+            if field_arrays:
+                try:
+                    field_data = np.stack(field_arrays, axis=0)
+                except ValueError as error:
+                    raise ValueError(
+                        "All field arrays must have the same shape to store them "
+                        "in /fields/field_data"
+                    ) from error
+            else:
+                field_data = np.empty((0,), dtype=self._dtype_cpu)
+
+        with h5py.File(full_filename, 'w') as h5f:
+            # Root schema attributes
+            h5f.attrs['schema_name'] = 'pypfc_hdf5'
+            h5f.attrs['schema_version'] = schema_version
+            h5f.attrs['writer_name'] = 'pyPFC'
+            h5f.attrs['created_utc'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+            h5f.attrs['endian'] = 'little' if np.little_endian else 'big'
+
+            # Create top-level groups
+            grp_meta = h5f.create_group('meta')
+            grp_sim = h5f.create_group('simulation')
+            grp_grid = h5f.create_group('grid')
+            grp_fields = h5f.create_group('fields')
+            grp_atoms = h5f.create_group('atoms')
+            grp_diag = h5f.create_group('diagnostics')
+            grp_user = h5f.create_group('user')
+
+            # Optional dictionaries
+            if meta is not None:
+                for key, val in meta.items():
+                    _write_value(grp_meta, str(key), val)
+
+            if simulation is not None:
+                for key, val in simulation.items():
+                    _write_value(grp_sim, str(key), val)
+
+            if grid is not None:
+                for key, val in grid.items():
+                    _write_value(grp_grid, str(key), val)
+
+            if field_data is not None and field_labels is not None:
+                _write_value(grp_fields, 'field_data', field_data)
+                _write_value(
+                    grp_fields,
+                    'field_labels',
+                    np.asarray(field_labels, dtype=str),
+                )
+
+            if diagnostics is not None:
+                for key, val in diagnostics.items():
+                    _write_value(grp_diag, str(key), val)
+
+            if user_data is not None:
+                for key, val in user_data.items():
+                    _write_value(grp_user, str(key), val)
+
+            for key, value in atom_datasets.items():
+                _write_value(grp_atoms, key, value)
+
+        if self._verbose:
+            tend = time.time()
+            print(f"Time to write HDF5 file {full_filename}: {tend - tstart:.2f} s")
+
+# =====================================================================================
+
+    def load_hdf5(self, filename: str) -> Dict[str, Any]:
+        """
+        Load pyPFC data from a single HDF5 file.
+
+        Parameters
+        ----------
+        filename : str
+            Input filename with or without .h5 extension.
+
+        Returns
+        -------
+        data : dict
+            Dictionary containing ``root_attrs`` and group dictionaries for
+            ``meta``, ``simulation``, ``grid``, ``fields``, ``atoms``,
+            ``diagnostics`` and ``user`` (when present). Supported Python
+            ``None``, list/tuple and dtype values written by ``save_hdf5``
+            are restored to their original types. ``fields`` contains
+            ``field_data`` (stacked along axis 0) and matching
+            ``field_labels``. Legacy named field datasets are converted to
+            this representation when loaded. ``atoms`` contains
+            ``coords``, ``atom_data`` and ``atom_data_labels`` when present;
+            legacy ``coord`` datasets are returned as ``coords``.
+        """
+
+        if self._verbose:
+            tstart = time.time()
+
+        try:
+            import h5py
+        except ImportError as e:
+            raise ImportError("h5py is required for load_hdf5. Install with 'pip install h5py'.") from e
+
+        if filename.endswith('.h5') or filename.endswith('.hdf5'):
+            full_filename = filename
+        else:
+            full_filename = filename + '.h5'
+
+        if not os.path.exists(full_filename):
+            raise FileNotFoundError(f"The file {full_filename} does not exist.")
+
+        def _decode_scalar(value: Any) -> Any:
+            if isinstance(value, bytes):
+                return value.decode('utf-8')
+            if isinstance(value, np.void):
+                return bytes(value)
+            if isinstance(value, np.generic):
+                return value.item()
+            return value
+
+        def _read_node(node: Any) -> Any:
+            if isinstance(node, h5py.Dataset):
+                value = node[()]
+                if isinstance(value, np.ndarray):
+                    if value.dtype.kind == 'S':
+                        value = np.char.decode(value, 'utf-8').tolist()
+                    elif value.dtype.kind == 'O':
+                        value = [v.decode('utf-8') if isinstance(v, bytes) else str(v) for v in value.tolist()]
+                else:
+                    value = _decode_scalar(value)
+
+                type_marker = node.attrs.get('_pypfc_type')
+                if isinstance(type_marker, bytes):
+                    type_marker = type_marker.decode('utf-8')
+
+                if type_marker == 'numpy_dtype':
+                    return np.dtype(value)
+                if type_marker == 'numpy_scalar_type':
+                    return np.dtype(value).type
+                if type_marker == 'torch_dtype':
+                    dtype = getattr(torch, str(value), None)
+                    if not isinstance(dtype, torch.dtype):
+                        raise ValueError(f"Unknown PyTorch dtype in HDF5 data: {value}")
+                    return dtype
+
+                if type_marker in ('list', 'tuple'):
+                    if isinstance(value, np.ndarray):
+                        items = value.tolist()
+                    elif isinstance(value, list):
+                        items = value
+                    else:
+                        raise ValueError(
+                            f"Expected an array for saved {type_marker} at '{node.name}', got {type(value)}"
+                        )
+                    none_indices = node.attrs.get('_pypfc_none_indices', [])
+                    for index in np.asarray(none_indices, dtype=int).reshape(-1):
+                        if index < 0 or index >= len(items):
+                            raise ValueError(f"Invalid saved None index at '{node.name}': {index}")
+                        items[index] = None
+                    return tuple(items) if type_marker == 'tuple' else items
+
+                return value
+
+            type_marker = node.attrs.get('_pypfc_type')
+            if isinstance(type_marker, bytes):
+                type_marker = type_marker.decode('utf-8')
+            if type_marker == 'none':
+                return None
+            result: Dict[str, Any] = {}
+            for key in node.keys():
+                result[key] = _read_node(node[key])
+            return result
+
+        data: Dict[str, Any] = {}
+        with h5py.File(full_filename, 'r') as h5f:
+            data['root_attrs'] = {k: _decode_scalar(v) for k, v in h5f.attrs.items()}
+
+            for group_name in ('meta', 'simulation', 'grid', 'fields', 'atoms', 'diagnostics', 'user'):
+                if group_name in h5f:
+                    data[group_name] = _read_node(h5f[group_name])
+                else:
+                    data[group_name] = {}
+
+            if 'coord' in data['atoms'] and 'coords' not in data['atoms']:
+                data['atoms']['coords'] = data['atoms'].pop('coord')
+
+            fields = data['fields']
+            if 'field_data' in fields or 'field_labels' in fields:
+                if 'field_data' not in fields or 'field_labels' not in fields:
+                    raise ValueError(
+                        "HDF5 /fields group must contain both field_data and field_labels"
+                    )
+                field_data = np.asarray(fields['field_data'])
+                field_labels = fields['field_labels']
+                if not isinstance(field_labels, list) or not all(
+                    isinstance(label, str) for label in field_labels
+                ):
+                    raise ValueError("HDF5 /fields/field_labels must contain strings")
+                if field_data.ndim == 0 or field_data.shape[0] != len(field_labels):
+                    raise ValueError(
+                        "HDF5 /fields/field_data first dimension must match "
+                        "the number of field_labels"
+                    )
+            elif fields:
+                field_labels = list(fields)
+                field_arrays = [np.asarray(value) for value in fields.values()]
+                if any(array.ndim == 0 for array in field_arrays):
+                    raise ValueError("Legacy HDF5 field datasets must be arrays")
+                try:
+                    field_data = np.stack(field_arrays, axis=0)
+                except ValueError as error:
+                    raise ValueError(
+                        "Legacy HDF5 field datasets must have matching shapes"
+                    ) from error
+                data['fields'] = {
+                    'field_data': field_data,
+                    'field_labels': field_labels,
+                }
+            else:
+                data['fields'] = {
+                    'field_data': np.empty((0,)),
+                    'field_labels': [],
+                }
+
+            # Ensure atom_data_labels is returned as list[str] when present.
+            if 'atom_data_labels' in data['atoms']:
+                labels = data['atoms']['atom_data_labels']
+                if isinstance(labels, np.ndarray):
+                    data['atoms']['atom_data_labels'] = labels.astype(str).tolist()
+
+        if self._verbose:
+            tend = time.time()
+            print(f"Time to read HDF5 file {full_filename}: {tend - tstart:.2f} s")
+
+        return data
 
 # =====================================================================================

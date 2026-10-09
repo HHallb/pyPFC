@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Håkan Hallberg
+# Copyright (C) 2026 Håkan Hallberg
 # SPDX-License-Identifier: GPL-3.0-or-later
 # See LICENSE file for full license text
 
@@ -6,6 +6,7 @@ import numpy as np
 import datetime
 import torch
 import time
+from fractions import Fraction
 from scipy.spatial import cKDTree
 from scipy.ndimage import zoom
 from skimage import measure
@@ -91,7 +92,8 @@ class setup_base(setup_grid):
         elif self._device_type.upper() == 'CPU':
             self._device = torch.device('cpu') 
             torch.set_num_threads(self._set_num_threads)
-            torch.set_num_interop_threads(self._set_num_interop_threads)
+            if torch.get_num_interop_threads() != self._set_num_interop_threads:
+                torch.set_num_interop_threads(self._set_num_interop_threads)
             if self._verbose:
                 print(f"Using {self._set_num_threads} CPU threads and {self._set_num_interop_threads} interop threads.")
         if self._verbose:
@@ -615,14 +617,13 @@ class setup_base(setup_grid):
 
 # =====================================================================================
 
-    def interpolate_density_maxima(self, den: Union[np.ndarray, torch.Tensor], ene: Optional[Union[np.ndarray, torch.Tensor]] = None, pf: Optional[Union[np.ndarray, torch.Tensor]] = None) -> Tuple[np.ndarray, Optional[np.ndarray], Optional[np.ndarray]]:
+    def interpolate_density_maxima(self, den: Union[np.ndarray, torch.Tensor], ene: Optional[Union[np.ndarray, torch.Tensor]] = None, fields: Optional[Union[np.ndarray, torch.Tensor]] = None) -> Tuple[np.ndarray, Optional[np.ndarray], Optional[np.ndarray]]:
         """
         Find density field maxima and interpolate atomic positions and properties.
         
         Identifies local maxima in the density field as atomic positions and performs
         high-order interpolation to obtain sub-grid precision coordinates. Also 
-        interpolates associated field values (density, energy, phase fields) at
-        the atomic positions.
+        interpolates associated field values at the atomic positions.
         
         Parameters
         ----------
@@ -630,8 +631,8 @@ class setup_base(setup_grid):
             Density field from PFC simulation.
         ene : ndarray of float, shape (nx,ny,nz), optional
             Energy field for interpolation at atomic positions.
-        pf : list of ndarray, optional
-            List of phase fields for interpolation at atomic positions.
+        fields : list of ndarray, optional
+            List of additional fields for interpolation at atomic positions.
             Each array should have shape (nx,ny,nz).
             
         Returns
@@ -640,7 +641,7 @@ class setup_base(setup_grid):
             Interpolated coordinates of density maxima (atomic positions).
         atom_data : ndarray of float, shape (n_maxima, 2+n_phase_fields)
             Interpolated field values at atomic positions.
-            Columns: [density, energy, pf1, pf2, ..., pfN]
+            Columns: [density, energy, field1, field2, ..., fieldN]
             
         Notes
         -----
@@ -730,33 +731,33 @@ class setup_base(setup_grid):
             atom_coord = coords
 
         # Handle phase field(s) efficiently
-        if pf is not None:
-            if isinstance(pf, np.ndarray) and pf.ndim == 3:
-                pf_list = [pf]
+        if fields is not None:
+            if isinstance(fields, np.ndarray) and fields.ndim == 3:
+                field_list = [fields]
             else:
-                pf_list = list(pf)
+                field_list = list(fields)
             
-            n_pf = len(pf_list)
+            n_fields = len(field_list)
             n_atoms = len(atom_coord)
             
-            # Extract phase field values efficiently
-            pfpos = np.empty((n_atoms, n_pf), dtype=self._dtype_cpu)
-            for pf_idx, phase_field in enumerate(pf_list):
+            # Extract field values efficiently
+            field_pos = np.empty((n_atoms, n_fields), dtype=self._dtype_cpu)
+            for field_idx, phase_field in enumerate(field_list):
                 if self._density_merge_distance > 0.0 and n_maxima != n_atoms:
                     # Merging occurred - use first value (approximate)
-                    pf_values = phase_field[maxima_indices]
-                    pfpos[:, pf_idx] = pf_values[:n_atoms]
+                    field_values = phase_field[maxima_indices]
+                    field_pos[:, field_idx] = field_values[:n_atoms]
                 else:
                     # No merging - direct extraction
-                    pfpos[:, pf_idx] = phase_field[maxima_indices]
+                    field_pos[:, field_idx] = phase_field[maxima_indices]
             
             # Assemble final data array efficiently
             if ene is not None:
-                atom_data = np.column_stack((denpos, enepos, pfpos))
+                atom_data = np.column_stack((denpos, enepos, field_pos))
             else:
-                atom_data = np.column_stack((denpos, pfpos))
+                atom_data = np.column_stack((denpos, field_pos))
         else:
-            # No phase fields - simpler assembly
+            # No additional fields - simpler assembly
             if ene is not None:
                 atom_data = np.column_stack((denpos, enepos))
             else:
@@ -1336,5 +1337,786 @@ class setup_base(setup_grid):
             print(f"   Mean CSP:   {np.mean(csp):.6f}")
 
         return csp
+
+# =====================================================================================
+
+    def interpolate_gb_from_phase_field(self, pf: Union[np.ndarray, torch.Tensor], search_direction: str = 'x') -> np.ndarray:
+        """
+        Interpolate grain-boundary points from a phase-field iso-contour.
+        
+        The GB position is defined as the first crossing of the iso-level
+        ``pf_iso_level`` along the selected search direction. The search
+        is periodic along the sweep axis, so the segment connecting the last and
+        first grid point is also considered.
+        
+        Parameters
+        ----------
+        pf : ndarray of float, shape (nx, ny, nz)
+            3D phase field data for GB interpolation.
+        search_direction : str, optional
+            Direction along which to search for the GB. Options: 'x', '-x', 'y', '-y', 'z', '-z'.
+            
+        Returns
+        -------
+        gb_point_coords : ndarray of float, shape (n_points, 3)
+            Coordinates of grain-boundary points. For each line in the plane
+            perpendicular to the search axis, one point is returned. If no
+            crossing is found for a line, the coordinate in the search axis is
+            NaN.
+            
+        Raises
+        ------
+        ValueError
+            If search direction or phase-field shape is invalid.
+        """
+        
+        if torch.is_tensor(pf):
+            pf_np = pf.detach().cpu().numpy()
+        else:
+            pf_np = np.asarray(pf)
+
+        expected_shape = (self._nx, self._ny, self._nz)
+        if pf_np.shape != expected_shape:
+            raise ValueError(f"Expected pf shape {expected_shape}, got {pf_np.shape}")
+
+        direction = search_direction.strip().lower()
+        if direction not in ('x', '-x', 'y', '-y', 'z', '-z'):
+            raise ValueError(f"Unsupported search direction: {search_direction}")
+
+        axis = {'x': 0, '-x': 0, 'y': 1, '-y': 1, 'z': 2, '-z': 2}[direction]
+        forward = not direction.startswith('-')
+
+        n_axis = expected_shape[axis]
+        other_axes = [ax for ax in (0, 1, 2) if ax != axis]
+        n0 = expected_shape[other_axes[0]]
+        n1 = expected_shape[other_axes[1]]
+
+        gb_point_coords = np.full((n0 * n1, 3), np.nan, dtype=self._dtype_cpu)
+        tol = 1e-14
+
+        for i0 in range(n0):
+            for i1 in range(n1):
+                point_nr = i0 * n1 + i1
+
+                line_selector = [slice(None), slice(None), slice(None)]
+                line_selector[other_axes[0]] = i0
+                line_selector[other_axes[1]] = i1
+                line = pf_np[tuple(line_selector)]
+
+                coord = np.array([
+                    np.nan,
+                    np.nan,
+                    np.nan
+                ], dtype=self._dtype_cpu)
+                coord[other_axes[0]] = i0 * self._ddiv[other_axes[0]]
+                coord[other_axes[1]] = i1 * self._ddiv[other_axes[1]]
+
+                k_values = range(n_axis) if forward else range(n_axis - 1, -1, -1)
+                hit_found = False
+
+                for k_a in k_values:
+                    if forward:
+                        k_b = (k_a + 1) % n_axis
+                    else:
+                        k_b = (k_a - 1) % n_axis
+
+                    pf_a = line[k_a]
+                    pf_b = line[k_b]
+                    da = pf_a - self._pf_iso_level
+                    db = pf_b - self._pf_iso_level
+
+                    if abs(da) < tol:
+                        t = 0.0
+                    elif abs(db) < tol:
+                        t = 1.0
+                    elif da * db < 0.0:
+                        t = (self._pf_iso_level - pf_a) / (pf_b - pf_a)
+                    else:
+                        continue
+
+                    if forward:
+                        k_iso = (k_a + t) % n_axis
+                    else:
+                        k_iso = (k_a - t) % n_axis
+
+                    coord[axis] = k_iso * self._ddiv[axis]
+                    hit_found = True
+                    break
+
+                if hit_found:
+                    gb_point_coords[point_nr] = coord
+                else:
+                    # Keep transverse coordinates even if no crossing was found.
+                    gb_point_coords[point_nr, other_axes[0]] = coord[other_axes[0]]
+                    gb_point_coords[point_nr, other_axes[1]] = coord[other_axes[1]]
+
+        return gb_point_coords
+
+# =====================================================================================
+
+    def minimum_periodic_domain_single_crystal(self, orientation: np.ndarray, alat: float = 1.0, struct: str = 'FCC', target_ddiv: float = 0.125) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """
+        Find the minimum periodic 3D domain for a single oriented crystal.
+
+        The function estimates the smallest axis-aligned domain that is periodic
+        for a crystal whose orientation is given by a rotation matrix.
+        The returned grid divisions are chosen so the grid spacing in each direction
+        does not exceed ``target_ddiv`` and the divisions remain even.
+
+        Parameters
+        ----------
+        orientation : ndarray of float, shape (3, 3)
+            Crystal orientation matrix that maps the crystal frame to the lab frame.
+            This should be a proper rotation matrix (orthonormal with determinant +1).
+        alat : float, optional
+            Lattice parameter. Default is 1.0.
+        struct : str, optional
+            Crystal structure. Options: 'FCC', 'BCC', 'SC'. Default is 'FCC'.
+        target_ddiv : float, optional
+            Maximum allowed grid spacing. Default is 0.125.
+
+        Returns
+        -------
+        min_domain_size : ndarray of float, shape (3,)
+            Minimum periodic domain dimensions.
+        min_ndiv : ndarray of int, shape (3,)
+            Minimum number of divisions for the periodic domain.
+        ddiv : ndarray of float, shape (3,)
+            Actual grid spacing in each direction, which does not exceed ``target_ddiv``.
+
+        Raises
+        ------
+        ValueError
+            If orientation is invalid, the structure is unsupported, or a periodic
+            domain cannot be determined.
+        """
+
+        orientation = np.asarray(orientation, dtype=self._dtype_cpu)
+        if orientation.shape != (3, 3):
+            raise ValueError(f"orientation must have shape (3, 3), got {orientation.shape}")
+        if alat <= 0.0:
+            raise ValueError(f"alat must be positive, got alat={alat}")
+        if target_ddiv <= 0.0:
+            raise ValueError(f"target_ddiv must be positive, got target_ddiv={target_ddiv}")
+
+        # Guard against malformed orientation matrices to avoid silent geometry errors.
+        if not np.allclose(orientation.T @ orientation, np.eye(3), atol=1e-10, rtol=0.0):
+            raise ValueError("orientation must be orthonormal (R.T @ R = I).")
+        if not np.isclose(np.linalg.det(orientation), 1.0, atol=1e-10, rtol=0.0):
+            raise ValueError("orientation must have determinant +1.")
+
+        struct_u = struct.upper()
+        if struct_u == 'SC':
+            primitive_vectors = np.array([
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+            ], dtype=self._dtype_cpu)
+        elif struct_u == 'BCC':
+            primitive_vectors = np.array([
+                [0.5, 0.5, -0.5],
+                [0.5, -0.5, 0.5],
+                [-0.5, 0.5, 0.5],
+            ], dtype=self._dtype_cpu)
+        elif struct_u == 'FCC':
+            primitive_vectors = np.array([
+                [0.0, 0.5, 0.5],
+                [0.5, 0.0, 0.5],
+                [0.5, 0.5, 0.0],
+            ], dtype=self._dtype_cpu)
+        else:
+            raise ValueError(f"Unsupported crystal structure: {struct}")
+
+        basis = (orientation @ (primitive_vectors * alat).T).T
+
+        def _lcm(a: int, b: int) -> int:
+            return abs(a * b) // np.gcd(a, b)
+
+        def _reduce_integer_vector(values: np.ndarray) -> np.ndarray:
+            values = np.asarray(values, dtype=int)
+            nonzero = values[values != 0]
+            if nonzero.size == 0:
+                return values
+            divisor = int(np.abs(nonzero[0]))
+            for value in nonzero[1:]:
+                divisor = int(np.gcd(divisor, int(np.abs(value))))
+            if divisor > 1:
+                values = values // divisor
+            return values
+
+        def _period_along_axis(axis_index: int) -> float:
+            # If t = n @ basis is parallel to a lab axis, then n = L * w,
+            # where w is the corresponding row of inv(basis). We search for the
+            # smallest L that makes all components of n integers.
+            inv_basis = np.linalg.inv(basis)
+            w = inv_basis[axis_index, :]
+
+            tol = 1e-12
+            nonzero = np.where(np.abs(w) > tol)[0]
+            if nonzero.size == 0:
+                raise ValueError(f"Could not determine a periodic translation along axis {axis_index}.")
+
+            ref_idx = nonzero[np.argmax(np.abs(w[nonzero]))]
+            ref = w[ref_idx]
+            if np.abs(ref) < tol:
+                raise ValueError(f"Could not determine a periodic translation along axis {axis_index}.")
+
+            max_denominator = 4096
+            for _ in range(4):
+                ratios = w / ref
+                rational_parts = []
+                for ratio in ratios:
+                    if np.abs(ratio) < tol:
+                        rational_parts.append(Fraction(0, 1))
+                    else:
+                        rational_parts.append(Fraction(float(ratio)).limit_denominator(max_denominator))
+
+                common_den = 1
+                for frac in rational_parts:
+                    common_den = _lcm(common_den, frac.denominator)
+
+                integer_direction = np.array([
+                    frac.numerator * (common_den // frac.denominator)
+                    for frac in rational_parts
+                ], dtype=int)
+                integer_direction = _reduce_integer_vector(integer_direction)
+
+                scale = integer_direction[ref_idx] / ref
+                candidate = scale * w
+                if np.allclose(candidate, np.rint(candidate), atol=1e-8, rtol=0.0):
+                    return float(np.abs(scale))
+
+                max_denominator *= 4
+
+            raise ValueError(
+                f"Could not find a commensurate periodic length along axis {axis_index} for struct={struct_u} and the provided orientation matrix."
+            )
+
+        min_domain_size = np.empty(3, dtype=self._dtype_cpu)
+        min_ndiv = np.empty(3, dtype=int)
+
+        for axis_index in range(3):
+            min_domain_size[axis_index] = _period_along_axis(axis_index)
+            ndiv_axis = int(np.ceil(min_domain_size[axis_index] / target_ddiv))
+            if ndiv_axis < 2:
+                ndiv_axis = 2
+            if ndiv_axis % 2 != 0:
+                ndiv_axis += 1
+            min_ndiv[axis_index] = ndiv_axis
+
+        return min_domain_size, min_ndiv, min_domain_size / min_ndiv
+
+# =====================================================================================
+
+    def minimum_periodic_domain_bicrystal(self, axis: np.ndarray, angle: float, alat: float = 1.0, struct: str = 'FCC', target_ddiv: float = 0.125, gb_type: str = 'tilt') -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """
+        Find the minimum periodic 3D domain for a given crystal structure and
+        grain boundary configuration.
+
+        The function estimates the smallest axis-aligned domain that is periodic
+        after rotating a crystal by ``angle`` around the GB axis ``[h k l]``.
+        The returned grid divisions are chosen so the grid spacing in each direction
+        does not exceed ``target_ddiv`` and the divisions remain even.
+
+        Parameters
+        ----------
+        axis : ndarray of float, shape (3,)
+            Grain-boundary axis given by Miller indices ``[h k l]``.
+            For ``gb_type='tilt'``, this is the tilt axis.
+            For ``gb_type='twist'``, this is the twist axis (parallel to GB normal).
+        angle : float
+            Rotation angle in radians.
+        alat : float, optional
+            Lattice parameter. Default is 1.0.
+        struct : str, optional
+            Crystal structure. Options: 'FCC', 'BCC', 'SC'. Default is 'FCC'.
+        target_ddiv : float, optional
+            Maximum allowed grid spacing. Default is 0.125.
+        gb_type : str, optional
+            Type of grain boundary. Options: 'tilt', 'twist'. Default is 'tilt'.
+
+        Returns
+        -------
+        min_domain_size : ndarray of float, shape (3,)
+            Minimum periodic domain dimensions.
+        min_ndiv : ndarray of int, shape (3,)
+            Minimum number of divisions for the periodic domain.
+        ddiv : ndarray of float, shape (3,)
+            Actual grid spacing in each direction, which does not exceed ``target_ddiv``.
+        g1 : ndarray of float, shape (3, 3)
+            Rotation matrix for crystal 1, rotated by ``+angle`` around ``[h k l]``.
+        g2 : ndarray of float, shape (3, 3)
+            Rotation matrix for crystal 2, rotated by ``-angle`` around ``[h k l]``.
+
+        Raises
+        ------
+        ValueError
+            If the axis is invalid, the structure is unsupported, or a periodic
+            domain cannot be determined.
+        """
+
+        axis = np.asarray(axis, dtype=self._dtype_cpu).reshape(3)
+        axis_norm = np.linalg.norm(axis)
+        if axis_norm == 0.0:
+            raise ValueError("Rotation axis must be non-zero.")
+        if alat <= 0.0:
+            raise ValueError(f"alat must be positive, got alat={alat}")
+        if target_ddiv <= 0.0:
+            raise ValueError(f"target_ddiv must be positive, got target_ddiv={target_ddiv}")
+
+        gb_type_u = gb_type.lower()
+        if gb_type_u not in ('tilt', 'twist'):
+            raise ValueError(f"Unsupported gb_type: {gb_type}. Use 'tilt' or 'twist'.")
+
+        struct_u = struct.upper()
+        if struct_u == 'SC':
+            primitive_vectors = np.array([
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+            ], dtype=self._dtype_cpu)
+        elif struct_u == 'BCC':
+            primitive_vectors = np.array([
+                [0.5, 0.5, -0.5],
+                [0.5, -0.5, 0.5],
+                [-0.5, 0.5, 0.5],
+            ], dtype=self._dtype_cpu)
+        elif struct_u == 'FCC':
+            primitive_vectors = np.array([
+                [0.0, 0.5, 0.5],
+                [0.5, 0.0, 0.5],
+                [0.5, 0.5, 0.0],
+            ], dtype=self._dtype_cpu)
+        else:
+            raise ValueError(f"Unsupported crystal structure: {struct}")
+
+        # Rotate the crystal basis using Rodrigues' formula.
+        # For both symmetric tilt and symmetric twist boundaries, the two crystals
+        # are represented by equal and opposite rotations around ``axis``.
+        axis_unit = axis / axis_norm
+        ux, uy, uz = axis_unit
+        c = np.cos(angle)
+        s = np.sin(angle)
+        one_c = 1.0 - c
+        rot = np.array([
+            [c + ux * ux * one_c,      ux * uy * one_c - uz * s, ux * uz * one_c + uy * s],
+            [uy * ux * one_c + uz * s,  c + uy * uy * one_c,      uy * uz * one_c - ux * s],
+            [uz * ux * one_c - uy * s,  uz * uy * one_c + ux * s, c + uz * uz * one_c     ],
+        ], dtype=self._dtype_cpu)
+
+        basis = (rot @ (primitive_vectors * alat).T).T
+
+        # Rotation matrices for the two crystals (±angle around the GB axis [h k l]).
+        g1 = rot.copy()
+        g2 = np.array([
+            [c + ux * ux * one_c,      ux * uy * one_c + uz * s, ux * uz * one_c - uy * s],
+            [uy * ux * one_c - uz * s,  c + uy * uy * one_c,      uy * uz * one_c + ux * s],
+            [uz * ux * one_c + uy * s,  uz * uy * one_c - ux * s, c + uz * uz * one_c     ],
+        ], dtype=self._dtype_cpu)
+
+        def _lcm(a: int, b: int) -> int:
+            return abs(a * b) // np.gcd(a, b)
+
+        def _reduce_integer_vector(values: np.ndarray) -> np.ndarray:
+            values = np.asarray(values, dtype=int)
+            nonzero = values[values != 0]
+            if nonzero.size == 0:
+                return values
+            divisor = int(np.abs(nonzero[0]))
+            for value in nonzero[1:]:
+                divisor = int(np.gcd(divisor, int(np.abs(value))))
+            if divisor > 1:
+                values = values // divisor
+            return values
+
+        def _period_along_axis(axis_index: int) -> float:
+            # If t = n @ basis is parallel to a lab axis, then n = L * w,
+            # where w is the corresponding row of inv(basis). We search for the
+            # smallest L that makes all components of n integers.
+            inv_basis = np.linalg.inv(basis)
+            w = inv_basis[axis_index, :]
+
+            tol = 1e-12
+            nonzero = np.where(np.abs(w) > tol)[0]
+            if nonzero.size == 0:
+                raise ValueError(f"Could not determine a periodic translation along axis {axis_index}.")
+
+            ref_idx = nonzero[np.argmax(np.abs(w[nonzero]))]
+            ref = w[ref_idx]
+            if np.abs(ref) < tol:
+                raise ValueError(f"Could not determine a periodic translation along axis {axis_index}.")
+
+            max_denominator = 4096
+            for _ in range(4):
+                ratios = w / ref
+                rational_parts = []
+                for ratio in ratios:
+                    if np.abs(ratio) < tol:
+                        rational_parts.append(Fraction(0, 1))
+                    else:
+                        rational_parts.append(Fraction(float(ratio)).limit_denominator(max_denominator))
+
+                common_den = 1
+                for frac in rational_parts:
+                    common_den = _lcm(common_den, frac.denominator)
+
+                integer_direction = np.array([
+                    frac.numerator * (common_den // frac.denominator)
+                    for frac in rational_parts
+                ], dtype=int)
+                integer_direction = _reduce_integer_vector(integer_direction)
+
+                scale = integer_direction[ref_idx] / ref
+                candidate = scale * w
+                if np.allclose(candidate, np.rint(candidate), atol=1e-8, rtol=0.0):
+                    return float(np.abs(scale))
+
+                max_denominator *= 4
+
+            raise ValueError(
+                f"Could not find a commensurate periodic length along axis {axis_index} for struct={struct_u} and angle={np.rad2deg(angle):.3f} degrees."
+            )
+
+        min_domain_size = np.empty(3, dtype=self._dtype_cpu)
+        min_ndiv = np.empty(3, dtype=int)
+
+        for axis_index in range(3):
+            min_domain_size[axis_index] = _period_along_axis(axis_index)
+            ndiv_axis = int(np.ceil(min_domain_size[axis_index] / target_ddiv))
+            if ndiv_axis < 2:
+                ndiv_axis = 2
+            if ndiv_axis % 2 != 0:
+                ndiv_axis += 1
+            min_ndiv[axis_index] = ndiv_axis
+
+        return min_domain_size, min_ndiv, min_domain_size / min_ndiv, g1, g2
+
+# =====================================================================================
+
+    def get_csl_config(self, axis: Union[List[int], np.ndarray], max_csl: int, struct: str = 'FCC', gb_type: str = 'tilt') -> List[Dict[str, Any]]:
+        """
+        Generate candidate CSL configurations for symmetric tilt or twist
+        grain boundaries.
+
+        The returned list contains candidate misorientation angles and associated
+        GB normals ``[u v w]`` for a specified GB axis ``[h k l]``. The list can be used to pick
+        a commensurate angle and then call ``minimum_periodic_domain`` with
+        ``angle = theta/2``.
+
+        Parameters
+        ----------
+        axis : array_like of int, shape (3,)
+            Boundary-defining axis ``[h k l]``.
+            For ``gb_type='tilt'``, this is the tilt axis.
+            For ``gb_type='twist'``, this is the twist axis (parallel to GB normal).
+        max_csl : int
+            Maximum CSL number (Sigma) to include.
+        struct : str, optional
+            Crystal structure. Options: 'FCC', 'BCC', 'SC'.
+        gb_type : str, optional
+            Type of grain boundary. Options: 'tilt', 'twist'. Default is 'tilt'.
+
+        Returns
+        -------
+        csl_list : list of dict
+            Each item contains:
+            - 'theta' (radians)
+            - 'theta_deg' (degrees)
+            - 'gb_normal' (list [u, v, w])
+            - 'csl' (Sigma)
+            - 'pair' (integer generator pair (m, n))
+            - 'axis' (list [h, k, l])
+            - 'gb_type' ('tilt' or 'twist')
+        """
+
+        if max_csl < 1:
+            raise ValueError(f"max_csl must be >= 1, got max_csl={max_csl}")
+
+        struct_u = struct.upper()
+        if struct_u not in ('FCC', 'BCC', 'SC'):
+            raise ValueError(f"Unsupported crystal structure: {struct}")
+
+        gb_type_u = gb_type.lower()
+        if gb_type_u not in ('tilt', 'twist'):
+            raise ValueError(f"Unsupported gb_type: {gb_type}. Use 'tilt' or 'twist'.")
+
+        axis = np.asarray(axis, dtype=int).reshape(3)
+        if np.all(axis == 0):
+            raise ValueError("axis must be non-zero.")
+
+        def _reduce_int_vector(vec: np.ndarray) -> np.ndarray:
+            vec = np.asarray(vec, dtype=int)
+            nonzero = vec[vec != 0]
+            if nonzero.size == 0:
+                return vec
+            g = int(np.abs(nonzero[0]))
+            for val in nonzero[1:]:
+                g = int(np.gcd(g, int(np.abs(val))))
+            if g > 1:
+                vec = vec // g
+            for val in vec:
+                if val != 0:
+                    if val < 0:
+                        vec = -vec
+                    break
+            return vec
+
+        axis = _reduce_int_vector(axis)
+
+        # Build an integer basis in the plane perpendicular to the tilt axis.
+        trial_basis = [
+            np.array([1, 0, 0], dtype=int),
+            np.array([0, 1, 0], dtype=int),
+            np.array([0, 0, 1], dtype=int),
+        ]
+
+        p = None
+        for e in trial_basis:
+            cand = np.cross(axis, e)
+            if np.any(cand != 0):
+                p = _reduce_int_vector(cand)
+                break
+        if p is None:
+            raise ValueError(f"Could not construct a perpendicular basis for axis={axis.tolist()}")
+
+        q = _reduce_int_vector(np.cross(axis, p))
+        if np.all(q == 0):
+            raise ValueError(f"Could not construct a second perpendicular basis vector for axis={axis.tolist()}")
+
+        max_m = int(np.ceil(np.sqrt(2 * max_csl))) + 1
+        csl_list = []
+        seen = set()
+
+        for m in range(1, max_m + 1):
+            for n in range(1, max_m + 1):
+                if np.gcd(m, n) != 1:
+                    continue
+
+                sigma_raw = m * m + n * n
+                if struct_u in ('FCC', 'BCC') and (m % 2 == 1 and n % 2 == 1):
+                    sigma = sigma_raw // 2
+                else:
+                    sigma = sigma_raw
+
+                if sigma > max_csl:
+                    continue
+
+                theta = 2.0 * np.arctan2(n, m)
+                if gb_type_u == 'tilt':
+                    normal = _reduce_int_vector(m * p + n * q)
+                else:
+                    # For symmetric twist boundaries, the GB normal is parallel
+                    # to the twist axis.
+                    normal = axis.copy()
+
+                key = (int(sigma), tuple(normal.tolist()), round(float(theta), 12))
+                if key in seen:
+                    continue
+                seen.add(key)
+
+                csl_list.append({
+                    'theta': float(theta),
+                    'gb_normal': normal.tolist(),
+                    'csl': int(sigma),
+                    'pair': (int(m), int(n)),
+                    'axis': axis.tolist(),
+                    'gb_type': gb_type_u,
+                })
+
+        csl_list.sort(key=lambda item: (item['theta'], item['csl']))
+
+        return csl_list
+
+# =====================================================================================
+
+    def expand_minimum_domain(self, min_domain_size: np.ndarray, min_ndiv: np.ndarray, target_domain_size: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Repeat a minimum domain size, required for 3D periodicity, to match a
+        target domain size.
+
+        The returned grid parameters are adjusted to provide the closest possible
+        match to the target domain size, without being smaller.
+
+        Parameters
+        ----------
+        min_domain_size : ndarray of float, shape (3,)
+            Minimum periodic domain size in each direction (e.g. output from
+            ``minimum_periodic_domain``).
+        min_ndiv : ndarray of int, shape (3,)
+            Minimum number of grid divisions for ``min_domain_size`` (e.g. output
+            from ``minimum_periodic_domain``).
+        target_domain_size : ndarray of float, shape (3,)
+            Desired domain size in each direction.
+
+        Returns
+        -------
+        domain_size_exp : ndarray of float, shape (3,)
+            Adjusted domain size in each direction.
+        ndiv_exp : ndarray of int, shape (3,)
+            Adjusted number of grid divisions in each direction.
+
+        Raises
+        ------
+        ValueError
+            If input shapes are invalid, if any target domain component is
+            non-positive, or if any minimum domain/grid component is non-positive.
+        """
+
+        min_domain_size    = np.asarray(min_domain_size, dtype=self._dtype_cpu).reshape(3)
+        min_ndiv           = np.asarray(min_ndiv, dtype=int).reshape(3)
+        target_domain_size = np.asarray(target_domain_size, dtype=self._dtype_cpu).reshape(3)
+
+        if np.any(min_domain_size <= 0.0):
+            raise ValueError("min_domain_size must be positive in all directions.")
+        if np.any(min_ndiv <= 0):
+            raise ValueError("min_ndiv must be positive in all directions.")
+        if np.any(target_domain_size <= 0.0):
+            raise ValueError("target_domain_size must be positive in all directions.")
+
+        # Repeat each minimum periodic cell enough times to avoid undershooting.
+        nrep = np.ceil(target_domain_size / min_domain_size).astype(int)
+        nrep = np.maximum(nrep, 1)
+
+        domain_size_exp = min_domain_size * nrep
+        ndiv_exp        = min_ndiv * nrep
+
+        return domain_size_exp, ndiv_exp, nrep
+
+# =====================================================================================
+
+    def get_atom_bond_data(self, atom_coord: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Evaluate min/max neighbor bond angles and bond lengths for each atom
+        in a set of atoms.
+
+        The neighbor search is performed with periodic boundary conditions in all
+        three directions using the simulation domain size.
+
+        Parameters
+        ----------
+        atom_coord : ndarray of float, shape (n_atoms, 3)
+            Coordinates of the atoms.
+
+        Returns
+        -------
+        bond_angles : ndarray of float, shape (2, n_atoms)
+            Min/Max neighbor bond angles for each atom.
+        bond_lengths : ndarray of float, shape (2, n_atoms)
+            Min/Max neighbor bond lengths for each atom.
+        """
+
+        atom_coord = np.asarray(atom_coord, dtype=self._dtype_cpu)
+        if atom_coord.ndim != 2 or atom_coord.shape[1] != 3:
+            raise ValueError(f"Expected atom_coord shape (n_atoms, 3), got {atom_coord.shape}")
+
+        n_atoms = atom_coord.shape[0]
+        bond_angles = np.zeros((2, n_atoms), dtype=self._dtype_cpu)
+        bond_lengths = np.zeros((2, n_atoms), dtype=self._dtype_cpu)
+        if n_atoms < 2:
+            return bond_angles, bond_lengths
+
+        # Determine the number of nearest neighbors based on crystal structure.
+        nnb, _ = self.get_xtal_nearest_neighbors()
+        n_neighbors = int(nnb[0])
+        n_neighbors = min(n_neighbors, n_atoms - 1)
+        if n_neighbors < 1:
+            return bond_angles, bond_lengths
+
+        # cKDTree periodic mode requires points wrapped to [0, boxsize).
+        boxsize = np.asarray(self._domain_size, dtype=self._dtype_cpu)
+        if np.any(boxsize <= 0.0):
+            raise ValueError(f"Invalid periodic domain size: {boxsize}")
+        coords = np.mod(atom_coord, boxsize)
+
+        tree = cKDTree(coords, boxsize=boxsize)
+        _, indices = tree.query(coords, k=n_neighbors + 1)
+
+        # Neighbor vectors with minimum-image convention.
+        neighbor_idx = indices[:, 1:]
+        center = coords[:, None, :]
+        neighbor = coords[neighbor_idx]
+        vec = neighbor - center
+        vec -= boxsize[None, None, :] * np.round(vec / boxsize[None, None, :])
+
+        lengths = np.linalg.norm(vec, axis=2)
+        bond_lengths[0, :] = np.min(lengths, axis=1)
+        bond_lengths[1, :] = np.max(lengths, axis=1)
+
+        if n_neighbors < 2:
+            return bond_angles, bond_lengths
+
+        # Vectorized pair-angle evaluation among all neighbor pairs.
+        eps = np.finfo(self._dtype_cpu).eps
+        unit = np.zeros_like(vec)
+        nonzero = lengths > eps
+        unit[nonzero] = vec[nonzero] / lengths[nonzero, None]
+
+        cos_all = np.einsum('ijk,ilk->ijl', unit, unit)
+        tri = np.triu_indices(n_neighbors, k=1)
+        cos_pairs = np.clip(cos_all[:, tri[0], tri[1]], -1.0, 1.0)
+
+        valid_pairs = nonzero[:, tri[0]] & nonzero[:, tri[1]]
+        ang_pairs = np.arccos(cos_pairs)
+        ang_pairs[~valid_pairs] = np.nan
+
+        has_valid = np.any(valid_pairs, axis=1)
+        if np.any(has_valid):
+            bond_angles[0, has_valid] = np.nanmin(ang_pairs[has_valid], axis=1)
+            bond_angles[1, has_valid] = np.nanmax(ang_pairs[has_valid], axis=1)
+
+        return bond_angles, bond_lengths
+
+# =====================================================================================
+
+
+    def rotation_map_vector_to_x(self, n, eps=1.0e-14) -> np.ndarray:
+        """
+        Construct a rotation matrix A such that
+
+            A @ n = e_x,
+
+        where e_x = [1, 0, 0].
+
+        Parameters
+        ----------
+        n : ndarray of float, shape (3,)
+            Vector to be rotated to align with the x-axis.
+        eps : float, optional
+            Tolerance for numerical comparisons (default is 1.0e-14).
+
+        Returns
+        -------
+        A : ndarray of float, shape (3, 3)
+            Rotation matrix such that A @ n = e_x.
+        """
+        n = np.asarray(n, dtype=float)
+        n = n / np.linalg.norm(n)
+
+        ex = np.array([1.0, 0.0, 0.0])
+
+        c = np.dot(n, ex)
+
+        if c > 1.0 - eps:
+            return np.eye(3)
+
+        if c < -1.0 + eps:
+            return np.array([
+                [-1.0,  0.0,  0.0],
+                [ 0.0,  1.0,  0.0],
+                [ 0.0,  0.0, -1.0],
+            ])
+
+        v = np.cross(n, ex)
+        s = np.linalg.norm(v)
+
+        vx = np.array([
+            [0.0,   -v[2],  v[1]],
+            [v[2],   0.0, -v[0]],
+            [-v[1], v[0],  0.0],
+        ])
+
+        A = np.eye(3) + vx + vx @ vx * ((1.0 - c) / (s * s))
+
+        return A
 
 # =====================================================================================

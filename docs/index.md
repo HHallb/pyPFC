@@ -16,7 +16,7 @@ pyPFC is a high-performance simulation framework designed for modeling crystal s
 
 - **GPU Acceleration**: Full GPU support using PyTorch for large-scale simulations
 - **Adjustable Floating Point Precision**: Permits optimized use of GPU memory resources and execution efficiency
-- **Flexible I/O**: VTK, Extended XYZ and pickle format support for data exchange
+- **Flexible I/O**: HDF5, VTK, Extended XYZ and pickle format support for data exchange
 - **Advanced Data Processing**: Built-in functionalities as well as interfaces to [OVITO](https://www.ovito.org/) libraries (optional)
 - **Memory Optimization**: Efficient memory management for large 3D grids
 - **Density Field Evolution**: Different time integration schemes are available
