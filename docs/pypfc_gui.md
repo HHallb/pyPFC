@@ -10,7 +10,7 @@
 
 Click **Open** to select an HDF5 (`.h5`) file. Its contents are shown in the tree on the left. Select a field label to display a 2D slice of that field, or select atom coordinates or an atom-data label to display the atom positions. Three-dimensional fields can be viewed in the `xy`, `xz`, or `yz` plane; the GUI shows a central slice.
 
-Plot settings allow axes and the color legend to be shown or hidden, atom marker size to be changed, and the colormap to be selected. Use the mouse to pan or zoom. **Dist** measures the distance between two clicked points, **Box** zooms into a dragged rectangle, and **Ext** restores the full plot extent. **Img** saves the current plot as PNG or TIFF.
+Plot settings allow axes and the color legend to be shown or hidden, atom marker size to be changed and the colormap to be selected. Use the mouse to pan or zoom. **Dist** measures the distance between two clicked points, **Box** zooms into a dragged rectangle and **Ext** restores the full plot extent. **Img** saves the current plot as PNG or TIFF.
 
 ## Exporting and evaluating data
 
