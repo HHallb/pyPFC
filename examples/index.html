@@ -623,6 +623,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#example-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 6
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#file-formats" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1141,6 +1152,10 @@
 <h2 id="example-5">Example 5<a class="headerlink" href="#example-5" title="Permanent link">&para;</a></h2>
 <p><strong>Source code</strong>: <a href="https://github.com/HHallb/pyPFC/blob/main/examples/ex05_structure_analysis.py">ex05_structure_analysis.py</a></p>
 <p><strong>Description</strong>: This is an example to illustrate the use of structure analysis by the centro-symmetry parameter (CSP) method in the pyPFC package and use of the class <code>pypfc_ovito</code>. The example demonstrates how to set up a simulation, generate an initial density field, evolve the density field over time, and perform structure analysis to identify defects in the crystal structure. The results are saved to VTK files for visualization.</p>
+<h2 id="example-6">Example 6<a class="headerlink" href="#example-6" title="Permanent link">&para;</a></h2>
+<p><strong>Source code</strong>: <a href="https://github.com/HHallb/pyPFC/blob/main/examples/ex06_hdf5_file_io.py">ex06_hdf5_file_io.py</a></p>
+<p><strong>Description</strong>: Demonstrates HDF5 file I/O with <code>pypfc.save_hdf5()</code> and <code>pypfc.load_hdf5()</code>. The example shows how to map a typical legacy pickle-style payload list to the newer HDF5 group structure.</p>
+<p>Field arrays are supplied as a label-to-array mapping and stored in <code>/fields/field_data</code> with matching <code>/fields/field_labels</code>. Discrete data is supplied through one <code>atoms</code> mapping containing <code>coords</code>, <code>atom_data</code>, and <code>atom_data_labels</code>, stored under <code>/atoms</code>.</p>
 <hr />
 <h2 id="file-formats">File Formats<a class="headerlink" href="#file-formats" title="Permanent link">&para;</a></h2>
 <p>pyPFC works with different file formats for data I/O:</p>
@@ -1153,6 +1168,11 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>.h5</code></td>
+<td>Binary HDF5 format</td>
+<td>Custom analysis using <code>pypfc.save_hdf5()</code> and <code>pypfc.load_hdf5()</code></td>
+</tr>
 <tr>
 <td><code>.pickle</code></td>
 <td>Binary Python pickle format</td>

@@ -895,10 +895,32 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.pypfc.setup_simulation.evaluate_chemical_potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        evaluate_chemical_potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.pypfc.setup_simulation.evaluate_energy" class="md-nav__link">
     <span class="md-ellipsis">
       
         evaluate_energy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc.setup_simulation.evaluate_grand_potential_energy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        evaluate_grand_potential_energy
       
     </span>
   </a>
@@ -939,6 +961,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.pypfc.setup_simulation.get_chemical_potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_chemical_potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.pypfc.setup_simulation.get_density" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -965,6 +998,17 @@
     <span class="md-ellipsis">
       
         get_energy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc.setup_simulation.get_grand_potential_energy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_grand_potential_energy
       
     </span>
   </a>
@@ -1616,18 +1660,18 @@ the corresponding precomputed Fourier-space operators.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="src.pypfc.setup_simulation.evaluate_energy" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">evaluate_energy</span>
+<h3 id="src.pypfc.setup_simulation.evaluate_chemical_potential" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">evaluate_chemical_potential</span>
 
 
-<a href="#src.pypfc.setup_simulation.evaluate_energy" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">evaluate_energy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">float</span>
+<a href="#src.pypfc.setup_simulation.evaluate_chemical_potential" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">evaluate_chemical_potential</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">float</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Evaluate the PFC energy.</p>
-<p>Computes the total free energy of the system using the phase field
+        <p>Evaluate the chemical potential.</p>
+<p>Computes the chemical potential of the system using the phase field
 crystal energy functional.</p>
 
 
@@ -1641,22 +1685,129 @@ crystal energy functional.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>ene</code></td>            <td>
+<td><code>chem_pot</code></td>            <td>
                   <code><span title="torch.Tensor">Tensor</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Energy field with shape [nx, ny, nz].</p>
+                <p>Chemical potential field with shape [nx, ny, nz].</p>
               </div>
             </td>
           </tr>
           <tr class="doc-section-item">
-<td><code>eneAv</code></td>            <td>
+<td><code>chem_pot_av</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Average chemical potential.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc.setup_simulation.evaluate_energy" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">evaluate_energy</span>
+
+
+<a href="#src.pypfc.setup_simulation.evaluate_energy" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">evaluate_energy</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">include_total</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Evaluate the PFC energy.</p>
+<p>Computes the free energy density of the system using the phase field
+crystal energy functional.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>include_total</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, include the integrated total energy as a third return
+value. Defaults to False to preserve the legacy two-value return.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>ene</code></td>            <td>
+                  <code><span title="ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Energy-density field on CPU with shape [nx, ny, nz].</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>ene_av</code></td>            <td>
                   <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
                 <p>Average free energy density.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>ene_tot</code></td>            <td>
+                  <code>(<span title="float">float</span>, <span title="optional">optional</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Integrated total energy, returned only when <code>include_total=True</code>.</p>
               </div>
             </td>
           </tr>
@@ -1668,6 +1819,150 @@ crystal energy functional.</p>
   <summary>Notes</summary>
   <p>Energy is computed in Fourier space for efficiency and transformed
 back to real space for local energy density visualization.</p>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc.setup_simulation.evaluate_grand_potential_energy" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">evaluate_grand_potential_energy</span>
+
+
+<a href="#src.pypfc.setup_simulation.evaluate_grand_potential_energy" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">evaluate_grand_potential_energy</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">density</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">energy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">chemical_potential</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">chemical_potential_av</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Evaluate the grand potential PFC energy density.</p>
+<p>Computes the grand potential energy density of the system using the PFC
+energy functional, the density field and the chemical potential.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>density</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (nx,ny,nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Density field.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (nx,ny,nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Free energy density.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>chemical_potential</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (nx,ny,nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Chemical potential field.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>chemical_potential_av</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Average chemical potential. If <code>None</code>, computed from <code>chemical_potential</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>grand_potential_energy</code></td>            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Grand potential energy density field with shape [nx, ny, nz].</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>grand_potential_energy_av</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Average grand potential energy density.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  
 </details>
 
     </div>
@@ -1806,6 +2101,61 @@ back to real space for local energy density visualization.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="src.pypfc.setup_simulation.get_chemical_potential" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_chemical_potential</span>
+
+
+<a href="#src.pypfc.setup_simulation.get_chemical_potential" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_chemical_potential</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the PFC chemical potential field and its mean value.</p>
+<p>Computes the local chemical potential field and its spatial average using
+the current density field configuration.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>chem_pot</code></td>            <td>
+                  <code>ndarray of float, shape (nx,ny,nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Local chemical potential field on CPU.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>chem_pot_av</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Spatially averaged chemical potential.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="src.pypfc.setup_simulation.get_density" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">get_density</span>
 
@@ -1841,7 +2191,7 @@ data from GPU to CPU if necessary.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-<td><code>mean_den</code></td>            <td>
+<td><code>den_av</code></td>            <td>
                   <code><span title="float">float</span></code>
             </td>
             <td>
@@ -1909,14 +2259,51 @@ data from GPU to CPU if necessary.</p>
 
 
 <a href="#src.pypfc.setup_simulation.get_energy" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_energy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_energy</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">include_total</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">]</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Get the PFC energy field and its mean value.</p>
+        <p>Get the PFC energy density and its mean value, optionally including total energy.</p>
 <p>Computes the local energy density field and its spatial average using
 the current density field configuration.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>include_total</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, include the integrated total energy as a third return
+value. Defaults to False for compatibility with legacy callers.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     <p><span class="doc-section-title">Returns:</span></p>
@@ -1939,12 +2326,76 @@ the current density field configuration.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-<td><code>mean_ene</code></td>            <td>
+<td><code>ene_av</code></td>            <td>
                   <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
                 <p>Spatially averaged energy density.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>ene_tot</code></td>            <td>
+                  <code>(<span title="float">float</span>, <span title="optional">optional</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Integrated total energy, returned only when <code>include_total=True</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc.setup_simulation.get_grand_potential_energy" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_grand_potential_energy</span>
+
+
+<a href="#src.pypfc.setup_simulation.get_grand_potential_energy" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_grand_potential_energy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the grand potential energy density field and its mean value.</p>
+<p>Computes the grand potential energy density field and its spatial average.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>grand_potential_energy</code></td>            <td>
+                  <code>ndarray of float, shape (nx,ny,nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Local grand potential energy density field on CPU.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>grand_potential_energy_av</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Spatially averaged grand potential energy density.</p>
               </div>
             </td>
           </tr>

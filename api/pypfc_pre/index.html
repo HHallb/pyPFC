@@ -1551,9 +1551,11 @@ See the <a href="../core/">pyPFC overview</a> for a complete list of the configu
 <div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">do_polycrystal</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">xtal_rot</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">liq_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">xtal_strain</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">strain_frame</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"lab"</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">liq_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -1602,11 +1604,49 @@ See the <a href="../core/">pyPFC overview</a> for a complete list of the configu
 <ul>
 <li><code>model=0</code>: No parameter needed. The number of crystal seeds is determined
   from the number of provided orientations.</li>
+<li><code>model=1</code>: [ctrl_points] - A 6x2 array of control points for the
+  grain boundary configuration</li>
+<li><code>model=2</code>: [h1,w1,w3,w4] - geometry control parameters</li>
 </ul>
               </div>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>xtal_strain</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (n_xtal ,6)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Small-strain tensor components for each crystal [exx, eyy, ezz, exy, exz, eyz]
+(tensor shear components, i.e. exy = gamma_xy/2). Positive normal
+components stretch the lattice. None or all zeros gives the
+unstrained field.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>strain_frame</code>
+            </td>
+            <td>
+                  <code>(<span title="lab">lab</span>, <span title="crystal">crystal</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Frame in which <code>strain</code> is expressed. Default 'lab'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;lab&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -1637,6 +1677,8 @@ See the <a href="../core/">pyPFC overview</a> for a complete list of the configu
                 <p>Density field layout.</p>
 <ul>
 <li>0: A row of cylindrical seeds along y, with cylinders extending through z</li>
+<li>1: A five-grain structure forming two triple junctions, columnar through z</li>
+<li>2: A four-grain grain structure, columnar through z</li>
 </ul>
               </div>
             </td>
@@ -1686,7 +1728,7 @@ See the <a href="../core/">pyPFC overview</a> for a complete list of the configu
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the value of <code>model</code> is not supported (should be 0).</p>
+                <p>If the value of <code>model</code> is not supported (should be 0, 1 or 2).</p>
               </div>
             </td>
           </tr>
@@ -2016,8 +2058,11 @@ on the temperature-like parameter <code>sigma</code>.</p>
 
 <a href="#src.pypfc_pre.setup_pre.generate_density_field" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">generate_density_field</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">crd</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="n">ndarray</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">crd</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">g</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">strain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">strain_frame</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"lab"</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -2061,11 +2106,46 @@ on the temperature-like parameter <code>sigma</code>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Rotation matrix for crystal orientation.</p>
+                <p>Rotation matrix for crystal orientation (maps lab to crystal coordinates).</p>
               </div>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>strain</code>
+            </td>
+            <td>
+                  <code>sequence of 6 floats or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Small-strain tensor components [exx, eyy, ezz, exy, exz, eyz]
+(tensor shear components, i.e. exy = gamma_xy/2). Positive normal
+components stretch the lattice. None or all zeros gives the
+unstrained field.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>strain_frame</code>
+            </td>
+            <td>
+                  <code>(<span title="lab">lab</span>, <span title="crystal">crystal</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Frame in which <code>strain</code> is expressed. Default 'lab'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;lab&#39;</code>
             </td>
           </tr>
       </tbody>

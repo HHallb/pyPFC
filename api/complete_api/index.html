@@ -1055,10 +1055,43 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.pypfc_base.setup_base.expand_minimum_domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        expand_minimum_domain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.pypfc_base.setup_base.get_alpha" class="md-nav__link">
     <span class="md-ellipsis">
       
         get_alpha
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc_base.setup_base.get_atom_bond_data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_atom_bond_data
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc_base.setup_base.get_csl_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_csl_config
       
     </span>
   </a>
@@ -1257,6 +1290,50 @@
     <span class="md-ellipsis">
       
         interpolate_density_maxima
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc_base.setup_base.interpolate_gb_from_phase_field" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        interpolate_gb_from_phase_field
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc_base.setup_base.minimum_periodic_domain_bicrystal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        minimum_periodic_domain_bicrystal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc_base.setup_base.minimum_periodic_domain_single_crystal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        minimum_periodic_domain_single_crystal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc_base.setup_base.rotation_map_vector_to_x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        rotation_map_vector_to_x
       
     </span>
   </a>
@@ -1595,6 +1672,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.pypfc_io.setup_io.load_hdf5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        load_hdf5
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.pypfc_io.setup_io.load_pickle" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1610,6 +1698,17 @@
     <span class="md-ellipsis">
       
         read_extended_xyz
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc_io.setup_io.save_hdf5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        save_hdf5
       
     </span>
   </a>
@@ -1711,10 +1810,32 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.pypfc.setup_simulation.evaluate_chemical_potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        evaluate_chemical_potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.pypfc.setup_simulation.evaluate_energy" class="md-nav__link">
     <span class="md-ellipsis">
       
         evaluate_energy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc.setup_simulation.evaluate_grand_potential_energy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        evaluate_grand_potential_energy
       
     </span>
   </a>
@@ -1755,6 +1876,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#src.pypfc.setup_simulation.get_chemical_potential" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_chemical_potential
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#src.pypfc.setup_simulation.get_density" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1781,6 +1913,17 @@
     <span class="md-ellipsis">
       
         get_energy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#src.pypfc.setup_simulation.get_grand_potential_energy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_grand_potential_energy
       
     </span>
   </a>
@@ -2880,6 +3023,160 @@ reciprocal lattice points at intervals of 2π/d in reciprocal space.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="src.pypfc_base.setup_base.expand_minimum_domain" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">expand_minimum_domain</span>
+
+
+<a href="#src.pypfc_base.setup_base.expand_minimum_domain" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">expand_minimum_domain</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">min_domain_size</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">min_ndiv</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">target_domain_size</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Repeat a minimum domain size, required for 3D periodicity, to match a
+target domain size.</p>
+<p>The returned grid parameters are adjusted to provide the closest possible
+match to the target domain size, without being smaller.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>min_domain_size</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum periodic domain size in each direction (e.g. output from
+<code>minimum_periodic_domain</code>).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>min_ndiv</code>
+            </td>
+            <td>
+                  <code>ndarray of int, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum number of grid divisions for <code>min_domain_size</code> (e.g. output
+from <code>minimum_periodic_domain</code>).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_domain_size</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Desired domain size in each direction.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>domain_size_exp</code></td>            <td>
+                  <code>ndarray of float, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Adjusted domain size in each direction.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>ndiv_exp</code></td>            <td>
+                  <code>ndarray of int, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Adjusted number of grid divisions in each direction.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If input shapes are invalid, if any target domain component is
+non-positive, or if any minimum domain/grid component is non-positive.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="src.pypfc_base.setup_base.get_alpha" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">get_alpha</span>
 
@@ -2909,6 +3206,246 @@ reciprocal lattice points at intervals of 2π/d in reciprocal space.</p>
             <td>
               <div class="doc-md-description">
                 <p>Gaussian peak widths (α_i) for each peak in the correlation function.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc_base.setup_base.get_atom_bond_data" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_atom_bond_data</span>
+
+
+<a href="#src.pypfc_base.setup_base.get_atom_bond_data" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_atom_bond_data</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">atom_coord</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Evaluate min/max neighbor bond angles and bond lengths for each atom
+in a set of atoms.</p>
+<p>The neighbor search is performed with periodic boundary conditions in all
+three directions using the simulation domain size.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>atom_coord</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (n_atoms, 3)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Coordinates of the atoms.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>bond_angles</code></td>            <td>
+                  <code>ndarray of float, shape (2, n_atoms)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Min/Max neighbor bond angles for each atom.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>bond_lengths</code></td>            <td>
+                  <code>ndarray of float, shape (2, n_atoms)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Min/Max neighbor bond lengths for each atom.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc_base.setup_base.get_csl_config" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_csl_config</span>
+
+
+<a href="#src.pypfc_base.setup_base.get_csl_config" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_csl_config</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">axis</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">ndarray</span><span class="p">],</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">max_csl</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">struct</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"FCC"</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">gb_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"tilt"</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Generate candidate CSL configurations for symmetric tilt or twist
+grain boundaries.</p>
+<p>The returned list contains candidate misorientation angles and associated
+GB normals <code>[u v w]</code> for a specified GB axis <code>[h k l]</code>. The list can be used to pick
+a commensurate angle and then call <code>minimum_periodic_domain</code> with
+<code>angle = theta/2</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>axis</code>
+            </td>
+            <td>
+                  <code>array_like of int, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Boundary-defining axis <code>[h k l]</code>.
+For <code>gb_type='tilt'</code>, this is the tilt axis.
+For <code>gb_type='twist'</code>, this is the twist axis (parallel to GB normal).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>max_csl</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Maximum CSL number (Sigma) to include.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>struct</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Crystal structure. Options: 'FCC', 'BCC', 'SC'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;FCC&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>gb_type</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Type of grain boundary. Options: 'tilt', 'twist'. Default is 'tilt'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;tilt&#39;</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>csl_list</code></td>            <td>
+                  <code>list of dict</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Each item contains:
+- 'theta' (radians)
+- 'theta_deg' (degrees)
+- 'gb_normal' (list [u, v, w])
+- 'csl' (Sigma)
+- 'pair' (integer generator pair (m, n))
+- 'axis' (list [h, k, l])
+- 'gb_type' ('tilt' or 'twist')</p>
               </div>
             </td>
           </tr>
@@ -4383,7 +4920,7 @@ weighting: interpolated_value = Σ(wi × vi) / Σ(wi), where wi = 1 / (di^power)
 <div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">interpolate_density_maxima</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">den</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">],</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">ene</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">pf</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">]</span>
@@ -4394,8 +4931,7 @@ weighting: interpolated_value = Σ(wi × vi) / Σ(wi), where wi = 1 / (di^power)
         <p>Find density field maxima and interpolate atomic positions and properties.</p>
 <p>Identifies local maxima in the density field as atomic positions and performs
 high-order interpolation to obtain sub-grid precision coordinates. Also 
-interpolates associated field values (density, energy, phase fields) at
-the atomic positions.</p>
+interpolates associated field values at the atomic positions.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -4443,14 +4979,14 @@ the atomic positions.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>pf</code>
+                <code>fields</code>
             </td>
             <td>
                   <code>list of ndarray</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List of phase fields for interpolation at atomic positions.
+                <p>List of additional fields for interpolation at atomic positions.
 Each array should have shape (nx,ny,nz).</p>
               </div>
             </td>
@@ -4488,7 +5024,7 @@ Each array should have shape (nx,ny,nz).</p>
             <td>
               <div class="doc-md-description">
                 <p>Interpolated field values at atomic positions.
-Columns: [density, energy, pf1, pf2, ..., pfN]</p>
+Columns: [density, energy, field1, field2, ..., fieldN]</p>
               </div>
             </td>
           </tr>
@@ -4502,6 +5038,655 @@ Columns: [density, energy, pf1, pf2, ..., pfN]</p>
 density thresholding and merging of nearby maxima to remove spurious peaks.
 The interpolation order is controlled by the <code>_density_interp_order</code> attribute.</p>
 </details>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc_base.setup_base.interpolate_gb_from_phase_field" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">interpolate_gb_from_phase_field</span>
+
+
+<a href="#src.pypfc_base.setup_base.interpolate_gb_from_phase_field" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">interpolate_gb_from_phase_field</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">pf</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">],</span> <span class="n">search_direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"x"</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Interpolate grain-boundary points from a phase-field iso-contour.</p>
+<p>The GB position is defined as the first crossing of the iso-level
+<code>pf_iso_level</code> along the selected search direction. The search
+is periodic along the sweep axis, so the segment connecting the last and
+first grid point is also considered.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>pf</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (nx, ny, nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>3D phase field data for GB interpolation.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>search_direction</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Direction along which to search for the GB. Options: 'x', '-x', 'y', '-y', 'z', '-z'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;x&#39;</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>gb_point_coords</code></td>            <td>
+                  <code>ndarray of float, shape (n_points, 3)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Coordinates of grain-boundary points. For each line in the plane
+perpendicular to the search axis, one point is returned. If no
+crossing is found for a line, the coordinate in the search axis is
+NaN.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If search direction or phase-field shape is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc_base.setup_base.minimum_periodic_domain_bicrystal" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">minimum_periodic_domain_bicrystal</span>
+
+
+<a href="#src.pypfc_base.setup_base.minimum_periodic_domain_bicrystal" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">minimum_periodic_domain_bicrystal</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">axis</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">alat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">struct</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"FCC"</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">target_ddiv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.125</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">gb_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"tilt"</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Find the minimum periodic 3D domain for a given crystal structure and
+grain boundary configuration.</p>
+<p>The function estimates the smallest axis-aligned domain that is periodic
+after rotating a crystal by <code>angle</code> around the GB axis <code>[h k l]</code>.
+The returned grid divisions are chosen so the grid spacing in each direction
+does not exceed <code>target_ddiv</code> and the divisions remain even.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>axis</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Grain-boundary axis given by Miller indices <code>[h k l]</code>.
+For <code>gb_type='tilt'</code>, this is the tilt axis.
+For <code>gb_type='twist'</code>, this is the twist axis (parallel to GB normal).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>angle</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Rotation angle in radians.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>alat</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Lattice parameter. Default is 1.0.</p>
+              </div>
+            </td>
+            <td>
+                  <code>1.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>struct</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Crystal structure. Options: 'FCC', 'BCC', 'SC'. Default is 'FCC'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;FCC&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_ddiv</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Maximum allowed grid spacing. Default is 0.125.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.125</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>gb_type</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Type of grain boundary. Options: 'tilt', 'twist'. Default is 'tilt'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;tilt&#39;</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>min_domain_size</code></td>            <td>
+                  <code>ndarray of float, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum periodic domain dimensions.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>min_ndiv</code></td>            <td>
+                  <code>ndarray of int, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum number of divisions for the periodic domain.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>ddiv</code></td>            <td>
+                  <code>ndarray of float, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Actual grid spacing in each direction, which does not exceed <code>target_ddiv</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>g1</code></td>            <td>
+                  <code>ndarray of float, shape (3, 3)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Rotation matrix for crystal 1, rotated by <code>+angle</code> around <code>[h k l]</code>.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>g2</code></td>            <td>
+                  <code>ndarray of float, shape (3, 3)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Rotation matrix for crystal 2, rotated by <code>-angle</code> around <code>[h k l]</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the axis is invalid, the structure is unsupported, or a periodic
+domain cannot be determined.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc_base.setup_base.minimum_periodic_domain_single_crystal" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">minimum_periodic_domain_single_crystal</span>
+
+
+<a href="#src.pypfc_base.setup_base.minimum_periodic_domain_single_crystal" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">minimum_periodic_domain_single_crystal</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">orientation</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">alat</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">struct</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"FCC"</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">target_ddiv</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.125</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Find the minimum periodic 3D domain for a single oriented crystal.</p>
+<p>The function estimates the smallest axis-aligned domain that is periodic
+for a crystal whose orientation is given by a rotation matrix.
+The returned grid divisions are chosen so the grid spacing in each direction
+does not exceed <code>target_ddiv</code> and the divisions remain even.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>orientation</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (3, 3)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Crystal orientation matrix that maps the crystal frame to the lab frame.
+This should be a proper rotation matrix (orthonormal with determinant +1).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>alat</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Lattice parameter. Default is 1.0.</p>
+              </div>
+            </td>
+            <td>
+                  <code>1.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>struct</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Crystal structure. Options: 'FCC', 'BCC', 'SC'. Default is 'FCC'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;FCC&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_ddiv</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Maximum allowed grid spacing. Default is 0.125.</p>
+              </div>
+            </td>
+            <td>
+                  <code>0.125</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>min_domain_size</code></td>            <td>
+                  <code>ndarray of float, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum periodic domain dimensions.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>min_ndiv</code></td>            <td>
+                  <code>ndarray of int, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum number of divisions for the periodic domain.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>ddiv</code></td>            <td>
+                  <code>ndarray of float, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Actual grid spacing in each direction, which does not exceed <code>target_ddiv</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If orientation is invalid, the structure is unsupported, or a periodic
+domain cannot be determined.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc_base.setup_base.rotation_map_vector_to_x" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">rotation_map_vector_to_x</span>
+
+
+<a href="#src.pypfc_base.setup_base.rotation_map_vector_to_x" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">rotation_map_vector_to_x</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-14</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Construct a rotation matrix A such that</p>
+<div class="language-text highlight"><pre><span></span><code>A @ n = e_x,
+</code></pre></div>
+<p>where e_x = [1, 0, 0].</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>n</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (3,)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Vector to be rotated to align with the x-axis.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>eps</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Tolerance for numerical comparisons (default is 1.0e-14).</p>
+              </div>
+            </td>
+            <td>
+                  <code>1e-14</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>A</code></td>            <td>
+                  <code>ndarray of float, shape (3, 3)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Rotation matrix such that A @ n = e_x.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
 
     </div>
 
@@ -5188,9 +6373,11 @@ Used for FFT-based operations and differential operators.</p>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">do_polycrystal</span><span class="p">(</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">xtal_rot</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">liq_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">xtal_strain</span><span class="p">:</span> <span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">strain_frame</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"lab"</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">liq_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5239,11 +6426,49 @@ Used for FFT-based operations and differential operators.</p>
 <ul>
 <li><code>model=0</code>: No parameter needed. The number of crystal seeds is determined
   from the number of provided orientations.</li>
+<li><code>model=1</code>: [ctrl_points] - A 6x2 array of control points for the
+  grain boundary configuration</li>
+<li><code>model=2</code>: [h1,w1,w3,w4] - geometry control parameters</li>
 </ul>
               </div>
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>xtal_strain</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (n_xtal ,6)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Small-strain tensor components for each crystal [exx, eyy, ezz, exy, exz, eyz]
+(tensor shear components, i.e. exy = gamma_xy/2). Positive normal
+components stretch the lattice. None or all zeros gives the
+unstrained field.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>strain_frame</code>
+            </td>
+            <td>
+                  <code>(<span title="lab">lab</span>, <span title="crystal">crystal</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Frame in which <code>strain</code> is expressed. Default 'lab'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;lab&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -5274,6 +6499,8 @@ Used for FFT-based operations and differential operators.</p>
                 <p>Density field layout.</p>
 <ul>
 <li>0: A row of cylindrical seeds along y, with cylinders extending through z</li>
+<li>1: A five-grain structure forming two triple junctions, columnar through z</li>
+<li>2: A four-grain grain structure, columnar through z</li>
 </ul>
               </div>
             </td>
@@ -5323,7 +6550,7 @@ Used for FFT-based operations and differential operators.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If the value of <code>model</code> is not supported (should be 0).</p>
+                <p>If the value of <code>model</code> is not supported (should be 0, 1 or 2).</p>
               </div>
             </td>
           </tr>
@@ -5668,8 +6895,11 @@ on the temperature-like parameter <code>sigma</code>.</p>
 
 <a href="#src.pypfc_pre.setup_pre.generate_density_field" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">generate_density_field</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">crd</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="n">ndarray</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">crd</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">g</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">strain</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">strain_frame</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"lab"</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5713,11 +6943,46 @@ on the temperature-like parameter <code>sigma</code>.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Rotation matrix for crystal orientation.</p>
+                <p>Rotation matrix for crystal orientation (maps lab to crystal coordinates).</p>
               </div>
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>strain</code>
+            </td>
+            <td>
+                  <code>sequence of 6 floats or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Small-strain tensor components [exx, eyy, ezz, exy, exz, eyz]
+(tensor shear components, i.e. exy = gamma_xy/2). Positive normal
+components stretch the lattice. None or all zeros gives the
+unstrained field.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>strain_frame</code>
+            </td>
+            <td>
+                  <code>(<span title="lab">lab</span>, <span title="crystal">crystal</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Frame in which <code>strain</code> is expressed. Default 'lab'.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;lab&#39;</code>
             </td>
           </tr>
       </tbody>
@@ -6622,6 +7887,94 @@ directory as default.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="src.pypfc_io.setup_io.load_hdf5" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">load_hdf5</span>
+
+
+<a href="#src.pypfc_io.setup_io.load_hdf5" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">load_hdf5</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Load pyPFC data from a single HDF5 file.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>filename</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Input filename with or without .h5 extension.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>data</code></td>            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dictionary containing <code>root_attrs</code> and group dictionaries for
+<code>meta</code>, <code>simulation</code>, <code>grid</code>, <code>fields</code>, <code>atoms</code>,
+<code>diagnostics</code> and <code>user</code> (when present). Supported Python
+<code>None</code>, list/tuple and dtype values written by <code>save_hdf5</code>
+are restored to their original types. <code>fields</code> contains
+<code>field_data</code> (stacked along axis 0) and matching
+<code>field_labels</code>. Legacy named field datasets are converted to
+this representation when loaded. <code>atoms</code> contains
+<code>coords</code>, <code>atom_data</code> and <code>atom_data_labels</code> when present;
+legacy <code>coord</code> datasets are returned as <code>coords</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="src.pypfc_io.setup_io.load_pickle" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">load_pickle</span>
 
@@ -6859,6 +8212,275 @@ format and handles both .xyz and .xyz.gz extensions.</p>
               <div class="doc-md-description">
                 <p>Particle phase field values (if available).</p>
               </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc_io.setup_io.save_hdf5" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">save_hdf5</span>
+
+
+<a href="#src.pypfc_io.setup_io.save_hdf5" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">save_hdf5</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">meta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">simulation</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">grid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">atoms</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">diagnostics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">user_data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">compression</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"gzip"</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">compression_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">schema_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"1.0.0"</span><span class="p">,</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Save pyPFC data to a single HDF5 file.</p>
+<p>The file uses a structured layout with top-level groups:
+<code>meta</code>, <code>simulation</code>, <code>grid</code>, <code>fields</code>, <code>atoms</code>,
+<code>diagnostics</code> and <code>user</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>filename</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Output filename with or without .h5 extension.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>meta</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Metadata dictionary stored under <code>/meta</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>simulation</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Simulation parameters stored under <code>/simulation</code>. Defaults to
+the configuration used to initialize this simulation.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>grid</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Grid data stored under <code>/grid</code>. If None, defaults to
+current <code>domain_size</code>, <code>ndiv</code> and <code>ddiv</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>fields</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Mapping of field labels to equally shaped arrays. The arrays are
+stacked along a leading axis and stored as <code>/fields/field_data</code>;
+labels are stored in matching order as <code>/fields/field_labels</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>atoms</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Discrete atom data. Recognized keys are <code>coords</code> with shape
+<code>(n_atoms, 3)</code>, <code>atom_data</code> with shape
+<code>(n_atoms, n_features)</code>, and <code>atom_data_labels</code> with length
+<code>n_features</code>. These are stored under <code>/atoms</code> using the same
+dataset names.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>diagnostics</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Diagnostics stored under <code>/diagnostics</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>user_data</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>User-defined data stored under <code>/user</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>compression</code>
+            </td>
+            <td>
+                  <code>(<span title="gzip">gzip</span>, <span title="lzf">lzf</span>, None)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Dataset compression algorithm for non-scalar arrays.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;gzip&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>compression_level</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Compression level for gzip (0-9).</p>
+              </div>
+            </td>
+            <td>
+                  <code>4</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>schema_version</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>HDF5 schema version written as root attribute.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;1.0.0&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>Python</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>are</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
@@ -7675,18 +9297,18 @@ the corresponding precomputed Fourier-space operators.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="src.pypfc.setup_simulation.evaluate_energy" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">evaluate_energy</span>
+<h3 id="src.pypfc.setup_simulation.evaluate_chemical_potential" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">evaluate_chemical_potential</span>
 
 
-<a href="#src.pypfc.setup_simulation.evaluate_energy" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">evaluate_energy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">float</span>
+<a href="#src.pypfc.setup_simulation.evaluate_chemical_potential" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">evaluate_chemical_potential</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">float</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Evaluate the PFC energy.</p>
-<p>Computes the total free energy of the system using the phase field
+        <p>Evaluate the chemical potential.</p>
+<p>Computes the chemical potential of the system using the phase field
 crystal energy functional.</p>
 
 
@@ -7700,22 +9322,134 @@ crystal energy functional.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>ene</code></td>            <td>
+<td><code>chem_pot</code></td>            <td>
                   <code><span title="torch.Tensor">Tensor</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Energy field with shape [nx, ny, nz].</p>
+                <p>Chemical potential field with shape [nx, ny, nz].</p>
               </div>
             </td>
           </tr>
           <tr class="doc-section-item">
-<td><code>eneAv</code></td>            <td>
+<td><code>chem_pot_av</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Average chemical potential.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  
+</details>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc.setup_simulation.evaluate_energy" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">evaluate_energy</span>
+
+
+<a href="#src.pypfc.setup_simulation.evaluate_energy" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">evaluate_energy</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">include_total</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Evaluate the PFC energy.</p>
+<p>Computes the free energy density of the system using the phase field
+crystal energy functional.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>include_total</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, include the integrated total energy as a third return
+value. Defaults to False to preserve the legacy two-value return.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>ene</code></td>            <td>
+                  <code><span title="ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Energy-density field on CPU with shape [nx, ny, nz].</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>ene_av</code></td>            <td>
                   <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
                 <p>Average free energy density.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>ene_tot</code></td>            <td>
+                  <code>(<span title="float">float</span>, <span title="optional">optional</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Integrated total energy, returned only when <code>include_total=True</code>.</p>
               </div>
             </td>
           </tr>
@@ -7727,6 +9461,155 @@ crystal energy functional.</p>
   <summary>Notes</summary>
   <p>Energy is computed in Fourier space for efficiency and transformed
 back to real space for local energy density visualization.</p>
+</details>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc.setup_simulation.evaluate_grand_potential_energy" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">evaluate_grand_potential_energy</span>
+
+
+<a href="#src.pypfc.setup_simulation.evaluate_grand_potential_energy" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">evaluate_grand_potential_energy</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">density</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">energy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">chemical_potential</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">chemical_potential_av</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Evaluate the grand potential PFC energy density.</p>
+<p>Computes the grand potential energy density of the system using the PFC
+energy functional, the density field and the chemical potential.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>density</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (nx,ny,nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Density field.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>energy</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (nx,ny,nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Free energy density.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>chemical_potential</code>
+            </td>
+            <td>
+                  <code>ndarray of float, shape (nx,ny,nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Chemical potential field.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>chemical_potential_av</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Average chemical potential. If <code>None</code>, computed from <code>chemical_potential</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>grand_potential_energy</code></td>            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Grand potential energy density field with shape [nx, ny, nz].</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>grand_potential_energy_av</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Average grand potential energy density.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  
 </details>
 
     </div>
@@ -7885,6 +9768,66 @@ back to real space for local energy density visualization.</p>
 <div class="doc doc-object doc-function">
 
 
+<h3 id="src.pypfc.setup_simulation.get_chemical_potential" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_chemical_potential</span>
+
+
+<a href="#src.pypfc.setup_simulation.get_chemical_potential" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_chemical_potential</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the PFC chemical potential field and its mean value.</p>
+<p>Computes the local chemical potential field and its spatial average using
+the current density field configuration.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>chem_pot</code></td>            <td>
+                  <code>ndarray of float, shape (nx,ny,nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Local chemical potential field on CPU.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>chem_pot_av</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Spatially averaged chemical potential.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
 <h3 id="src.pypfc.setup_simulation.get_density" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">get_density</span>
 
@@ -7920,7 +9863,7 @@ data from GPU to CPU if necessary.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-<td><code>mean_den</code></td>            <td>
+<td><code>den_av</code></td>            <td>
                   <code><span title="float">float</span></code>
             </td>
             <td>
@@ -7998,14 +9941,51 @@ data from GPU to CPU if necessary.</p>
 
 
 <a href="#src.pypfc.setup_simulation.get_energy" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_energy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_energy</span><span class="p">(</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">include_total</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">]</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
 
-        <p>Get the PFC energy field and its mean value.</p>
+        <p>Get the PFC energy density and its mean value, optionally including total energy.</p>
 <p>Computes the local energy density field and its spatial average using
 the current density field configuration.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>include_total</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, include the integrated total energy as a third return
+value. Defaults to False for compatibility with legacy callers.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
     <p><span class="doc-section-title">Returns:</span></p>
@@ -8028,12 +10008,81 @@ the current density field configuration.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-<td><code>mean_ene</code></td>            <td>
+<td><code>ene_av</code></td>            <td>
                   <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
                 <p>Spatially averaged energy density.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>ene_tot</code></td>            <td>
+                  <code>(<span title="float">float</span>, <span title="optional">optional</span>)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Integrated total energy, returned only when <code>include_total=True</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="src.pypfc.setup_simulation.get_grand_potential_energy" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">get_grand_potential_energy</span>
+
+
+<a href="#src.pypfc.setup_simulation.get_grand_potential_energy" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_grand_potential_energy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Get the grand potential energy density field and its mean value.</p>
+<p>Computes the grand potential energy density field and its spatial average.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>grand_potential_energy</code></td>            <td>
+                  <code>ndarray of float, shape (nx,ny,nz)</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Local grand potential energy density field on CPU.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>grand_potential_energy_av</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Spatially averaged grand potential energy density.</p>
               </div>
             </td>
           </tr>
