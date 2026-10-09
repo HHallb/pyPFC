@@ -913,6 +913,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    pyPFC GUI
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -929,6 +947,58 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#opening-and-viewing-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opening and viewing data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#exporting-and-evaluating-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Exporting and evaluating data
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#launch" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Launch
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -977,8 +1047,18 @@
 
 <p><img alt="pyPFC logo" src="../images/pyPFC_logo_transparent.png" /></p>
 <h1 id="pypfc-gui">pyPFC GUI<a class="headerlink" href="#pypfc-gui" title="Permanent link">&para;</a></h1>
-<p>If using the recommended HDF5-based file format for saving pyPFC data, <code>pypfc_gui</code> provides a very light-weight GUI to inspect and work with those files.</p>
+<p><code>pypfc_gui</code> is a small graphical tool for browsing and inspecting pyPFC HDF5 output. It is intended for basic visualization and post-processing, not for setting up or running simulations.</p>
 <p><img alt="pypfc_gui main window" src="../images/pyPFC_gui_main_window.png" /></p>
+<h2 id="opening-and-viewing-data">Opening and viewing data<a class="headerlink" href="#opening-and-viewing-data" title="Permanent link">&para;</a></h2>
+<p>Click <strong>Open</strong> to select an HDF5 (<code>.h5</code>) file. Its contents are shown in the tree on the left. Select a field label to display a 2D slice of that field, or select atom coordinates or an atom-data label to display the atom positions. Three-dimensional fields can be viewed in the <code>xy</code>, <code>xz</code>, or <code>yz</code> plane; the GUI shows a central slice.</p>
+<p>Plot settings allow axes and the color legend to be shown or hidden, atom marker size to be changed, and the colormap to be selected. Use the mouse to pan or zoom. <strong>Dist</strong> measures the distance between two clicked points, <strong>Box</strong> zooms into a dragged rectangle, and <strong>Ext</strong> restores the full plot extent. <strong>Img</strong> saves the current plot as PNG or TIFF.</p>
+<h2 id="exporting-and-evaluating-data">Exporting and evaluating data<a class="headerlink" href="#exporting-and-evaluating-data" title="Permanent link">&para;</a></h2>
+<p>Click <strong>Export</strong> to export one or more HDF5 files to Extended XYZ (atom data), VTK/VTP (atom data), or VTK/VTS (field data). Files without the data required by the chosen format are skipped.</p>
+<p>When a loaded file contains field data, <strong>Field data</strong> opens <strong>Evaluate data</strong>. Choose a density field and calculate energy density, chemical potential or grand potential energy. Optionally enable <strong>Do atom interpolation</strong> to find density maxima and add interpolated atom positions to the tree. Calculated fields and interpolated atom data are temporary GUI results; they are not written back to the source HDF5 file.</p>
+<h2 id="launch">Launch<a class="headerlink" href="#launch" title="Permanent link">&para;</a></h2>
+<p>From the pyPFC repository root, launch the application with:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>src/pypfc_gui.py
+</span></code></pre></div>
 
 
 
