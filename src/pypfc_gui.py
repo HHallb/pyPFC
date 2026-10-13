@@ -12,9 +12,11 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QGroupBox,
     QLabel,
+    QInputDialog,
     QLineEdit,
     QMainWindow,
     QMessageBox,
+    QMenu,
     QPushButton,
     QRadioButton,
     QSplitter,
@@ -30,6 +32,7 @@ from PySide6.QtWidgets import (
 from functools import partial
 import sys
 from pathlib import Path
+import uuid
 import numpy as np
 from typing import Any, Callable
 
@@ -152,7 +155,7 @@ class EvaluateDataDialog(QDialog):
         evaluate_callback: Callable[["EvaluateDataDialog"], None],
     ) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Evaluate data")
+        self.setWindowTitle("Fields")
         self.setModal(True)
         self._evaluate_callback = evaluate_callback
 
@@ -194,6 +197,50 @@ class EvaluateDataDialog(QDialog):
     @property
     def evaluation_name(self) -> str:
         return self.evaluation_combo.currentText()
+
+    def accept(self) -> None:
+        self._evaluate_callback(self)
+        super().accept()
+
+
+class AtomsDialog(QDialog):
+    def __init__(
+        self,
+        parent: QWidget,
+        density_labels: list[str] | None,
+        interpolate: bool,
+        evaluate_callback: Callable[["AtomsDialog"], None],
+    ) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Atoms")
+        self.setModal(True)
+        self.interpolate = interpolate
+        self._evaluate_callback = evaluate_callback
+
+        layout = QVBoxLayout(self)
+        form = QFormLayout()
+        self.selection_combo = QComboBox()
+        if interpolate:
+            self.selection_combo.addItems(density_labels or [])
+            form.addRow("Select density data", self.selection_combo)
+        else:
+            self.selection_combo.addItems(
+                ["Centro-Symmetry Parameter (CSP)", "Atom bond data"]
+            )
+            form.addRow("Select atom data", self.selection_combo)
+        layout.addLayout(form)
+
+        self.button_box = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok
+            | QDialogButtonBox.StandardButton.Cancel
+        )
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+        layout.addWidget(self.button_box)
+
+    @property
+    def selection(self) -> str:
+        return self.selection_combo.currentText()
 
     def accept(self) -> None:
         self._evaluate_callback(self)
@@ -283,6 +330,7 @@ class MainWindow(QMainWindow):
         self.dtime: float | None = None
         self._computed_field_labels: set[str] = set()
         self._computed_atom_data: dict[str, tuple[np.ndarray, np.ndarray]] = {}
+        self._computed_atom_group = False
 
         self.setWindowTitle("pyPFC GUI")
         self.setMinimumSize(QSize(800, 600))
@@ -301,6 +349,8 @@ class MainWindow(QMainWindow):
         self.tree.setMouseTracking(True)
         self.tree.viewport().setMouseTracking(True)
         self.tree.viewport().installEventFilter(self)
+        self.tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.tree.customContextMenuRequested.connect(self._show_tree_context_menu)
         self.left_splitter = QSplitter(Qt.Orientation.Vertical)
         self.left_splitter.addWidget(self.tree)
 
@@ -460,11 +510,16 @@ class MainWindow(QMainWindow):
         button_export_action.setStatusTip("Export data from HDF5 file(s)")
         button_export_action.triggered.connect(self._show_export_dialog)
         toolbar_main.addAction(button_export_action)
-        self.field_data_action = QAction("Field data", self)
+        self.field_data_action = QAction("Fields", self)
         self.field_data_action.setStatusTip("Evaluate fields from the selected density data")
         self.field_data_action.triggered.connect(self._show_evaluate_data_dialog)
         self.field_data_action.setVisible(False)
         toolbar_main.addAction(self.field_data_action)
+        self.atoms_action = QAction("Atoms", self)
+        self.atoms_action.setStatusTip("Interpolate or evaluate atom data")
+        self.atoms_action.triggered.connect(self._show_atoms_dialog)
+        self.atoms_action.setVisible(False)
+        toolbar_main.addAction(self.atoms_action)
 
         toolbar_row = QWidget()
         toolbar_row.setFixedHeight(32)
@@ -529,12 +584,14 @@ class MainWindow(QMainWindow):
         self.dtime = simulation_data.get("dtime")
         self._computed_field_labels.clear()
         self._computed_atom_data.clear()
+        self._computed_atom_group = False
         self.field_data_action.setVisible(
             self.fields is not None
             and self.fields.size > 0
             and isinstance(self.field_labels, (list, tuple, np.ndarray))
             and len(self.field_labels) > 0
         )
+        self._update_atoms_action_visibility()
 
         fields_by_label = {}
         if self.fields is not None and self.field_labels is not None:
@@ -545,8 +602,20 @@ class MainWindow(QMainWindow):
         self.selected_file_path = file_path
         self.loaded_data = loaded_data
         self._populate_hdf5_tree(loaded_data)
+        if self._find_tree_item(("atoms",)) is not None:
+            self._add_computed_atom_data_items()
         self._clear_plot()
         self.statusBar().showMessage(f"Loaded: {file_path}")
+
+    def _update_atoms_action_visibility(self) -> None:
+        has_field_data = (
+            self.fields is not None
+            and self.fields.ndim == 4
+            and self.fields.shape[0] > 0
+            and self.field_labels is not None
+            and len(self.field_labels) > 0
+        )
+        self.atoms_action.setVisible(has_field_data or self.atom_coords is not None)
 
     def _show_export_dialog(self, _: bool = False) -> None:
         dialog = ExportDialog(self, self.selected_file_path)
@@ -562,6 +631,222 @@ class MainWindow(QMainWindow):
 
         dialog = EvaluateDataDialog(self, labels, self._evaluate_data)
         dialog.exec()
+
+    def _show_atoms_dialog(self, _: bool = False) -> None:
+        if self.loaded_data is None:
+            return
+        labels = (
+            self._string_labels(self.field_labels)
+            if self.field_labels is not None
+            else []
+        )
+        atoms_data = self.loaded_data.get("atoms", {})
+        interpolation_ready = (
+            isinstance(atoms_data, dict)
+            and atoms_data.get("coords") is not None
+            and atoms_data.get("atom_data") is not None
+            and atoms_data.get("atom_data_labels") is not None
+        )
+        if interpolation_ready:
+            dialog = AtomsDialog(self, None, False, self._evaluate_atom_data)
+        else:
+            if not labels:
+                QMessageBox.warning(
+                    self,
+                    "Atoms",
+                    "The open file contains no field data to interpolate.",
+                )
+                return
+            dialog = AtomsDialog(self, labels, True, self._evaluate_atom_data)
+        dialog.exec()
+
+    def _evaluate_atom_data(self, dialog: AtomsDialog) -> None:
+        if self.loaded_data is None:
+            return
+        try:
+            if dialog.interpolate:
+                if self.fields is None:
+                    raise ValueError("The open file contains no field data.")
+                field_labels = self._string_labels(self.field_labels)
+                density_index = field_labels.index(dialog.selection)
+                density = np.asarray(self.fields[density_index])
+                evaluation_sim = self._create_atom_evaluation_simulation(density)
+                atom_coords, interpolated_data = (
+                    evaluation_sim.interpolate_density_maxima(density)
+                )
+                if atom_coords.shape[0] == 0:
+                    raise ValueError("No density maxima were found.")
+                atom_values = np.ascontiguousarray(interpolated_data[:, :1])
+                atom_labels = ["den"]
+                self.atom_coords = np.ascontiguousarray(atom_coords)
+                self.atom_data = atom_values
+                self.atom_data_labels = atom_labels
+                atoms_group = self.loaded_data.setdefault("atoms", {})
+                atoms_group["coords"] = self.atom_coords
+                atoms_group["atom_data"] = self.atom_data
+                atoms_group["atom_data_labels"] = self.atom_data_labels
+                self._computed_atom_data = {
+                    "den": (self.atom_coords, self.atom_data)
+                }
+                self._computed_atom_group = True
+            else:
+                if self.atom_coords is None:
+                    raise ValueError("The open file contains no /atoms/coords data.")
+                field_labels = (
+                    self._string_labels(self.field_labels)
+                    if self.field_labels is not None
+                    else []
+                )
+                if self.fields is not None and field_labels:
+                    source_field = (
+                        "density" if "density" in field_labels else field_labels[0]
+                    )
+                    density = np.asarray(
+                        self.fields[field_labels.index(source_field)]
+                    )
+                else:
+                    density = None
+                evaluation_sim = self._create_atom_evaluation_simulation(density)
+                coords = np.asarray(self.atom_coords)
+                if dialog.selection == "Centro-Symmetry Parameter (CSP)":
+                    values = evaluation_sim.get_csp(coords)
+                    self._store_computed_atom_features(
+                        [("csp", np.asarray(values))]
+                    )
+                elif dialog.selection == "Atom bond data":
+                    bond_angles, bond_lengths = evaluation_sim.get_atom_bond_data(
+                        coords
+                    )
+                    self._store_computed_atom_features(
+                        [
+                            ("min_bond_angle", bond_angles[0]),
+                            ("max_bond_angle", bond_angles[1]),
+                            ("min_bond_length", bond_lengths[0]),
+                            ("max_bond_length", bond_lengths[1]),
+                        ]
+                    )
+                else:
+                    raise ValueError(f"Unsupported atom-data choice: {dialog.selection}")
+        except (
+            ImportError,
+            OSError,
+            TypeError,
+            ValueError,
+            KeyError,
+            IndexError,
+            RuntimeError,
+        ) as error:
+            QMessageBox.warning(self, "Atoms", f"Could not evaluate atom data:\n{error}")
+            return
+
+        self._sync_loaded_data_group("atoms")
+        self._populate_hdf5_tree(self.loaded_data)
+        self._add_computed_atom_data_items()
+        self._color_computed_atom_group()
+
+    def _create_atom_evaluation_simulation(
+        self,
+        density: np.ndarray | None,
+    ) -> pypfc.setup_simulation:
+        if density is not None:
+            density = np.asarray(density)
+        grid = self.loaded_data.get("grid", {}) if self.loaded_data else {}
+        ndiv = (
+            np.asarray(grid["ndiv"], dtype=int).reshape(-1)
+            if grid.get("ndiv") is not None
+            else (
+                np.asarray(density.shape, dtype=int)
+                if density is not None
+                else np.empty(0, dtype=int)
+            )
+        )
+        domain_value = grid.get("domain_size")
+        if domain_value is None:
+            spacing = grid.get("ddiv")
+            if spacing is None:
+                raise ValueError("The HDF5 file has no grid size or spacing data.")
+            domain_size = np.asarray(spacing, dtype=float).reshape(-1) * ndiv
+        else:
+            domain_size = np.asarray(domain_value, dtype=float).reshape(-1)
+        if (
+            ndiv.shape != (3,)
+            or domain_size.shape != (3,)
+            or not np.isfinite(domain_size).all()
+            or np.any(domain_size <= 0)
+            or (
+                density is not None
+                and (
+                    density.ndim != 3
+                    or not np.issubdtype(density.dtype, np.number)
+                    or not np.array_equal(ndiv, density.shape)
+                )
+            )
+        ):
+            raise ValueError("The density field and grid metadata are incompatible.")
+
+        config = dict(self.loaded_data.get("simulation", {}))
+        config.update(
+            device_type="cpu",
+            verbose=False,
+            torch_threads=torch.get_num_threads(),
+            torch_threads_interop=torch.get_num_interop_threads(),
+        )
+        evaluation_sim = pypfc.setup_simulation(
+            domain_size=domain_size,
+            ndiv=ndiv,
+            config=config,
+        )
+        if density is not None:
+            density = np.ascontiguousarray(density, dtype=evaluation_sim._dtype_cpu)
+            evaluation_sim.set_density(density)
+        return evaluation_sim
+
+    def _store_computed_atom_features(
+        self,
+        features: list[tuple[str, np.ndarray]],
+    ) -> None:
+        if self.atom_coords is None:
+            raise ValueError("The open file contains no /atoms/coords data.")
+        atom_coords = np.asarray(self.atom_coords)
+        n_atoms = atom_coords.shape[0]
+        if self.atom_data is None:
+            atom_data = np.empty((n_atoms, 0), dtype=atom_coords.dtype)
+        else:
+            atom_data = np.asarray(self.atom_data).copy()
+        labels = (
+            self._string_labels(self.atom_data_labels)
+            if self.atom_data_labels is not None
+            else []
+        )
+        computed: dict[str, tuple[np.ndarray, np.ndarray]] = {}
+        for label, values in features:
+            column = np.asarray(values).reshape(-1)
+            if column.shape != (n_atoms,):
+                raise ValueError(f"Atom data '{label}' has an unexpected shape.")
+            if label in labels:
+                atom_data[:, labels.index(label)] = column
+            else:
+                atom_data = np.column_stack((atom_data, column))
+                labels.append(label)
+            computed[label] = (atom_coords, column[:, np.newaxis])
+        self.atom_data = atom_data
+        self.atom_data_labels = labels
+        self._computed_atom_data.update(computed)
+        self._sync_loaded_data_group("atoms")
+
+    def _color_computed_atom_group(self) -> None:
+        if not self._computed_atom_group:
+            return
+        blue = QBrush(QColor("blue"))
+        for path in (
+            ("atoms",),
+            ("atoms", "coords"),
+            ("atoms", "atom_data"),
+            ("atoms", "atom_data_labels"),
+        ):
+            item = self._find_tree_item(path)
+            if item is not None:
+                item.setForeground(0, blue)
 
     def _evaluate_data(self, dialog: EvaluateDataDialog) -> None:
         if self.fields is None or self.field_labels is None:
@@ -731,26 +1016,634 @@ class MainWindow(QMainWindow):
                 ("atoms", "atom_data_labels"),
             )
             atoms_group.addChild(parent)
-        existing_computed_labels = {
-            parent.child(index).text(0)
-            for index in range(parent.childCount())
-            if parent.child(index).data(0, Qt.ItemDataRole.UserRole + 2)
-            == "computed"
-        }
+        labels = (
+            self._string_labels(self.atom_data_labels)
+            if self.atom_data_labels is not None
+            else []
+        )
         for label in self._computed_atom_data:
-            if label in existing_computed_labels:
-                continue
-            item = QTreeWidgetItem([label, "interpolated"])
+            item = next(
+                (
+                    parent.child(index)
+                    for index in range(parent.childCount())
+                    if parent.child(index).text(0) == label
+                ),
+                None,
+            )
+            if item is None:
+                item = QTreeWidgetItem([label, ""])
+                item.setData(
+                    0,
+                    Qt.ItemDataRole.UserRole,
+                    ("atoms", "atom_data_labels", label),
+                )
+                parent.addChild(item)
             item.setData(
                 0,
-                Qt.ItemDataRole.UserRole,
-                ("atoms", "atom_data_labels", label),
+                Qt.ItemDataRole.UserRole + 1,
+                labels.index(label) if label in labels else -1,
             )
-            item.setData(0, Qt.ItemDataRole.UserRole + 1, -1)
             item.setData(0, Qt.ItemDataRole.UserRole + 2, "computed")
             item.setForeground(0, QBrush(QColor("blue")))
-            parent.addChild(item)
         parent.setExpanded(True)
+
+    def _show_tree_context_menu(self, position: Any) -> None:
+        item = self.tree.itemAt(position)
+        if item is None:
+            return
+        item_path = item.data(0, Qt.ItemDataRole.UserRole)
+        if item_path == ("atoms",):
+            menu = QMenu(self)
+            if self._computed_atom_group:
+                add_action = menu.addAction("Add to file")
+            delete_action = menu.addAction("Delete")
+            action = menu.exec(self.tree.viewport().mapToGlobal(position))
+            if self._computed_atom_group and action is add_action:
+                self._add_computed_atom_group_to_file()
+            if action is delete_action:
+                self._delete_atoms_group()
+            return
+        computed_atom_group_paths = {
+            ("atoms", "atom_data"),
+            ("atoms", "atom_data_labels"),
+            ("atoms", "coords"),
+        }
+        if (
+            self._computed_atom_group
+            and item_path in computed_atom_group_paths
+            and item.foreground(0).color() == QColor("blue")
+        ):
+            menu = QMenu(self)
+            add_action = menu.addAction("Add to file")
+            if menu.exec(self.tree.viewport().mapToGlobal(position)) is add_action:
+                self._add_computed_atom_group_to_file()
+            return
+        if (
+            not isinstance(item_path, tuple)
+            or len(item_path) != 3
+            or item_path[:2]
+            not in (("atoms", "atom_data_labels"), ("fields", "field_labels"))
+            or item_path == ("fields", "field_labels", "density")
+        ):
+            return
+
+        self.tree.setCurrentItem(item)
+        is_computed = (
+            item.data(0, Qt.ItemDataRole.UserRole + 2) == "computed"
+            or item_path[2] in self._computed_field_labels
+        )
+        menu = QMenu(self)
+        add_action = menu.addAction("Add to file")
+        add_action.setEnabled(is_computed)
+        delete_action = menu.addAction("Delete")
+        rename_action = menu.addAction("Rename")
+        action = menu.exec(self.tree.viewport().mapToGlobal(position))
+        if action is add_action:
+            self._edit_tree_data_item("add", item_path)
+        elif action is delete_action:
+            self._edit_tree_data_item("delete", item_path)
+        elif action is rename_action:
+            self._edit_tree_data_item("rename", item_path)
+
+    def _add_computed_atom_group_to_file(self) -> None:
+        if (
+            self.selected_file_path is None
+            or self.atom_coords is None
+            or self.atom_data is None
+            or self.atom_data_labels is None
+        ):
+            return
+        try:
+            labels = self._string_labels(self.atom_data_labels)
+            coords = np.asarray(self.atom_coords)
+            atom_data = np.asarray(self.atom_data)
+            if (
+                coords.ndim != 2
+                or coords.shape[1] != 3
+                or atom_data.ndim != 2
+                or atom_data.shape != (coords.shape[0], len(labels))
+            ):
+                raise ValueError("Interpolated atom data has an inconsistent shape.")
+            self._write_hdf5_label_data(
+                "atoms",
+                "atom_data",
+                "atom_data_labels",
+                atom_data,
+                labels,
+                coords=coords,
+                replace_coords=True,
+            )
+        except (ImportError, OSError, TypeError, ValueError, KeyError, IndexError) as error:
+            QMessageBox.critical(
+                self,
+                "Unable to save atoms",
+                f"Could not add interpolated atom data to the HDF5 file:\n{error}",
+            )
+            return
+
+        self._computed_atom_group = False
+        self._computed_atom_data.clear()
+        self._sync_loaded_data_group("atoms")
+        if self.loaded_data is not None:
+            self._populate_hdf5_tree(self.loaded_data)
+        self.statusBar().showMessage("Added interpolated atoms to the HDF5 file")
+
+    def _delete_atoms_group(self) -> None:
+        if self.selected_file_path is None:
+            return
+        try:
+            import h5py
+        except ImportError as error:
+            QMessageBox.critical(
+                self,
+                "Unable to delete atoms",
+                f"h5py is required to edit HDF5 data:\n{error}",
+            )
+            return
+
+        try:
+            with h5py.File(self.selected_file_path, "r+") as h5_file:
+                if "atoms" in h5_file:
+                    del h5_file["atoms"]
+        except (OSError, RuntimeError, ValueError) as error:
+            QMessageBox.critical(
+                self,
+                "Unable to delete atoms",
+                f"Could not delete '/atoms' from the open file:\n{error}",
+            )
+            return
+
+        if self.loaded_data is not None:
+            self.loaded_data.pop("atoms", None)
+        self.atom_coords = None
+        self.atom_data = None
+        self.atom_data_labels = None
+        self._computed_atom_data.clear()
+        self._computed_atom_group = False
+        self._populate_hdf5_tree(self.loaded_data or {})
+        self._update_atoms_action_visibility()
+        self._clear_plot()
+        self.statusBar().showMessage("Deleted /atoms from the open file")
+
+    def _edit_tree_data_item(
+        self,
+        operation: str,
+        item_path: tuple[str, ...],
+    ) -> None:
+        group_name, _, label = item_path
+        is_field = group_name == "fields"
+        data_key = "field_data" if is_field else "atom_data"
+        label_key = "field_labels" if is_field else "atom_data_labels"
+        if self.selected_file_path is None:
+            return
+
+        item = self.tree.currentItem()
+        is_computed = (
+            item is not None
+            and item.data(0, Qt.ItemDataRole.UserRole) == item_path
+            and item.data(0, Qt.ItemDataRole.UserRole + 2) == "computed"
+        ) or (is_field and label in self._computed_field_labels)
+
+        new_label = label
+        if operation == "rename":
+            new_label, accepted = QInputDialog.getText(
+                self,
+                "Rename data",
+                "New name:",
+                QLineEdit.EchoMode.Normal,
+                label,
+            )
+            new_label = new_label.strip()
+            if not accepted:
+                return
+            if not new_label:
+                QMessageBox.warning(self, "Rename data", "The name cannot be empty.")
+                return
+
+        previous_state = (
+            self.fields,
+            self.field_labels,
+            self.den,
+            self.ene,
+            self.atom_data,
+            self.atom_data_labels,
+            self._computed_field_labels.copy(),
+            self._computed_atom_data.copy(),
+            self.atom_coords,
+            self._computed_atom_group,
+        )
+        try:
+            disk_data, disk_labels, disk_coords = self._read_hdf5_label_data(
+                group_name,
+                data_key,
+                label_key,
+            )
+            disk_index = disk_labels.index(label) if label in disk_labels else None
+            if operation == "add":
+                if not is_computed:
+                    return
+                if is_field:
+                    session_labels = self._string_labels(self.field_labels)
+                    session_data = np.asarray(self.fields)
+                    session_index = session_labels.index(label)
+                    new_disk_data, new_disk_labels = self._replace_or_append_column(
+                        disk_data,
+                        disk_labels,
+                        label,
+                        session_data[session_index],
+                        field=True,
+                    )
+                else:
+                    if label not in self._computed_atom_data:
+                        return
+                    computed_coords, computed_values = self._computed_atom_data[label]
+                    if disk_coords is None:
+                        if disk_data.size:
+                            raise ValueError(
+                                "The atom data in the open file has no matching "
+                                "coordinate dataset."
+                            )
+                        disk_data = np.empty(
+                            (computed_coords.shape[0], 0),
+                            dtype=computed_values.dtype,
+                        )
+                    elif (
+                        computed_coords.shape != disk_coords.shape
+                        or not np.allclose(computed_coords, disk_coords)
+                    ):
+                        raise ValueError(
+                            "Interpolated atom data can only be added when its "
+                            "coordinates match the atoms in the open file."
+                        )
+                    new_disk_data, new_disk_labels = self._replace_or_append_column(
+                        disk_data,
+                        disk_labels,
+                        label,
+                        computed_values[:, 0],
+                        field=False,
+                    )
+                self._write_hdf5_label_data(
+                    group_name,
+                    data_key,
+                    label_key,
+                    new_disk_data,
+                    new_disk_labels,
+                    coords=computed_coords if not is_field and disk_coords is None else None,
+                )
+                if not is_field:
+                    if self.atom_coords is None:
+                        self.atom_coords = computed_coords
+                    session_atom_labels = (
+                        self._string_labels(self.atom_data_labels)
+                        if self.atom_data_labels is not None
+                        else []
+                    )
+                    self._set_session_atom_data(
+                        self.atom_data,
+                        session_atom_labels,
+                        label,
+                        self._computed_atom_data[label][1][:, 0],
+                    )
+                    self._computed_atom_data.pop(label, None)
+                    if disk_coords is None:
+                        self._computed_atom_group = False
+                if is_field:
+                    self._computed_field_labels.discard(label)
+            elif operation in ("delete", "rename"):
+                if operation == "rename":
+                    if new_label == label:
+                        return
+                    if is_field:
+                        session_labels = self._string_labels(self.field_labels)
+                    elif is_computed:
+                        base_atom_labels = (
+                            self._string_labels(self.atom_data_labels)
+                            if self.atom_data_labels is not None
+                            else []
+                        )
+                        session_labels = [
+                            *base_atom_labels,
+                            *self._computed_atom_data.keys(),
+                        ]
+                    else:
+                        session_labels = self._string_labels(self.atom_data_labels)
+                    if (
+                        (new_label in disk_labels or new_label in session_labels)
+                        and new_label != label
+                    ):
+                        QMessageBox.warning(
+                            self,
+                            "Rename data",
+                            f"An item named '{new_label}' already exists.",
+                        )
+                        return
+
+                if is_field:
+                    session_labels = self._string_labels(self.field_labels)
+                    session_data = np.asarray(self.fields)
+                    session_index = session_labels.index(label)
+                    if operation == "delete":
+                        session_data = np.delete(session_data, session_index, axis=0)
+                        session_labels.pop(session_index)
+                        self._computed_field_labels.discard(label)
+                    else:
+                        session_labels[session_index] = new_label
+                        if label in self._computed_field_labels:
+                            self._computed_field_labels.discard(label)
+                            self._computed_field_labels.add(new_label)
+                    self.fields = session_data
+                    self.field_labels = session_labels
+                    self.den = (
+                        session_data[session_labels.index("density")]
+                        if "density" in session_labels
+                        else None
+                    )
+                    self.ene = (
+                        session_data[session_labels.index("energy")]
+                        if "energy" in session_labels
+                        else None
+                    )
+                elif is_computed:
+                    atom_coords, atom_values = self._computed_atom_data[label]
+                    session_labels = (
+                        self._string_labels(self.atom_data_labels)
+                        if self.atom_data_labels is not None
+                        else []
+                    )
+                    if label in session_labels and self.atom_data is not None:
+                        session_data = np.asarray(self.atom_data)
+                        session_index = session_labels.index(label)
+                        if operation == "delete":
+                            session_data = np.delete(
+                                session_data,
+                                session_index,
+                                axis=1,
+                            )
+                            session_labels.pop(session_index)
+                        else:
+                            session_labels[session_index] = new_label
+                        self.atom_data = session_data
+                        self.atom_data_labels = session_labels
+                    if operation == "delete":
+                        self._computed_atom_data.pop(label)
+                    else:
+                        self._computed_atom_data.pop(label)
+                        self._computed_atom_data[new_label] = (
+                            atom_coords,
+                            atom_values,
+                        )
+                else:
+                    session_labels = self._string_labels(self.atom_data_labels)
+                    session_data = np.asarray(self.atom_data)
+                    session_index = session_labels.index(label)
+                    if operation == "delete":
+                        session_data = np.delete(session_data, session_index, axis=1)
+                        session_labels.pop(session_index)
+                    else:
+                        session_labels[session_index] = new_label
+                    self.atom_data = session_data
+                    self.atom_data_labels = session_labels
+
+                if disk_index is not None:
+                    if operation == "delete":
+                        axis = 0 if is_field else 1
+                        disk_data = np.delete(disk_data, disk_index, axis=axis)
+                        disk_labels.pop(disk_index)
+                    else:
+                        disk_labels[disk_index] = new_label
+                    self._write_hdf5_label_data(
+                        group_name,
+                        data_key,
+                        label_key,
+                        disk_data,
+                        disk_labels,
+                    )
+            else:
+                return
+        except (ImportError, OSError, TypeError, ValueError, KeyError, IndexError) as error:
+            (
+                self.fields,
+                self.field_labels,
+                self.den,
+                self.ene,
+                self.atom_data,
+                self.atom_data_labels,
+                self._computed_field_labels,
+                self._computed_atom_data,
+                self.atom_coords,
+                self._computed_atom_group,
+            ) = previous_state
+            QMessageBox.critical(
+                self,
+                "Unable to update HDF5 data",
+                f"Could not {operation} '{label}':\n{error}",
+            )
+            return
+
+        self._sync_loaded_data_group(group_name)
+        if self.loaded_data is not None:
+            self._populate_hdf5_tree(self.loaded_data)
+            self._add_computed_atom_data_items()
+            self._color_computed_atom_group()
+        self.statusBar().showMessage(f"Updated {group_name} data: {label}")
+
+    @staticmethod
+    def _string_labels(labels: Any) -> list[str]:
+        if isinstance(labels, np.ndarray):
+            labels = labels.tolist()
+        if not isinstance(labels, (list, tuple)):
+            raise ValueError("The HDF5 label collection is unavailable.")
+        if not all(isinstance(label, str) for label in labels):
+            raise ValueError("The HDF5 label collection must contain strings.")
+        return list(labels)
+
+    def _read_hdf5_label_data(
+        self,
+        group_name: str,
+        data_key: str,
+        label_key: str,
+    ) -> tuple[np.ndarray, list[str], np.ndarray | None]:
+        try:
+            import h5py
+        except ImportError as error:
+            raise ImportError("h5py is required to edit HDF5 data.") from error
+
+        group_path = f"/{group_name}"
+        with h5py.File(self.selected_file_path, "r") as h5_file:
+            group = h5_file.get(group_path)
+            coords = (
+                np.asarray(h5_file["/atoms/coords"])
+                if group_name == "atoms"
+                and group is not None
+                and "coords" in group
+                else None
+            )
+            if group is None and group_name == "atoms":
+                data = np.empty((0, 0), dtype=float)
+                labels = []
+            elif group is None:
+                raise KeyError(f"The HDF5 file has no {group_path} group.")
+            elif (
+                data_key not in group
+                and label_key not in group
+                and group_name == "atoms"
+            ):
+                data = np.empty(
+                    (coords.shape[0], 0) if coords is not None else (0, 0),
+                    dtype=coords.dtype if coords is not None else float,
+                )
+                labels = []
+            elif data_key in group and label_key in group:
+                data = np.asarray(group[data_key])
+                labels = group[label_key].asstr()[()].tolist()
+                if isinstance(labels, str):
+                    labels = [labels]
+            else:
+                raise KeyError(
+                    f"{group_path} must contain both '{data_key}' and '{label_key}'."
+                )
+        if data.shape[0 if group_name == "fields" else 1] != len(labels):
+            raise ValueError(
+                f"{group_path}/{data_key} and {group_path}/{label_key} do not match."
+            )
+        return data, self._string_labels(labels), coords
+
+    @staticmethod
+    def _replace_or_append_column(
+        data: np.ndarray,
+        labels: list[str],
+        label: str,
+        values: np.ndarray,
+        *,
+        field: bool,
+    ) -> tuple[np.ndarray, list[str]]:
+        values = np.asarray(values)
+        index = labels.index(label) if label in labels else None
+        axis = 0 if field else 1
+        expected_shape = data.shape[1:] if field else (data.shape[0],)
+        if values.shape != expected_shape:
+            raise ValueError(
+                f"Data for '{label}' has shape {values.shape}; expected {expected_shape}."
+            )
+        if index is None:
+            data = np.concatenate(
+                (data, np.expand_dims(values, axis=axis)),
+                axis=axis,
+            )
+            labels.append(label)
+        else:
+            if field:
+                data[index] = values
+            else:
+                data[:, index] = values
+        return data, labels
+
+    def _write_hdf5_label_data(
+        self,
+        group_name: str,
+        data_key: str,
+        label_key: str,
+        data: np.ndarray,
+        labels: list[str],
+        coords: np.ndarray | None = None,
+        replace_coords: bool = False,
+    ) -> None:
+        try:
+            import h5py
+        except ImportError as error:
+            raise ImportError("h5py is required to edit HDF5 data.") from error
+
+        temporary_suffix = uuid.uuid4().hex
+        data_temp = f"_pypfc_gui_data_{temporary_suffix}"
+        labels_temp = f"_pypfc_gui_labels_{temporary_suffix}"
+        coords_temp = f"_pypfc_gui_coords_{temporary_suffix}"
+        with h5py.File(self.selected_file_path, "r+") as h5_file:
+            group = h5_file.require_group(f"/{group_name}")
+            options = {}
+            data_attrs = {}
+            labels_attrs = {}
+            if data_key in group and label_key in group:
+                old_data = group[data_key]
+                old_labels = group[label_key]
+                data_attrs = dict(old_data.attrs.items())
+                labels_attrs = dict(old_labels.attrs.items())
+                if old_data.compression is not None:
+                    options["compression"] = old_data.compression
+                    if old_data.compression_opts is not None:
+                        options["compression_opts"] = old_data.compression_opts
+                if old_data.shuffle:
+                    options["shuffle"] = True
+                if old_data.fletcher32:
+                    options["fletcher32"] = True
+            elif data_key in group or label_key in group:
+                raise KeyError(
+                    f"/{group_name} must contain both '{data_key}' and '{label_key}'."
+                )
+
+            new_data = group.create_dataset(data_temp, data=data, **options)
+            new_labels = group.create_dataset(
+                labels_temp,
+                data=np.asarray(labels, dtype=object),
+                dtype=h5py.string_dtype(encoding="utf-8"),
+            )
+            for key, value in data_attrs.items():
+                new_data.attrs[key] = value
+            for key, value in labels_attrs.items():
+                new_labels.attrs[key] = value
+            if coords is not None and ("coords" not in group or replace_coords):
+                group.create_dataset(coords_temp, data=coords)
+
+            if data_key in group:
+                del group[data_key]
+                del group[label_key]
+            group.move(data_temp, data_key)
+            group.move(labels_temp, label_key)
+            if coords_temp in group:
+                if "coords" in group:
+                    del group["coords"]
+                group.move(coords_temp, "coords")
+
+    def _set_session_atom_data(
+        self,
+        atom_data: np.ndarray | None,
+        labels: list[str],
+        label: str,
+        values: np.ndarray,
+    ) -> None:
+        if self.atom_coords is None:
+            raise ValueError("The open file has no atom coordinates.")
+        atom_coords = np.asarray(self.atom_coords)
+        values = np.asarray(values)
+        if values.shape != (atom_coords.shape[0],):
+            raise ValueError(f"Interpolated data for '{label}' has an unexpected shape.")
+        if atom_data is None:
+            atom_data = np.empty((atom_coords.shape[0], 0), dtype=values.dtype)
+        else:
+            atom_data = np.asarray(atom_data)
+        if label in labels:
+            atom_data[:, labels.index(label)] = values
+        else:
+            atom_data = np.column_stack((atom_data, values))
+            labels.append(label)
+        self.atom_data = atom_data
+        self.atom_data_labels = labels
+        if self.loaded_data is not None:
+            atoms_group = self.loaded_data.setdefault("atoms", {})
+            atoms_group["atom_data"] = atom_data
+            atoms_group["atom_data_labels"] = labels
+
+    def _sync_loaded_data_group(self, group_name: str) -> None:
+        if self.loaded_data is None:
+            return
+        group = self.loaded_data.setdefault(group_name, {})
+        if group_name == "fields":
+            group["field_data"] = self.fields
+            group["field_labels"] = self.field_labels
+        else:
+            if self.atom_data is not None:
+                group["atom_data"] = self.atom_data
+            if self.atom_data_labels is not None:
+                group["atom_data_labels"] = self.atom_data_labels
 
     def _find_tree_item(self, path: tuple[str, ...]) -> QTreeWidgetItem | None:
         for index in range(self.tree.topLevelItemCount()):

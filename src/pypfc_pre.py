@@ -408,9 +408,10 @@ class setup_pre(setup_base):
             
             - `model=0`: No parameter needed. The number of crystal seeds is determined
               from the number of provided orientations.
-            - `model=1`: [ctrl_points] - A 6x2 array of control points for the
-              grain boundary configuration
-            - `model=2`: [h1,w1,w3,w4] - geometry control parameters
+            - `model=1`: [ctrl_points] - A 6x2 array of control point xy coordinates
+              for the grain boundary configuration
+            - `model=2`: [ctrl_points] - A 8x2 array of control point xy coordinates
+              for the grain boundary configuration
         xtal_strain : ndarray of float, shape (n_xtal ,6), optional
             Small-strain tensor components for each crystal [exx, eyy, ezz, exy, exz, eyz]
             (tensor shear components, i.e. exy = gamma_xy/2). Positive normal
@@ -426,7 +427,7 @@ class setup_pre(setup_base):
             
             - 0: A row of cylindrical seeds along y, with cylinders extending through z
             - 1: A five-grain structure forming two triple junctions, columnar through z
-            - 2: A four-grain grain structure, columnar through z
+            - 2: A four-grain grain structure, columnar through z and defined by eight points
         
         Returns
         -------
@@ -516,68 +517,44 @@ class setup_pre(setup_base):
             density[condition] = self.generate_density_field(crd, xtal_rot[:,:,3].T)
 
         elif model==2:
-            h1 = params[0]
-            w1 = params[1]
-            w3 = params[2]
-            w4 = params[3]
-
-            Fy = (Ly - h1)/2
-            Fx = (Lx - w1 - w3 - w4)/2
-            Ex = Fx
-            Ey = Fy + h1
-            Ax = Ex + w3
-            Ay = Ey
-            Bx = Ax + w1
-            By = Ay
-            Cx = Fx + w3
-            Cy = Fy
-            Dx = Cx + w1
-            Dy = Cy
-            Gx = Bx + w4
-            Gy = By
-            Hx = Dx + w4
-            Hy = Dy
-
-            A = (Ax,Ay)
-            B = (Bx,By)
-            C = (Cx,Cy)
-            D = (Dx,Dy)
-            E = (Ex,Ey)
-            F = (Fx,Fy)
-            G = (Gx,Gy)
-            H = (Hx,Hy)
-
-            lh = liq_width / 2
+            points = params
+            Ax,Ay  = points[0,:]
+            Bx,By  = points[1,:]
+            Cx,Cy  = points[2,:]
+            Dx,Dy  = points[3,:]
+            Ex,Ey  = points[4,:]
+            Fx,Fy  = points[5,:]
+            Gx,Gy  = points[6,:]
+            Hx,Hy  = points[7,:]
 
             # Crystal 1
-            condition1 = points_inside_polygon(Xc, Yc, ((Ax+lh,Ay-lh),(Bx-lh,By-lh),(Dx-lh,Dy+lh),(Cx+lh,Cy+lh)))
-            condition2 = points_inside_polygon(Xc, Yc, ((0.0,Ey-lh),(Ex-lh,Ey-lh),(Fx-lh,Fy+lh),(0.0,Fy+lh)))
-            condition3 = points_inside_polygon(Xc, Yc, ((Gx+lh,Gy-lh),(Lx,Gy-lh),(Lx,Hy+lh),(Hx+lh,Hy+lh)))
+            condition1 = points_inside_polygon(Xc, Yc, ((Ax,Ay), (Bx,By), (Dx,Dy), (Cx,Cy)))
+            condition2 = points_inside_polygon(Xc, Yc, ((0.0,Ey),(Ex,Ey), (Fx,Fy), (0.0,Fy)))
+            condition3 = points_inside_polygon(Xc, Yc, ((Gx,Gy), (Lx,Gy), (Lx,Hy), (Hx,Hy)))
             condition  = condition1 | condition2 | condition3
             crd        = np.array([Xc[condition], Yc[condition], Zc[condition]])
             density[condition] = self.generate_density_field(crd, xtal_rot[:,:,0].T, strain=xtal_strain[0,:])
 
             # Crystal 2
-            condition1 = points_inside_polygon(Xc, Yc, ((Cx+lh,Cy-lh), (Dx-lh,Dy-lh), (Dx-lh,0.0), (Cx+lh,0.0)))
-            condition2 = points_inside_polygon(Xc, Yc, ((Ax+lh,Ly),(Bx-lh,Ly),(Bx-lh,By+lh),(Ax+lh,Ay+lh)))
-            condition3 = points_inside_polygon(Xc, Yc, ((Ex-lh,Ey+lh), (0.0,Ey+lh), (0.0,Ly), (Ex-lh,Ly)))
-            condition4 = points_inside_polygon(Xc, Yc, ((Fx-lh,Fy-lh), (Fx-lh,0.0), (0.0,0.0), (0.0,Fy-lh)))
-            condition5 = points_inside_polygon(Xc, Yc, ((Gx+lh,Gy+lh), (Gx+lh,Ly), (Lx,Ly), (Lx,Gy+lh)))
-            condition6 = points_inside_polygon(Xc, Yc, ((Hx+lh,Hy-lh), (Lx,Hy-lh), (Lx,0.0), (Hx+lh,0.0)))
+            condition1 = points_inside_polygon(Xc, Yc, ((Cx,Cy), (Dx,Dy), (Dx,0.0), (Cx,0.0)))
+            condition2 = points_inside_polygon(Xc, Yc, ((Ax,Ly), (Bx,Ly), (Bx,By), (Ax,Ay)))
+            condition3 = points_inside_polygon(Xc, Yc, ((Ex,Ey), (0.0,Ey), (0.0,Ly), (Ex,Ly)))
+            condition4 = points_inside_polygon(Xc, Yc, ((Fx,Fy), (Fx,0.0), (0.0,0.0), (0.0,Fy)))
+            condition5 = points_inside_polygon(Xc, Yc, ((Gx,Gy), (Gx,Ly), (Lx,Ly), (Lx,Gy)))
+            condition6 = points_inside_polygon(Xc, Yc, ((Hx,Hy), (Lx,Hy), (Lx,0.0), (Hx,0.0)))
             condition  = condition1 | condition2 | condition3 | condition4 | condition5 | condition6
             crd        = np.array([Xc[condition], Yc[condition], Zc[condition]])
             density[condition] = self.generate_density_field(crd, xtal_rot[:,:,1].T, strain=xtal_strain[1,:])
 
             # Crystal 3
-            condition = (Xc >= Ex+lh) & (Xc <= Ax-lh)
+            condition = (Xc >= Ex) & (Xc <= Ax)
             crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
             density[condition] = self.generate_density_field(crd, xtal_rot[:,:,2].T, strain=xtal_strain[2,:])
 
             # Crystal 4
-            condition = (Xc >= Bx+lh) & (Xc <= Gx-lh)
+            condition = (Xc >= Bx) & (Xc <= Gx)
             crd       = np.array([Xc[condition], Yc[condition], Zc[condition]])
             density[condition] = self.generate_density_field(crd, xtal_rot[:,:,3].T, strain=xtal_strain[3,:])
-
         else:
             raise ValueError(f'Unsupported value: model={model}')
 
