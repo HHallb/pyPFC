@@ -6474,9 +6474,10 @@ Used for FFT-based operations and differential operators.</p>
 <ul>
 <li><code>model=0</code>: No parameter needed. The number of crystal seeds is determined
   from the number of provided orientations.</li>
-<li><code>model=1</code>: [ctrl_points] - A 6x2 array of control points for the
-  grain boundary configuration</li>
-<li><code>model=2</code>: [h1,w1,w3,w4] - geometry control parameters</li>
+<li><code>model=1</code>: [ctrl_points] - A 6x2 array of control point xy coordinates
+  for the grain boundary configuration</li>
+<li><code>model=2</code>: [ctrl_points] - A 8x2 array of control point xy coordinates
+  for the grain boundary configuration</li>
 </ul>
               </div>
             </td>
@@ -6548,7 +6549,7 @@ unstrained field.</p>
 <ul>
 <li>0: A row of cylindrical seeds along y, with cylinders extending through z</li>
 <li>1: A five-grain structure forming two triple junctions, columnar through z</li>
-<li>2: A four-grain grain structure, columnar through z</li>
+<li>2: A four-grain grain structure, columnar through z and defined by eight points</li>
 </ul>
               </div>
             </td>
