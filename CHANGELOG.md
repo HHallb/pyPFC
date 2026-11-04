@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - 2026-11-03
+
+### Added
+
+### Changed
+
+### Fixed
+
+- Corrected an error in the evaluation of the chemical potential in `evaluate_chemical_potential()` in `pypfc`
+
 ## [Unreleased] - 2026-10-09
 
 ### Added

@@ -890,7 +890,7 @@ class setup_simulation(setup_io):
 
 # =====================================================================================
 
-    def evaluate_chemical_potential(self) -> float:
+    def evaluate_chemical_potential(self) -> Tuple[np.ndarray, float]:
         """
         Evaluate the chemical potential.
 
@@ -899,13 +899,16 @@ class setup_simulation(setup_io):
 
         Returns
         -------
-        chem_pot : torch.Tensor
-            Chemical potential field with shape [nx, ny, nz].
+        chem_pot : ndarray of float, shape (nx, ny, nz)
+            Chemical potential field on CPU.
         chem_pot_av : float
             Average chemical potential.
             
         Notes
         -----
+        This is the functional derivative of the free-energy density returned
+        by :meth:`evaluate_energy`. The pair-correlation contribution is the
+        negative convolution ``C2 * density``.
         """
 
         if self._verbose: tstart = time.time()
@@ -921,7 +924,7 @@ class setup_simulation(setup_io):
         self._tmp_d = torch.fft.irfftn(self._f_den_d*self._C2_d, s=self._tmp_d.shape)
         
         # Evaluate chemical potential (on device)
-        self._tmp_d = g1*self._den_d - g2*self._den_d.pow(2)/2 + g3*self._den_d.pow(3)/3 - self._den_d.mul(self._tmp_d)
+        self._tmp_d = g1*self._den_d - g2*self._den_d.pow(2)/2 + g3*self._den_d.pow(3)/3 - self._tmp_d
 
         # Evaluate the average chemical potential
         chem_pot_av = torch.sum(self._tmp_d) / (nx * ny * nz)
