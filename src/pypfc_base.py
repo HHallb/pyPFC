@@ -12,6 +12,9 @@ from scipy.spatial import cKDTree
 from scipy.ndimage import zoom
 from skimage import measure
 from scipy import ndimage as ndi
+from scipy.sparse import coo_matrix
+from scipy.sparse.csgraph import connected_components
+import torch.nn.functional as F
 from typing import Union, Tuple, Optional, Dict, Any, List
 from pypfc_grid import setup_grid
 
@@ -646,123 +649,173 @@ class setup_base(setup_grid):
             
         Notes
         -----
-        The method uses scipy.ndimage for high-order interpolation and applies
-        density thresholding and merging of nearby maxima to remove spurious peaks.
-        The interpolation order is controlled by the `_density_interp_order` attribute.
+        Local maxima are found with a non-strict comparison within a neighborhood of
+        half-width `_density_interp_order` grid points, so that peaks centered between
+        grid points are not missed. Maxima below `_density_threshold` times the maximum
+        density are discarded. Positions are refined to sub-grid precision by parabolic
+        interpolation along each axis, and maxima closer than `_density_merge_distance`
+        are merged, accounting for periodicity of the domain. Field values are obtained
+        at the refined positions by local tri-quadratic (27-point) interpolation.
+        On a CUDA device, the maxima are detected on the GPU (with fallback to the CPU
+        if the GPU runs out of memory). Input fields may be numpy arrays or torch tensors.
+
+        Weak density maxima (e.g. partially occupied sites at grain boundaries) are
+        counted as atoms unless `_density_threshold` is raised to exclude them.
         """
 
         if self._verbose: tstart = time.time()
 
-        # Grid spacing
-        dx, dy, dz = self._ddiv
-        
-        # Get density threshold early to avoid recomputation
-        max_den = np.max(den)
-        density_threshold = self._density_threshold * max_den
-        # Optimized local maxima detection using maximum_filter (this is actually quite efficient)
-        size = 1 + 2 * self._density_interp_order
-        footprint = np.ones((size, size, size), dtype=bool)
-        footprint[self._density_interp_order, self._density_interp_order, self._density_interp_order] = False
-        
-        # Find local maxima - maximum_filter is optimized in scipy
-        filtered = ndi.maximum_filter(den, footprint=footprint, mode='wrap')
-        
-        # Combine maxima detection and threshold filtering in one operation
-        valid_maxima_mask = (den > filtered) & (den >= density_threshold)
-        
-        # Early exit if no maxima found
-        if not np.any(valid_maxima_mask):
+        ddiv   = np.asarray(self._ddiv, dtype=float)
+        dsize  = np.asarray(self._domain_size, dtype=float)
+        shape  = np.array(den.shape)
+        radius = int(self._density_interp_order)
+
+        # Local maxima above the density threshold. A point is a maximum if it is not lower than any point
+        # in the surrounding (2*radius+1)^3 box. The non-strict comparison ensures that peaks centered between
+        # two grid points (equal values on adjacent grid points) are found; such duplicates are merged below.
+        # On a CUDA device, the maximum filter is evaluated by max_pool3d, otherwise (or if the GPU runs out
+        # of memory) by the separable maximum filter in scipy.ndimage.
+        idx = None
+        if self._device.type == 'cuda':
+            try:
+                with torch.no_grad():
+                    x    = torch.as_tensor(den, device=self._device)
+                    thr  = self._density_threshold * torch.max(x)
+                    xmax = F.max_pool3d(F.pad(x[None, None], (radius,) * 6, mode='circular'), kernel_size=2 * radius + 1, stride=1)[0, 0]
+                    idx  = torch.nonzero((x >= xmax) & (x >= thr)).cpu().numpy()
+                    del x, xmax
+            except torch.cuda.OutOfMemoryError:
+                idx = None
+                torch.cuda.empty_cache()
+        if idx is None:
+            den_np = den.detach().cpu().numpy() if isinstance(den, torch.Tensor) else np.asarray(den)
+            thr    = self._density_threshold * np.max(den_np)
+            idx    = np.argwhere((den_np >= ndi.maximum_filter(den_np, size=2 * radius + 1, mode='wrap')) & (den_np >= thr))
+
+        if idx.shape[0] == 0:
             atom_coord = np.array([]).reshape(0, 3)
-            atom_data = np.array([]).reshape(0, 1)
+            atom_data  = np.array([]).reshape(0, 1)
             return atom_coord, atom_data
-            
-        # Extract coordinates efficiently - avoid transpose operations
-        maxima_indices = np.where(valid_maxima_mask)
-        n_maxima = len(maxima_indices[0])
-        
-        # Pre-allocate coordinate array and fill directly
-        coords = np.empty((n_maxima, 3), dtype=self._dtype_cpu)
-        coords[:, 0] = maxima_indices[0] * dx
-        coords[:, 1] = maxima_indices[1] * dy 
-        coords[:, 2] = maxima_indices[2] * dz
-        
-        # Extract field values directly using the indices
-        denpos = den[maxima_indices]
-        enepos = ene[maxima_indices] if ene is not None else None
 
-        # Simplified clustering - most efficient for typical PFC use cases
-        if self._density_merge_distance > 0.0 and n_maxima > 1:
-            # Use KDTree for all cases - it's consistently fast and memory efficient
-            tree = cKDTree(coords)
-            visited = np.zeros(n_maxima, dtype=bool)
-            
-            cluster_coords = []
-            cluster_denpos = []
-            cluster_enepos = [] if ene is not None else None
-            
-            for i in range(n_maxima):
-                if visited[i]:
-                    continue
-                    
-                # Find all points within merge distance using KDTree
-                neighbors = tree.query_ball_point(coords[i], r=self._density_merge_distance)
-                
-                # Mark as visited
-                visited[neighbors] = True
-                
-                # Average the cluster - use numpy indexing directly
-                if len(neighbors) == 1:
-                    # Single point - no averaging needed
-                    cluster_coords.append(coords[i])
-                    cluster_denpos.append(denpos[i])
-                    if ene is not None:
-                        cluster_enepos.append(enepos[i])
-                else:
-                    # Multiple points - compute averages
-                    cluster_coords.append(np.mean(coords[neighbors], axis=0))
-                    cluster_denpos.append(np.mean(denpos[neighbors]))
-                    if ene is not None:
-                        cluster_enepos.append(np.mean(enepos[neighbors]))
-            
-            atom_coord = np.array(cluster_coords)
-            denpos = np.array(cluster_denpos)
-            if ene is not None:
-                enepos = np.array(cluster_enepos)
-        else:
-            atom_coord = coords
+        def _gather(field, flat):
+            # Values of a field (numpy array or torch tensor) at flat grid indices
+            if isinstance(field, torch.Tensor):
+                return field.reshape(-1)[torch.as_tensor(flat, device=field.device)].detach().cpu().numpy().astype(float)
+            return np.asarray(field).reshape(-1)[flat].astype(float)
 
-        # Handle phase field(s) efficiently
+        def _flat(ijk):
+            return np.ravel_multi_index(tuple((ijk % shape).T), tuple(shape))
+
+        # Sub-grid refinement of the maxima positions by parabolic interpolation along each axis
+        coords = idx * ddiv
+        f0     = _gather(den, _flat(idx))
+        for ax in range(3):
+            e     = np.zeros(3, dtype=int)
+            e[ax] = 1
+            fm    = _gather(den, _flat(idx - e))
+            fp    = _gather(den, _flat(idx + e))
+            curv  = fm - 2.0 * f0 + fp
+            safe  = np.where(curv < 0.0, curv, -1.0)
+            off   = np.where(curv < 0.0, 0.5 * (fm - fp) / safe, 0.0)
+            coords[:, ax] += np.clip(off, -0.5, 0.5) * ddiv[ax]
+        coords = np.mod(coords, dsize)
+        coords[coords >= dsize] = 0.0 # Guard against round-off giving exactly the domain size
+
+        # Merge maxima closer than the merge distance, accounting for periodicity of the domain
+        if self._density_merge_distance > 0.0 and coords.shape[0] > 1:
+            n      = coords.shape[0]
+            pairs  = cKDTree(coords, boxsize=dsize).query_pairs(self._density_merge_distance, output_type='ndarray')
+            graph  = coo_matrix((np.ones(pairs.shape[0], dtype=bool), (pairs[:, 0], pairs[:, 1])), shape=(n, n))
+            _, lab = connected_components(graph, directed=False)
+            _, first, inverse = np.unique(lab, return_index=True, return_inverse=True)
+            # Periodic cluster mean: average of the minimum-image offsets from the first member of each cluster
+            offset  = coords - coords[first[inverse]]
+            offset -= dsize * np.round(offset / dsize)
+            counts  = np.bincount(inverse)
+            mean_offset = np.column_stack([np.bincount(inverse, weights=offset[:, ax]) for ax in range(3)]) / counts[:, None]
+            coords = np.mod(coords[first] + mean_offset, dsize)
+            coords[coords >= dsize] = 0.0
+
+        atom_coord = coords.astype(self._dtype_cpu, copy=False)
+
+        # Field values at the atomic positions by local tri-quadratic (27-point Lagrange) interpolation,
+        # consistent with the parabolic refinement of the positions
+        g    = atom_coord / ddiv
+        base = np.rint(g).astype(np.int64)
+        t    = g - base
+        w    = np.stack([0.5 * t * (t - 1.0), 1.0 - t**2, 0.5 * t * (t + 1.0)]) # (3 offsets, n atoms, 3 axes)
+        stencil = [(a, b, c) for a in range(3) for b in range(3) for c in range(3)]
+        flat    = np.stack([_flat(base + np.array([a - 1, b - 1, c - 1])) for a, b, c in stencil])
+        weights = np.stack([w[a, :, 0] * w[b, :, 1] * w[c, :, 2] for a, b, c in stencil])
+        def _interp(field):
+            return np.sum(weights * _gather(field, flat), axis=0)
+
+        columns = [_interp(den)]
+        if ene is not None:
+            columns.append(_interp(ene))
         if fields is not None:
-            if isinstance(fields, np.ndarray) and fields.ndim == 3:
-                field_list = [fields]
-            else:
-                field_list = list(fields)
-            
-            n_fields = len(field_list)
-            n_atoms = len(atom_coord)
-            
-            # Extract field values efficiently
-            field_pos = np.empty((n_atoms, n_fields), dtype=self._dtype_cpu)
-            for field_idx, phase_field in enumerate(field_list):
-                if self._density_merge_distance > 0.0 and n_maxima != n_atoms:
-                    # Merging occurred - use first value (approximate)
-                    field_values = phase_field[maxima_indices]
-                    field_pos[:, field_idx] = field_values[:n_atoms]
-                else:
-                    # No merging - direct extraction
-                    field_pos[:, field_idx] = phase_field[maxima_indices]
-            
-            # Assemble final data array efficiently
-            if ene is not None:
-                atom_data = np.column_stack((denpos, enepos, field_pos))
-            else:
-                atom_data = np.column_stack((denpos, field_pos))
-        else:
-            # No additional fields - simpler assembly
-            if ene is not None:
-                atom_data = np.column_stack((denpos, enepos))
-            else:
-                atom_data = denpos[:, np.newaxis]
+            field_list = [fields] if (hasattr(fields, 'ndim') and fields.ndim == 3) else list(fields)
+            columns.extend(_interp(field) for field in field_list)
+        atom_data = np.column_stack(columns).astype(self._dtype_cpu, copy=False)
+
+        if self._verbose:
+            tend = time.time()
+            print(f'Time to interpolate {atom_coord.shape[0]} density maxima: {tend-tstart:.3f} s')
+
+        return atom_coord, atom_data
+
+        # Sub-grid refinement of the maxima positions by parabolic interpolation along each axis
+        coords = idx * ddiv
+        f0     = den[tuple(idx.T)]
+        for ax in range(3):
+            e    = np.zeros(3, dtype=int)
+            e[ax] = 1
+            fm   = den[tuple(((idx - e) % shape).T)]
+            fp   = den[tuple(((idx + e) % shape).T)]
+            curv = fm - 2.0 * f0 + fp
+            safe = np.where(curv < 0.0, curv, -1.0)
+            off  = np.where(curv < 0.0, 0.5 * (fm - fp) / safe, 0.0)
+            coords[:, ax] += np.clip(off, -0.5, 0.5) * ddiv[ax]
+        coords = np.mod(coords, domain_size)
+        coords[coords >= domain_size] = 0.0 # Guard against round-off giving exactly the domain size
+
+        # Merge maxima closer than the merge distance, accounting for periodicity
+        if self._density_merge_distance > 0.0 and coords.shape[0] > 1:
+            pairs  = cKDTree(coords, boxsize=domain_size).query_pairs(self._density_merge_distance, output_type='ndarray')
+            parent = np.arange(coords.shape[0])
+            def _root(i):
+                while parent[i] != i:
+                    parent[i] = parent[parent[i]]
+                    i = parent[i]
+                return i
+            for i, j in pairs:
+                ri, rj = _root(i), _root(j)
+                if ri != rj:
+                    parent[rj] = ri
+            roots = np.array([_root(i) for i in range(coords.shape[0])])
+            _, first, inverse = np.unique(roots, return_index=True, return_inverse=True)
+            # Periodic cluster mean: average the minimum-image offsets from the first member
+            offset = coords - coords[first[inverse]]
+            offset -= domain_size * np.round(offset / domain_size)
+            counts = np.bincount(inverse)
+            mean_offset = np.column_stack([np.bincount(inverse, weights=offset[:, ax]) for ax in range(3)]) / counts[:, None]
+            coords = np.mod(coords[first] + mean_offset, domain_size)
+            coords[coords >= domain_size] = 0.0
+
+        atom_coord = coords.astype(self._dtype_cpu, copy=False)
+
+        # Interpolate field values at the atomic positions (periodic spline interpolation)
+        grid_pos = (atom_coord / ddiv).T
+        def _interp(field):
+            return ndi.map_coordinates(_to_numpy(field), grid_pos, order=max(1, int(self._density_interp_order)), mode='grid-wrap')
+
+        columns = [_interp(den)]
+        if ene is not None:
+            columns.append(_interp(ene))
+        if fields is not None:
+            field_list = [fields] if (hasattr(fields, 'ndim') and fields.ndim == 3) else list(fields)
+            columns.extend(_interp(field) for field in field_list)
+        atom_data = np.column_stack(columns).astype(self._dtype_cpu, copy=False)
 
         if self._verbose:
             tend = time.time()

@@ -9,10 +9,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Improved performance of `interpolate_density_maxima()` in `pypfc_base` by a factor of approximately 2.5-3 on CPU (separable maximum filter, vectorized clustering of maxima, local tri-quadratic interpolation of field values instead of global spline prefiltering) and by more than an order of magnitude when running on a CUDA device (maxima detected on the GPU)
+
 ### Fixed
 
 - Corrected an error in the evaluation of the chemical potential in `evaluate_chemical_potential()` in `pypfc`
 - Corrected `get_csl_config()` in `pypfc_base`: symmetry-equivalent configurations are now removed (e.g. `[001]` tilt angles are limited to (0, 90] deg), Sigma and the misorientation angle are evaluated correctly for arbitrary axes `[hkl]` (previously only valid for `[001]`), Sigma is always odd and identical for SC/BCC/FCC, Sigma = 1 entries are excluded, and the documented `theta_deg` key is now returned
+- Corrected `interpolate_density_maxima()` in `pypfc_base`: density maxima centered between grid points are no longer missed (non-strict maximum detection), maxima are merged across periodic boundaries (previously duplicated), positions are refined to sub-grid precision as documented (previously grid-snapped), and field values (density, energy, additional fields) are interpolated at the refined positions of all atoms (previously, additional fields were misassigned after merging)
 
 ## [Unreleased] - 2026-10-09
 
