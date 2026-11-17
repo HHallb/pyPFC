@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - 2026-11-03
+## [Unreleased] - 2026-11-16
 
 ### Added
 
@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Corrected an error in the evaluation of the chemical potential in `evaluate_chemical_potential()` in `pypfc`
+- Corrected `get_csl_config()` in `pypfc_base`: symmetry-equivalent configurations are now removed (e.g. `[001]` tilt angles are limited to (0, 90] deg), Sigma and the misorientation angle are evaluated correctly for arbitrary axes `[hkl]` (previously only valid for `[001]`), Sigma is always odd and identical for SC/BCC/FCC, Sigma = 1 entries are excluded, and the documented `theta_deg` key is now returned
 
 ## [Unreleased] - 2026-10-09
 
