@@ -25,7 +25,7 @@
       
       
       <link rel="icon" href="../../images/pyPFC_favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -2446,7 +2446,7 @@ derived parameters.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="numpy.ndarray">ndarray</span></code>
+                  <code>ndarray</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2494,7 +2494,7 @@ derived parameters.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="numpy.ndarray">ndarray</span></code>
+                  <code>ndarray</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2542,7 +2542,7 @@ derived parameters.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="numpy.ndarray">ndarray</span></code>
+                  <code>ndarray</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2763,7 +2763,7 @@ reciprocal lattice positions.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>C2_d</code></td>            <td>
-                  <code>(<span title="torch.Tensor">Tensor</span>, <span title="shape">shape</span>(<span title="nx">nx</span>, <span title="ny">ny</span>, <span title="nz">nz</span> // 2 + 1))</code>
+                  <code>(<span title="torch.Tensor">Tensor</span>, shape(nx, ny, nz // 2 + 1))</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2885,7 +2885,7 @@ to introduce orientational dependence.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>H_d</code></td>            <td>
-                  <code>(<span title="torch.Tensor">Tensor</span>, <span title="shape">shape</span>(<span title="nx">nx</span>, <span title="ny">ny</span>, <span title="nz">nz</span> // 2 + 1))</code>
+                  <code>(<span title="torch.Tensor">Tensor</span>, shape(nx, ny, nz // 2 + 1))</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2936,7 +2936,7 @@ operations in PFC simulations.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>k2_d</code></td>            <td>
-                  <code>(<span title="torch.Tensor">Tensor</span>, <span title="shape">shape</span>(<span title="nx">nx</span>, <span title="ny">ny</span>, <span title="nz_half">nz_half</span>))</code>
+                  <code>(<span title="torch.Tensor">Tensor</span>, shape(nx, ny, nz_half))</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3388,6 +3388,19 @@ grain boundaries.</p>
 GB normals <code>[u v w]</code> for a specified GB axis <code>[h k l]</code>. The list can be used to pick
 a commensurate angle and then call <code>minimum_periodic_domain</code> with
 <code>angle = theta/2</code>.</p>
+<p>The CSL rotations about <code>[h k l]</code> are generated from coprime integer
+pairs <code>(m, n)</code> as <code>tan(theta/2) = n*sqrt(N)/m</code> and
+<code>Sigma = (m^2 + N*n^2)/2^k</code>, with <code>N = h^2 + k^2 + l^2</code> and <code>2^k</code>
+the largest power of two dividing <code>m^2 + N*n^2</code> (Sigma is always odd).
+Symmetry-equivalent configurations are removed so that only one
+representative (the one with the smallest <code>theta</code>) is returned. For
+tilt boundaries, configurations are equivalent if they share Sigma and
+the <code>{u v w}</code> family of the GB plane, giving e.g. <code>theta</code> in
+(0, 90] deg for <code>[001]</code>, (0, 180) deg for <code>[110]</code> and (0, 60] deg
+for <code>[111]</code>. For twist boundaries, equivalence follows from the
+rotational symmetry about the axis and <code>theta -&gt; -theta</code>, giving e.g.
+(0, 45] deg for <code>[001]</code>, (0, 90] deg for <code>[110]</code> and (0, 60] deg
+for <code>[111]</code>. Sigma = 1 configurations are excluded.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3444,7 +3457,9 @@ For <code>gb_type='twist'</code>, this is the twist axis (parallel to GB normal)
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Crystal structure. Options: 'FCC', 'BCC', 'SC'.</p>
+                <p>Crystal structure. Options: 'FCC', 'BCC', 'SC'. Sigma values are
+identical for all cubic Bravais lattices, so this argument is only
+validated.</p>
               </div>
             </td>
             <td>
@@ -3740,7 +3755,7 @@ structure during surface indentation, Phys. Rev. B, 58(17):11085-11088, 1998.
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="numpy.dtype">dtype</span></code>
+                  <code>dtype</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4436,7 +4451,7 @@ algorithm, with optional volume calculation for enclosed regions.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>volume</code></td>            <td>
-                  <code>(<span title="float">float</span>, <span title="optional">optional</span>)</code>
+                  <code>(<span title="float">float</span>, optional)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5945,7 +5960,7 @@ domain cannot be determined.</p>
                 <code>dtype</code>
             </td>
             <td>
-                  <code><span title="numpy.dtype">dtype</span></code>
+                  <code>dtype</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6509,7 +6524,7 @@ unstrained field.</p>
                 <code>strain_frame</code>
             </td>
             <td>
-                  <code>(<span title="lab">lab</span>, <span title="crystal">crystal</span>)</code>
+                  <code>(lab, crystal)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6690,7 +6705,7 @@ unstrained field.</p>
                 <code>model</code>
             </td>
             <td>
-                  <code>(<span title="int">int</span>, <span title="optional">optional</span>)</code>
+                  <code>(<span title="int">int</span>, optional)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7023,7 +7038,7 @@ unstrained field.</p>
                 <code>strain_frame</code>
             </td>
             <td>
-                  <code>(<span title="lab">lab</span>, <span title="crystal">crystal</span>)</code>
+                  <code>(lab, crystal)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7759,7 +7774,7 @@ and <span class="arithmatex">\(n_{s}\)</span> is solid phase density.</p>
                 <code>struct</code>
             </td>
             <td>
-                  <code>(<span title="FCC">FCC</span>, <span title="BCC">BCC</span>)</code>
+                  <code>(FCC, BCC)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8459,7 +8474,7 @@ dataset names.</p>
                 <code>compression</code>
             </td>
             <td>
-                  <code>(<span title="gzip">gzip</span>, <span title="lzf">lzf</span>, None)</code>
+                  <code>(<span title="gzip">gzip</span>, lzf, None)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9476,7 +9491,7 @@ value. Defaults to False to preserve the legacy two-value return.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>ene</code></td>            <td>
-                  <code><span title="ndarray">ndarray</span></code>
+                  <code>ndarray</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9496,7 +9511,7 @@ value. Defaults to False to preserve the legacy two-value return.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>ene_tot</code></td>            <td>
-                  <code>(<span title="float">float</span>, <span title="optional">optional</span>)</code>
+                  <code>(<span title="float">float</span>, optional)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10070,7 +10085,7 @@ value. Defaults to False for compatibility with legacy callers.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>ene_tot</code></td>            <td>
-                  <code>(<span title="float">float</span>, <span title="optional">optional</span>)</code>
+                  <code>(<span title="float">float</span>, optional)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10337,7 +10352,7 @@ properties and computational costs.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="array_like">array_like</span></code>
+                  <code>array_like</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10465,7 +10480,7 @@ models to introduce directional correlations.</p>
                 <code>Rot</code>
             </td>
             <td>
-                  <code><span title="array_like">array_like</span> or None</code>
+                  <code>array_like or None</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10945,7 +10960,7 @@ two-point correlation function.</p>
                 <code>params</code>
             </td>
             <td>
-                  <code><span title="array_like">array_like</span></code>
+                  <code>array_like</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11066,7 +11081,7 @@ Lower values indicate more perfect crystal structure.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>csp_values</code></td>            <td>
-                  <code>(<span title="ndarray">ndarray</span>, <span title="shape">shape</span>(<span title="N">N</span>))</code>
+                  <code>(ndarray, shape(N))</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11623,7 +11638,7 @@ with OVITO - the Open Visualization Tool, Modelling Simul. Mater. Sci. Eng. 18, 
                 <code>struct</code>
             </td>
             <td>
-                  <code>(<span title="FCC">FCC</span>, <span title="BCC">BCC</span>)</code>
+                  <code>(FCC, BCC)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11784,7 +11799,7 @@ with OVITO - the Open Visualization Tool, Modelling Simul. Mater. Sci. Eng. 18, 
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.path", "navigation.top", "search.highlight", "search.share", "toc.follow", "toc.integrate", "content.code.copy", "content.code.select", "content.action.edit", "content.action.view"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "H. Hallberg"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../javascripts/mathjax.js"></script>
       
