@@ -5097,9 +5097,17 @@ Columns: [density, energy, field1, field2, ..., fieldN]</p>
 
 <details class="note" open>
   <summary>Notes</summary>
-  <p>The method uses scipy.ndimage for high-order interpolation and applies
-density thresholding and merging of nearby maxima to remove spurious peaks.
-The interpolation order is controlled by the <code>_density_interp_order</code> attribute.</p>
+  <p>Local maxima are found with a non-strict comparison within a neighborhood of
+half-width <code>_density_interp_order</code> grid points, so that peaks centered between
+grid points are not missed. Maxima below <code>_density_threshold</code> times the maximum
+density are discarded. Positions are refined to sub-grid precision by parabolic
+interpolation along each axis, and maxima closer than <code>_density_merge_distance</code>
+are merged, accounting for periodicity of the domain. Field values are obtained
+at the refined positions by local tri-quadratic (27-point) interpolation.
+On a CUDA device, the maxima are detected on the GPU (with fallback to the CPU
+if the GPU runs out of memory). Input fields may be numpy arrays or torch tensors.</p>
+<p>Weak density maxima (e.g. partially occupied sites at grain boundaries) are
+counted as atoms unless <code>_density_threshold</code> is raised to exclude them.</p>
 </details>
 
     </div>
